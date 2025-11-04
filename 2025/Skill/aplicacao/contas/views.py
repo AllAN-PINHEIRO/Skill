@@ -1,58 +1,54 @@
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
-import bd
-import bcrypt
+# Imports para MVT (verifique se estão no topo do arquivo)
+from django.shortcuts import render, redirect # Essencial para MVT
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
+# Remova: from django.views.decorators.csrf import csrf_exempt
+# Remova: import json
 
-@csrf_exempt
+def homepage_view(request):
+    # Esta função simplesmente diz ao Django:
+    # "Encontre o arquivo 'index.html' na pasta 'templates' e o retorne"
+    
+    # Define o "contexto" (dados a enviar para o HTML). Por enquanto, está vazio.
+    contexto = {} 
+    
+    return render(request, 'index.html', contexto)
+
 def login_view(request):
+    # Caminho 1: Se o usuário está enviando o formulário
     if request.method == 'POST':
+        
+        # 1. Pega os dados do formulário HTML (NÃO MAIS JSON)
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        if not email or not password:
+            context = {'error_message': 'Por favor, preencha o email e a senha.'}
+            return render(request, 'login.html', context)
+
+        # 2. Verifica o email (Usando o Model)
         try:
-            data = json.loads(request.body)
-            username = data.get('username')
-            password = data.get('password')
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            context = {'error_message': 'Usuário não encontrado.'}
+            return render(request, 'login.html', context)
+        
+        # 3. Autentica (Usando o sistema do Django)
+        authenticated_user = authenticate(request, username=user.username, password=password)
 
-            conexao = bd.conectar_bd()
-            cursor = conexao.cursor(dictionary=True)
+        if authenticated_user is not None:
+            # 4. Faz o login e REDIRECIONA para a homepage
+            login(request, authenticated_user)
+            # 'home' é o 'name' da sua homepage no urls.py
+            return redirect('home') 
+        else:
+            # 5. Devolve a página de login com uma mensagem de erro
+            context = {'error_message': 'Senha incorreta.'}
+            return render(request, 'login.html', context)
 
-            query = "SELECT * FROM usuario WHERE email_usu = %s"
-            cursor.execute(query, (username,))
-            usuario = cursor.fetchone()
+    # Caminho 2: Se o usuário está apenas visitando a página
+    else:
+        # Apenas mostre a página de login em branco
+        return render(request, 'login.html')
 
-            if usuario:
-                # Verifica senha usando bcrypt
-                if bcrypt.checkpw(password.encode(), usuario['senha'].encode()):
-                    resposta = {'message': 'Login bem-sucedido'}
-                    status_code = 200
-                else:
-                    resposta = {'message': 'Senha incorreta'}
-                    status_code = 401
-            else:
-                resposta = {'message': 'Usuário não encontrado'}
-                status_code = 401
-
-            cursor.close()
-            conexao.close()
-
-            return JsonResponse(resposta, status=status_code)
-
-        except Exception as e:
-            return JsonResponse({"message": f"Erro: {str(e)}"}, status=400)
-
-    return JsonResponse({"message": "Método não permitido"}, status=405)
-
-
-def teste_conexao(request):
-    try:
-        conexao = bd.criar_conexao()
-        cursor = conexao.cursor()
-        cursor.execute("SELECT 1")  # Query simples só para testar
-        resultado = cursor.fetchone()
-        cursor.close()
-        conexao.close()
-
-        return JsonResponse({"status": "OK", "resultado": resultado})
-
-    except Exception as e:
-        return JsonResponse({"status": "ERRO", "mensagem": str(e)})
-
+# (Faça o mesmo para a register_view)

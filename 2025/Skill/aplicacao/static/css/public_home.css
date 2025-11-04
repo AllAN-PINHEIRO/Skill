@@ -1,0 +1,27 @@
+/* Este arquivo aplica customizações POR CIMA do Bootstrap */
+
+/* Exemplo: Força o botão de Entrar para o verde do IFBA */
+.btn-success {
+  background-color: #008000; /* Tom de verde do IFBA (ajuste se necessário) */
+  border-color: #006400;
+}
+
+.btn-success:hover {
+  background-color: #006400;
+  border-color: #004d00;
+}
+
+/* Garante que os links da sidebar não fiquem azuis (padrão do Bootstrap) */
+.card-box a, .list-group-item a {
+  text-decoration: none;
+  color: #333;
+}
+
+.card-box a:hover, .list-group-item a:hover {
+  color: #008000;
+}
+
+.card-header h3 {
+  font-size: 1.25rem; /* Ajusta o tamanho da fonte do título do card */
+  margin-bottom: 0;
+}

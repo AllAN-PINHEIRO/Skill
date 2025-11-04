@@ -1,0 +1,14 @@
+/* Estilo para centralizar o formulário na tela */
+body, html {
+    height: 100%;
+}
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa; /* Um cinza claro de fundo */
+}
+.login-card {
+    max-width: 450px;
+    width: 100%;
+}
