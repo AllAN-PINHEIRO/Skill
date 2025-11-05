@@ -2,110 +2,380 @@
 
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADS Eunápolis - Início</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ADS Eunápolis - Conecta IFBA</title>
 
-    <link rel="stylesheet" href="{% static 'css/public_home.css' %}">
-</head>
-<body class="bg-light">
-
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">
-                <img src="{% static 'img/logo-ifba-placeholder.png' %}" alt="Logo IFBA" height="40">
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="#">Apresentar</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Documentos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Disciplinas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Fale Conosco</a></li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a href="{% url 'login' %}" class="btn btn-success">Entrar</a>
-                    </li>
-                </ul>
-            </div>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="{% static 'css/public_home.css' %}" />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav
+      class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top"
+    >
+      <div class="container">
+        <a
+          class="navbar-brand d-flex align-items-center"
+          href="{% url 'home' %}"
+        >
+          <img
+            src="{% static 'img/logo_ifba.png' %}"
+            alt="Logo IFBA"
+            height="45"
+            class="me-2"
+          />
+          <span class="fw-bold text-success">Match Skills</span>
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto me-4">
+            <li class="nav-item">
+              <a class="nav-link px-3 smooth-scroll" href="#apresentacao"
+                >Apresentação</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-3 smooth-scroll" href="#cards"
+                >Documentos</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-3 smooth-scroll" href="#cards"
+                >Disciplinas</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-3 smooth-scroll" href="#footer"
+                >Fale Conosco</a
+              >
+            </li>
+          </ul>
+          <a href="{% url 'login-page' %}" class="btn btn-success px-4">Entrar</a>
         </div>
+      </div>
     </nav>
 
-    <div class="container mt-4">
-        <div class="row">
-            
-            <aside class="col-lg-4">
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h3>Últimas Notícias</h3>
-                    </div>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item"><a href="#">PAEE: Cronograma da seleção...</a></li>
-                        <li class="list-group-item"><a href="#">IFBA divulga edital...</a></li>
-                        <li class="list-group-item"><a href="#">IFBA Eunápolis divulga...</a></li>
-                        <li class="list-group-item"><a href="#">IFBA comemora 15 anos...</a></li>
-                    </ul>
-                </div>
+    <!-- Main Container -->
+    <div class="container my-5">
+      <div class="row g-4">
+        <!-- Sidebar -->
+        <aside class="col-lg-3 order-lg-1 order-2">
+          <!-- Últimas Notícias -->
+          <div class="sidebar-card mb-4 fade-in">
+            <div class="sidebar-header">
+              <i class="fas fa-newspaper me-2"></i>
+              <h5 class="mb-0">Últimas Notícias</h5>
+            </div>
+            <ul class="sidebar-list">
+              <li class="sidebar-item" data-badge="Novo">
+                <i class="fas fa-chevron-right"></i>
+                <a href="#" class="news-link"
+                  >PAEE: Cronograma da seleção de estudantes é retificado</a
+                >
+              </li>
+              <li class="sidebar-item" data-badge="Novo">
+                <i class="fas fa-chevron-right"></i>
+                <a href="#" class="news-link"
+                  >IFBA divulga edital para monitorias</a
+                >
+              </li>
+              <li class="sidebar-item">
+                <i class="fas fa-chevron-right"></i>
+                <a href="#" class="news-link"
+                  >IFBA Eunápolis divulga resultado final dos projetos</a
+                >
+              </li>
+              <li class="sidebar-item">
+                <i class="fas fa-chevron-right"></i>
+                <a href="#" class="news-link"
+                  >IFBA comemora 15 anos do curso de ADS</a
+                >
+              </li>
+            </ul>
+          </div>
 
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Links Úteis</h3>
-                    </div>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item"><a href="#">Calendário Acadêmico</a></li>
-                        <li class="list-group-item"><a href="#">Portal do Aluno</a></li>
-                        <li class="list-group-item"><a href="#">Portal do IFBA</a></li>
-                    </ul>
-                </div>
-            </aside>
+          <!-- Links Úteis -->
+          <div class="sidebar-card fade-in" style="animation-delay: 0.1s">
+            <div class="sidebar-header">
+              <i class="fas fa-link me-2"></i>
+              <h5 class="mb-0">Links Úteis</h5>
+            </div>
+            <ul class="sidebar-list">
+              <li class="sidebar-item quick-link">
+                <i class="fas fa-calendar-alt"></i>
+                <a href="#">Calendário Acadêmico</a>
+              </li>
+              <li class="sidebar-item quick-link">
+                <i class="fas fa-user-graduate"></i>
+                <a href="#">Portal do Aluno</a>
+              </li>
+              <li class="sidebar-item quick-link">
+                <i class="fas fa-school"></i>
+                <a href="#">Portal do IFBA</a>
+              </li>
+            </ul>
+          </div>
 
-            <main class="col-lg-8">
-                <div class="bg-white p-4 rounded shadow-sm">
-                    <h2>Apresentamos o curso de Tecnologia em Análise e Desenvolvimento de Sistemas</h2>
-                    <p>O profissional de Tecnologia em Análise e Desenvolvimento de Sistemas atua, principalmente, na área do desenvolvimento de sistemas de informação...</p>
-                    </div>
-                
-                <div class="row mt-4">
-                    <div class="col-md-4">
-                        <div class="card h-100">
-                            <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Perfil do Egresso">
-                            <div class="card-body">
-                                <h5 class="card-title">Perfil do Egresso</h5>
-                                <p class="card-text">Quer saber do que precisa para aceitar o desafio? Veja mais...</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card h-100">
-                            <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Calendário">
-                            <div class="card-body">
-                                <h5 class="card-title">Matriz Curricular e Calendário</h5>
-                                <p class="card-text">Fique atento ao calendário acadêmico e a sua grade curricular.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card h-100">
-                            <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Orientações">
-                            <div class="card-body">
-                                <h5 class="card-title">Informações e Orientações</h5>
-                                <p class="card-text">Para mais informações sobre o novo semestre, não deixe de conferir.</p>
-                            </div>
-                        </div>
-                    </div>
+          <!-- Contador de Visitantes -->
+          <div class="sidebar-card mt-4 fade-in" style="animation-delay: 0.2s">
+            <div class="stats-box">
+              <i class="fas fa-users"></i>
+              <div>
+                <div class="stat-number" id="visitorCount">0</div>
+                <div class="stat-label">Visitantes Online</div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="col-lg-9 order-lg-2 order-1">
+          <!-- Hero Section -->
+          <div class="hero-section fade-in" id="apresentacao">
+            <div class="hero-badge">
+              <i class="fas fa-graduation-cap"></i>
+              Curso Superior
+            </div>
+            <div class="hero-content">
+              <h1 class="hero-title">
+                Apresentamos o curso de<br /><span
+                  class="text-success typed-text"
+                  >Tecnologia em Análise e Desenvolvimento de Sistemas</span
+                >
+              </h1>
+              <p class="hero-text">
+                O profissional de Tecnologia em Análise e Desenvolvimento de
+                Sistemas atua, principalmente, na área do desenvolvimento de
+                sistemas de informação das organizações em geral. A computação
+                para esse profissional é, essencialmente, atividade-meio,
+                atuando como profissional de desenvolvimento e suporte de
+                sistemas, responsável pelo desenvolvimento de aplicações e de
+                sistemas de banco de dados. O profissional pode atuar como
+                consultor independente ou fazer parte de equipes técnicas em
+                organizações de diversos tipos, sejam elas de pequeno, médio e
+                grande porte.
+              </p>
+              <div class="hero-stats">
+                <div class="stat-item">
+                  <i class="fas fa-clock"></i>
+                  <span><strong>6 semestres</strong><br />Duração</span>
                 </div>
-            </main>
-            
-        </div>
+                <div class="stat-item">
+                  <i class="fas fa-moon"></i>
+                  <span><strong>Noturno</strong><br />Período</span>
+                </div>
+                <div class="stat-item">
+                  <i class="fas fa-certificate"></i>
+                  <span><strong>Tecnólogo</strong><br />Titulação</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cards Section -->
+          <div class="row g-4 mt-2" id="cards">
+            <div class="col-md-4">
+              <div class="info-card fade-in" style="animation-delay: 0.1s">
+                <div class="card-image card-purple">
+                  <i class="fas fa-user-tie"></i>
+                  <div class="card-overlay">
+                    <span class="overlay-text">Clique para explorar</span>
+                  </div>
+                </div>
+                <div class="card-content">
+                  <div class="card-badge">Carreira</div>
+                  <h5 class="card-title">Perfil do Egresso</h5>
+                  <p class="card-text">
+                    Quer saber do que precisa para aceitar o desafio? Veja mais
+                    sobre o perfil do egresso.
+                  </p>
+                  <a href="#" class="card-link">
+                    Saiba mais <i class="fas fa-arrow-right"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="info-card fade-in" style="animation-delay: 0.2s">
+                <div class="card-image card-pink">
+                  <i class="fas fa-calendar-check"></i>
+                  <div class="card-overlay">
+                    <span class="overlay-text">Clique para explorar</span>
+                  </div>
+                </div>
+                <div class="card-content">
+                  <div class="card-badge">Acadêmico</div>
+                  <h5 class="card-title">
+                    Matriz Curricular e Calendário Acadêmico
+                  </h5>
+                  <p class="card-text">
+                    Fique atento ao calendário acadêmico e a sua grade
+                    curricular.
+                  </p>
+                  <a href="#" class="card-link">
+                    Saiba mais <i class="fas fa-arrow-right"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="info-card fade-in" style="animation-delay: 0.3s">
+                <div class="card-image card-blue">
+                  <i class="fas fa-graduation-cap"></i>
+                  <div class="card-overlay">
+                    <span class="overlay-text">Clique para explorar</span>
+                  </div>
+                </div>
+                <div class="card-content">
+                  <div class="card-badge">Novo Semestre</div>
+                  <h5 class="card-title">
+                    Informações e Orientações para um novo semestre
+                  </h5>
+                  <p class="card-text">
+                    Para mais informações sobre o novo semestre não deixe de
+                    conferir as informações.
+                  </p>
+                  <a href="#" class="card-link">
+                    Saiba mais <i class="fas fa-arrow-right"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Accordion de Dúvidas Frequentes -->
+          <div class="faq-section mt-5 fade-in" style="animation-delay: 0.4s">
+            <h3 class="section-title">
+              <i class="fas fa-question-circle"></i>
+              Dúvidas Frequentes
+            </h3>
+            <div class="accordion" id="faqAccordion">
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#faq1"
+                  >
+                    Como funciona o processo seletivo?
+                  </button>
+                </h2>
+                <div
+                  id="faq1"
+                  class="accordion-collapse collapse"
+                  data-bs-parent="#faqAccordion"
+                >
+                  <div class="accordion-body">
+                    O processo seletivo ocorre através do SISU, utilizando a
+                    nota do ENEM. Fique atento aos prazos e editais publicados
+                    no portal do IFBA.
+                  </div>
+                </div>
+              </div>
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#faq2"
+                  >
+                    Qual a duração do curso?
+                  </button>
+                </h2>
+                <div
+                  id="faq2"
+                  class="accordion-collapse collapse"
+                  data-bs-parent="#faqAccordion"
+                >
+                  <div class="accordion-body">
+                    O curso tem duração de 6 semestres (3 anos), com aulas no
+                    período noturno de segunda a sexta-feira.
+                  </div>
+                </div>
+              </div>
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#faq3"
+                  >
+                    Quais áreas posso atuar após formado?
+                  </button>
+                </h2>
+                <div
+                  id="faq3"
+                  class="accordion-collapse collapse"
+                  data-bs-parent="#faqAccordion"
+                >
+                  <div class="accordion-body">
+                    Você poderá atuar como desenvolvedor de software, analista
+                    de sistemas, consultor de TI, gestor de projetos, entre
+                    outras áreas relacionadas à tecnologia da informação.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
-</body>
+    <!-- Footer -->
+    <footer class="footer mt-5" id="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6">
+            <p class="mb-0">
+              &copy; 2025 IFBA - Instituto Federal da Bahia - Campus Eunápolis
+            </p>
+          </div>
+          <div class="col-md-6 text-md-end">
+            <a href="#" class="footer-link me-3"
+              ><i class="fab fa-facebook"></i
+            ></a>
+            <a href="#" class="footer-link me-3"
+              ><i class="fab fa-instagram"></i
+            ></a>
+            <a href="#" class="footer-link"><i class="fab fa-linkedin"></i></a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Botão Voltar ao Topo -->
+    <button id="backToTop" class="back-to-top">
+      <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+    <script src="{% static 'js/public_home.js' %}"></script>
+  </body>
 </html>
