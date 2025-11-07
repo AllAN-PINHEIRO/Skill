@@ -15,9 +15,11 @@ document.addEventListener("DOMContentLoaded", function() {
       // Pega os valores dos inputs
       const nome = document.getElementById("nome").value;
       const email = document.getElementById("email").value;
+      const confirmEmail = document.getElementById("confirm-email").value;
       const matricula = document.getElementById("matricula").value;
       const campus = document.getElementById("campus").value;
       const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirm-password").value;
 
       // Limpa mensagens de erro antigas
       messageDiv.innerHTML = "";
@@ -25,7 +27,7 @@ document.addEventListener("DOMContentLoaded", function() {
       // Envia o JSON para a API de cadastro
       try {
           // Esta é a URL da API que definimos no urls.py
-          const response = await fetch('/api/register/', {
+          const response = await fetch('/auth/register/', {
               method: "POST",
               // Envia os cabeçalhos corretos (Segurança do Django)
               headers: { 
@@ -36,9 +38,11 @@ document.addEventListener("DOMContentLoaded", function() {
               body: JSON.stringify({ 
                   nome: nome,
                   email: email,
+                  confirmEmail: confirmEmail,
                   matricula: matricula,
                   campus: campus,
-                  password: password 
+                  password: password,
+                  confirmPassword: confirmPassword
               })
           });
 

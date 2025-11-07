@@ -66,7 +66,9 @@ def api_register_view(request):
         try:
             data = json.loads(request.body)
             email = data.get('email')
+            confirmEmail = data.get('confirmEmail')
             password = data.get('password')
+            confirmPassword = data.get('confirmPassword')
             nome_cadastro = data.get('nome')
             matricula = data.get('matricula')
             campus = data.get('campus')
@@ -75,7 +77,7 @@ def api_register_view(request):
             username = email
 
             # Validação básica
-            if not all([email, password, nome_cadastro, matricula, campus]):
+            if not all([email, confirmEmail, password, confirmPassword, nome_cadastro, matricula, campus]):
                 return JsonResponse({'message': 'Todos os campos são obrigatórios'}, status=400)
 
             # 1. Tenta criar o User (cuida da senha criptografada)

@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function() {
         // 7. Envia o JSON para a API (o "fetch")
         try {
             // Esta é a URL da API que definimos no urls.py
-            const response = await fetch('/api/login/', {
+            const response = await fetch('/auth/login/', {
                 method: "POST",
                 // 8. Envia os cabeçalhos corretos
                 headers: { 
