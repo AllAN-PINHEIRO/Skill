@@ -1,60 +1,58 @@
+// Em aplicacao/static/js/login.js
+
 // Espera o HTML carregar antes de rodar o script
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener('DOMContentLoaded', function () {
+  // 1. Pega o formulário
+  const loginForm = document.getElementById('login-form')
 
-    // 1. Pega o formulário
-    const loginForm = document.getElementById("login-form");
-    
-    // 2. Pega o local de exibir mensagens
-    const messageDiv = document.getElementById("form-message");
+  // 2. Pega o local de exibir mensagens
+  const messageDiv = document.getElementById('form-message')
 
-    // 3. Pega o Token CSRF (A "Segurança do Django")
-    // O Django colocou o token no input <input type="hidden" name="csrfmiddlewaretoken" ...>
-    const csrfToken = loginForm.querySelector('input[name="csrfmiddlewaretoken"]').value;
+  // 3. Pega o Token CSRF (A "Segurança do Django")
+  const csrfToken = loginForm.querySelector(
+    'input[name="csrfmiddlewaretoken"]'
+  ).value
 
+  // 4. Adiciona um "ouvinte" para quando o formulário for enviado
+  loginForm.addEventListener('submit', async function (event) {
+    event.preventDefault()
 
-    // 4. Adiciona um "ouvinte" para quando o formulário for enviado
-    loginForm.addEventListener("submit", async function(event) {
+    const email = document.getElementById('email').value
+    const password = document.getElementById('password').value
+
+    try {
+      // A "Correção": A URL agora aponta para a API, não para a página
+      const response = await fetch('/auth/api/login/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({ email: email, password: password })
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        messageDiv.innerHTML = `<div class="alert alert-success">${data.message}</div>`
         
-        // 5. Impede o formulário de recarregar a página (o envio MVT clássico)
-        event.preventDefault(); 
-        
-        // 6. Pega os valores dos inputs
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
+        // Salva o token JWT no localStorage
+        localStorage.setItem('accessToken', data.access)
 
-        // 7. Envia o JSON para a API (o "fetch")
-        try {
-            // Esta é a URL da API que definimos no urls.py
-            const response = await fetch('/auth/login/', {
-                method: "POST",
-                // 8. Envia os cabeçalhos corretos
-                headers: { 
-                    "Content-Type": "application/json",
-                    // 9. A "Segurança do Django": Envia o Token CSRF no cabeçalho
-                    "X-CSRFToken": csrfToken
-                },
-                // 10. Envia os dados no corpo como JSON
-                body: JSON.stringify({ email: email, password: password })
-            });
-
-            const data = await response.json();
-
-            // 11. Processa a Resposta JSON
-            if (response.ok) { // Status 200 (Sucesso)
-                messageDiv.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
-                
-                // Redireciona para a home após 1 segundo
-                setTimeout(() => {
-                    // Esta é a URL da homepage que definimos no urls.py
-                    window.location.href = "/"; 
-                }, 1000);
-
-            } else { // Status 400, 401, 500 (Erro)
-                messageDiv.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
-            }
-
-        } catch (erro) {
-            messageDiv.innerHTML = `<div class="alert alert-danger">Erro de conexão: ${erro.message}</div>`;
-        }
-    });
-});
+        setTimeout(() => {
+          // Redireciona para a homepage (/)
+          window.location.href = '/'
+        }, 1000)
+      } else {
+        messageDiv.innerHTML = `<div class="alert alert-danger">${data.message}</div>`
+      }
+    } catch (erro) {
+      // Este é o erro que você estava vendo: "Unexpected token '<'"
+      if (erro.message.includes("Unexpected token '<'")) {
+          messageDiv.innerHTML = `<div class="alert alert-danger"><b>Erro Crítico de Roteamento:</b> O servidor enviou HTML em vez de JSON. Verifique os arquivos 'urls.py'.</div>`;
+      } else {
+          messageDiv.innerHTML = `<div class="alert alert-danger">Erro de conexão: ${erro.message}</div>`;
+      }
+    }
+  })
+})

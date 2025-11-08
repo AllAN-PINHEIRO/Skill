@@ -16,7 +16,7 @@ class Cadastro(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     
     # --- Campos da tabela 'cadastro' ---
-    nome_cadastro = models.CharField(max_length=45)
+    nome = models.CharField(max_length=45)
     matricula = models.IntegerField(unique=True) # Garante que não haja matrículas repetidas
     campus = models.CharField(max_length=30)
     
@@ -29,4 +29,4 @@ class Cadastro(models.Model):
 
     def __str__(self):
         # Isso ajuda a identificar o objeto no painel Admin do Django
-        return self.nome_cadastro
+        return self.nome

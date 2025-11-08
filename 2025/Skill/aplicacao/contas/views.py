@@ -1,14 +1,17 @@
 # Imports para MVT (verifique se estão no topo do arquivo)
-import json
-from django.http import JsonResponse
 from django.shortcuts import render, redirect # Essencial para MVT
-from django.contrib.auth import authenticate, login
-from django.db import IntegrityError
-from .models import Cadastro
 from django.contrib.auth.models import User
-# Remova: from django.views.decorators.csrf import csrf_exempt
-# Remova: import json
+from .models import Cadastro
 
+# --- NOVOS IMPORTS PARA DRF ---
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .serializers import CadastroSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate
+
+# --- VIEWS DE PÁGINA (MVT) - Permanecem as mesmas ---
 def homepage_view(request):
     # Esta função simplesmente diz ao Django:
     # "Encontre o arquivo 'index.html' na pasta 'templates' e o retorne"
@@ -18,104 +21,62 @@ def login_page_view(request):
     """Serve a "casca" da página de login 'login.html'."""
     return render(request, 'login.html')
 
-def api_login_view(request):
-    """
-    API que processa o login (via JSON) e retorna JSON.
-    Esta view usa a segurança CSRF do Django.
-    """
-    if request.method == 'POST':
-        try:
-            # Carrega o JSON do corpo da requisição
-            data = json.loads(request.body)
-            email = data.get('email')
-            password = data.get('password')
-
-            if not email or not password:
-                return JsonResponse({'message': 'Email e senha são obrigatórios'}, status=400)
-
-            # Encontra o usuário pelo email (O "M" do MVT)
-            try:
-                user = User.objects.get(email=email)
-            except User.DoesNotExist:
-                return JsonResponse({'message': 'Usuário não encontrado'}, status=401)
-            
-            # Autentica (A "Segurança do Django")
-            authenticated_user = authenticate(request, username=user.username, password=password)
-
-            if authenticated_user is not None:
-                login(request, authenticated_user) # Cria a sessão
-                return JsonResponse({'message': 'Login bem-sucedido'}, status=200)
-            else:
-                return JsonResponse({'message': 'Senha incorreta'}, status=401)
-
-        except Exception as e:
-            return JsonResponse({"message": f"Erro: {str(e)}"}, status=500)
-    
-    return JsonResponse({"message": "Método não permitido"}, status=405)
-
 def register_page_view(request):
     """Serve a "casca" da página de registro 'register.html'."""
     return render(request, 'register.html')
 
-def api_register_view(request):
+# --- VIEWS DE API (DRF) - As novas versões ---
+
+class LoginAPIView(APIView):
     """
-    API que processa o registro (via JSON) e retorna JSON.
-    Esta view usa a segurança CSRF do Django.
+    API de Login com DRF. Recebe email e senha, retorna tokens JWT
+    e o TIPO DE USUÁRIO.
     """
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            email = data.get('email')
-            confirmEmail = data.get('confirmEmail')
-            password = data.get('password')
-            confirmPassword = data.get('confirmPassword')
-            nome_cadastro = data.get('nome')
-            matricula = data.get('matricula')
-            campus = data.get('campus')
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        # Usamos o email como username para autenticar
+        user = authenticate(username=email, password=password)
+
+        if user:
+            # --- A "CORREÇÃO" ESTÁ AQUI ---
             
-            # O 'username' do Django é obrigatório. Vamos usar o email.
-            username = email
-
-            # Validação básica
-            if not all([email, confirmEmail, password, confirmPassword, nome_cadastro, matricula, campus]):
-                return JsonResponse({'message': 'Todos os campos são obrigatórios'}, status=400)
-
-            # 1. Tenta criar o User (cuida da senha criptografada)
+            # 1. O usuário está autenticado, agora buscamos o 'Cadastro' dele.
             try:
-                new_user = User.objects.create_user(
-                    username=username,
-                    email=email,
-                    password=password
+                # O Django acessa o 'Cadastro' ligado ao 'user'
+                # (Isso funciona por causa do OneToOneField)
+                user_type = user.cadastro.tipoDoCadastro
+            except Cadastro.DoesNotExist:
+                # Caso de fallback (não deve acontecer se o registro estiver correto)
+                return Response(
+                    {'message': 'Erro: Usuário autenticado mas sem perfil de cadastro.'}, 
+                    status=status.HTTP_404_NOT_FOUND
                 )
-            except IntegrityError:
-                return JsonResponse({'message': 'Este email já está cadastrado.'}, status=400)
+            
+            # 2. Geramos os tokens
+            refresh = RefreshToken.for_user(user)
 
-            # 2. Tenta criar o Cadastro (perfil) e ligar ao User
-            try:
-                Cadastro.objects.create(
-                    user=new_user,
-                    nome_cadastro=nome_cadastro,
-                    matricula=matricula,
-                    campus=campus,
-                    tipoDoCadastro=1 # Define como Aluno (tipo 1) por padrão
-                )
-            except IntegrityError:
-                # Se a matrícula já existe, apaga o User que acabamos de criar.
-                # Isso é um "rollback" manual.
-                new_user.delete()
-                return JsonResponse({'message': 'Esta matrícula já está cadastrada.'}, status=400)
-            except Exception as e:
-                # Se outro erro ocorrer, também faz o rollback
-                new_user.delete()
-                return JsonResponse({'message': f'Erro ao criar cadastro: {e}'}, status=500)
+            # 3. Retornamos TUDO no JSON
+            return Response({
+                'message': 'Login bem-sucedido!',
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'user_type': user_type  # <-- ADICIONADO (ex: 1 para Aluno, 2 para Professor)
+            })
+        
+        # Se 'user' for None (senha errada ou email não existe)
+        return Response({'message': 'Email ou senha inválidos.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-            # Se tudo deu certo
-            return JsonResponse({'message': 'Usuário cadastrado com sucesso! Você já pode fazer o login.'}, status=201)
-
-        except json.JSONDecodeError:
-            return JsonResponse({"message": "JSON inválido"}, status=400)
-        except Exception as e:
-            # Captura qualquer outro erro
-            return JsonResponse({"message": f"Erro inesperado: {str(e)}"}, status=500)
-
-    return JsonResponse({"message": "Método não permitido"}, status=405)
+class RegisterAPIView(APIView):
+    """
+    API de Registro com DRF. Usa o CadastroSerializer para fazer todo o trabalho pesado.
+    """
+    def post(self, request):
+        serializer = CadastroSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save() # <-- A mágica acontece aqui! Chama o .create() do serializer.
+            return Response({'message': 'Usuário criado com sucesso!'}, status=status.HTTP_201_CREATED)
+        
+        # Se a validação falhar, o DRF retorna um JSON com todos os erros.
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
