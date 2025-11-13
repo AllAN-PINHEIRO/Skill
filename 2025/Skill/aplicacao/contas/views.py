@@ -1,4 +1,5 @@
 # Imports para MVT (verifique se estão no topo do arquivo)
+from django.http import HttpResponse
 from django.shortcuts import render, redirect # Essencial para MVT
 from django.contrib.auth.models import User
 from .models import Cadastro
@@ -10,6 +11,10 @@ from rest_framework import status
 from .serializers import CadastroSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
+from django.core.mail import send_mail
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 
 # --- VIEWS DE PÁGINA (MVT) - Permanecem as mesmas ---
 def homepage_view(request):
@@ -24,6 +29,9 @@ def login_page_view(request):
 def register_page_view(request):
     """Serve a "casca" da página de registro 'register.html'."""
     return render(request, 'register.html')
+
+def forgot_password_page_view(request):
+    return render(request, 'forgot-password.html')
 
 # --- VIEWS DE API (DRF) - As novas versões ---
 
@@ -80,3 +88,43 @@ class RegisterAPIView(APIView):
         
         # Se a validação falhar, o DRF retorna um JSON com todos os erros.
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class ForgotPasswordAPIView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({'Se um usuário com esse email existir, um link de redefinição de senha será enviado.'}, status=status.HTTP_200_OK)
+        
+        user = User.objects.filter(email=email).first()
+
+        if user:
+            token_generator = PasswordResetTokenGenerator()
+            token = token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            reset_path = f'/auth/reset-password-confirm/{uid}/{token}/'
+            reset_link = request.build_absolute_uri(reset_path)
+
+            subject = 'Redefinição de Senha - Match Skills'
+            message = (
+                f'Olá, {user.username}!\n\n'
+                f'Você solicitou uma redefinição de senha. Clique no link abaixo para redefinir sua senha:\n\n'
+                f'{reset_link}\n\n'
+                f'Se você não solicitou isso, ignore este email.\n\n'
+                f'Atenciosamente,\nEquipe Match Skills'
+            )
+
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    'naoresponda@matchskills.com',
+                    [email],
+                    fail_silently=False,
+                ) 
+
+            except Exception as e:
+                # Log the exception (in real applications, consider logging this to a file)
+                print(f"Erro ao enviar email: {e}")
+
+        return Response({'Se um usuário com esse email existir, um link de redefinição de senha será enviado.'}, status=status.HTTP_200_OK)
