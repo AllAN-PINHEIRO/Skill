@@ -31,10 +31,17 @@ document.addEventListener("DOMContentLoaded", function() {
 
           const data = await response.json();
 
-          // A API SEMPRE retorna 200 (OK) por segurança.
-          // Apenas mostramos a mensagem de sucesso que ela envia.
-          messageDiv.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
-          forgotForm.reset(); // Limpa o formulário
+          if (response.ok) {
+             // Mostra a mensagem de erro retornada pela API
+             // A API SEMPRE retorna 200 (OK) por segurança.
+            // Apenas mostramos a mensagem de sucesso que ela envia.
+            messageDiv.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+            forgotForm.reset(); // Limpa o formulário
+          } else {
+            // Mostra a mensagem de erro
+            const errorMessage = data.message || data.detail || 'Ocorreu um erro. Tente novamente.';
+            messageDiv.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
+          }  
 
       } catch (erro) {
           messageDiv.innerHTML = `<div class="alert alert-danger">Erro de conexão: ${erro.message}</div>`;
