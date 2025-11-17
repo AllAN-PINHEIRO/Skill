@@ -8,7 +8,7 @@ from .models import Cadastro
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import CadastroSerializer
+from .serializers import CadastroSerializer, PasswordResetSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.core.mail import send_mail
@@ -31,6 +31,10 @@ def register_page_view(request):
 
 def forgot_password_page_view(request):
     return render(request, 'forgot-password.html')
+
+def reset_password_page_view(request, uidb64, token):
+    context = {'uidb64': uidb64,'token': token}
+    return render(request, 'reset-password.html', context)
 
 # --- VIEWS DE API (DRF) - As novas versões ---
 
@@ -102,7 +106,7 @@ class ForgotPasswordAPIView(APIView):
         token_generator = PasswordResetTokenGenerator()
         token = token_generator.make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
-        reset_path = f'/auth/reset-password-confirm/{uid}/{token}/'
+        reset_path = f'/auth/reset-password/{uid}/{token}/'
         reset_link = request.build_absolute_uri(reset_path)
 
         subject = 'Redefinição de Senha - Match Skills'
@@ -130,3 +134,21 @@ class ForgotPasswordAPIView(APIView):
             )
 
         return Response({'message': 'Se um usuário com esse email existir, um link de redefinição de senha será enviado.'}, status=status.HTTP_200_OK)
+    
+class ResetPasswordAPIView(APIView):
+        def post(self, request):
+            # Passa os dados do JSON (request.data) para o serializer
+            serializer = PasswordResetSerializer(data=request.data)
+            
+            # 1. 'is_valid()' chama a função 'validate' do serializer
+            if serializer.is_valid():
+                # 2. 'save()' chama a função 'save' do serializer
+                serializer.save()
+                return Response(
+                    {'message': 'Senha redefinida com sucesso! Você já pode fazer login.'}, 
+                    status=status.HTTP_200_OK
+                )
+            
+            # 3. Se a validação falhar (senhas não batem, token inválido),
+            # o serializer envia os erros.
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

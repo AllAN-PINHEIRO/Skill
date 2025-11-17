@@ -9,7 +9,8 @@ def is_institutional_email(email):
     email_lower = email.lower()
     
     dominiosPermitidos = (
-        '@ifba.edu.br'
+        '@ifba.edu.br',
+        '@gmail.com'
     )
 
     return email_lower.endswith(dominiosPermitidos)
