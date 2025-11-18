@@ -10,6 +10,8 @@ urlpatterns = [
     path('register/', views.register_page_view, name='register-page'),
     path('forgot-password/', views.forgot_password_page_view, name='forgot-password'),
     path('reset-password/<uidb64>/<token>/', views.reset_password_page_view, name='reset-password'),
+    path('dashboard-aluno/', views.dashboard_aluno_page_view, name='dashboard-aluno'),
+    path('dashboard-professor/', views.dashboard_professor_page_view, name='dashboard-professor'),
 
     # 2. ROTAS DE API (JSON) - O que o JavaScript chama
     path('api/login/', views.LoginAPIView.as_view(), name='api-login'),
