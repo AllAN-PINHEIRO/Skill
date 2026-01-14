@@ -4,41 +4,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard do Aluno - Match Skills</title>
+    <title>Dashboard do Aluno - Conecta IFBA</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/public_home.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{% static 'css/dashboard_aluno.css' %}">
 </head>
-<body class="bg-light">
+<body>
     
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-        <div class="container">
-            <a class="navbar-brand fw-bold text-success" href="#">Match Skills (Aluno)</a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+    <!-- Overlay para mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-            <div class="collapse navbar-collapse" id="navbarContent">
-                <div class="ms-auto d-flex align-items-center">
-                     <span class="me-3 fw-medium">Olá, {{ nome_usuario }}</span>
-                     <a href="{% url 'home' %}" id="logout-link" class="btn btn-outline-danger btn-sm">Sair</a>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <i class="bi bi-gem"></i>
+            <h5>Conecta IFBA</h5>
+            <button class="sidebar-close" id="sidebarClose">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        
+        <ul class="sidebar-menu">
+            <li class="active">
+                <i class="bi bi-house-door"></i>
+                <span>Home</span>
+            </li>
+            <li>
+                <i class="bi bi-person"></i>
+                <span>Perfil</span>
+            </li>
+            <li>
+                <i class="bi bi-file-text"></i>
+                <span>Grade</span>
+            </li>
+            <li>
+                <i class="bi bi-briefcase"></i>
+                <span>Vagas</span>
+            </li>
+            <li style="margin-top: 2rem;">
+                <i class="bi bi-bell"></i>
+                <span>Notificações</span>
+                <span class="notification-badge ms-auto">12</span>
+            </li>
+            <li>
+                <i class="bi bi-question-circle"></i>
+                <span>Central de Ajuda</span>
+            </li>
+            <li>
+                <i class="bi bi-gear"></i>
+                <span>Configurações</span>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-link text-dark p-0 hamburger-menu" id="hamburgerMenu">
+                    <i class="bi bi-list" style="font-size: 1.75rem;"></i>
+                </button>
+                <div class="welcome-text">
+                    <h4>👋 Bem-Vindo, {{ nome_usuario }}!</h4>
+                    <p>24 jul 2025, Quinta</p>
+                </div>
+            </div>
+            <div class="user-profile">
+                <button class="btn btn-sm btn-outline-secondary search-btn">
+                    <i class="bi bi-search"></i>
+                    <span class="search-text">Pesquisar</span>
+                </button>
+                <div class="user-avatar">
+                    {{ nome_usuario|slice:":1"|upper }}
                 </div>
             </div>
         </div>
-    </nav>
 
-    <div class="container mt-5">
-        <div class="card shadow-sm border-0">
-            <div class="card-body text-center p-5">
-                <h2 class="mb-4 display-6">🎓 Área do Estudante</h2>
-                <p class="lead text-muted">Aqui você poderá ver vagas e cadastrar seu currículo.</p>
-                <button class="btn btn-primary btn-lg mt-3 px-4">Ver Vagas Disponíveis</button>
+        <!-- Feature Cards -->
+        <div class="card-section">
+            <div class="feature-card">
+                <svg class="feature-card-icon" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="100" cy="60" r="25" fill="#e0e7ff"/>
+                    <rect x="85" y="90" width="30" height="40" rx="5" fill="#c7d2fe"/>
+                    <path d="M70 130 Q50 140 60 160 L140 160 Q150 140 130 130 Z" fill="#a5b4fc"/>
+                    <rect x="40" y="50" width="120" height="80" rx="8" fill="none" stroke="#818cf8" stroke-width="2"/>
+                    <circle cx="120" cy="70" r="3" fill="#6366f1"/>
+                </svg>
+                <h5>Perfil</h5>
+            </div>
+
+            <div class="feature-card">
+                <svg class="feature-card-icon" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="60" cy="80" r="20" fill="#dbeafe"/>
+                    <circle cx="100" cy="80" r="20" fill="#bfdbfe"/>
+                    <circle cx="140" cy="80" r="20" fill="#93c5fd"/>
+                    <rect x="50" y="110" width="20" height="50" rx="4" fill="#60a5fa"/>
+                    <rect x="90" y="110" width="20" height="50" rx="4" fill="#3b82f6"/>
+                    <rect x="130" y="110" width="20" height="50" rx="4" fill="#2563eb"/>
+                </svg>
+                <h5>Vagas</h5>
+            </div>
+
+            <div class="feature-card">
+                <svg class="feature-card-icon" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="40" y="40" width="40" height="40" rx="4" fill="#ddd6fe"/>
+                    <rect x="90" y="40" width="40" height="40" rx="4" fill="#c4b5fd"/>
+                    <rect x="140" y="40" width="40" height="40" rx="4" fill="#a78bfa"/>
+                    <rect x="40" y="90" width="40" height="40" rx="4" fill="#8b5cf6"/>
+                    <rect x="90" y="90" width="40" height="40" rx="4" fill="#7c3aed"/>
+                    <rect x="140" y="90" width="40" height="40" rx="4" fill="#6d28d9"/>
+                </svg>
+                <h5>Grade</h5>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Skills Section -->
+            <div class="col-lg-6 mb-4">
+                <div class="section-header">
+                    <h5>
+                        <i class="bi bi-laptop"></i>
+                        <span class="section-title">Índice de Skills</span>
+                    </h5>
+                    <a href="#" class="section-link">
+                        <span class="link-text">Ver mais</span>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </div>
+                
+                <div class="stats-card">
+                    <p class="text-muted mb-3" style="font-size: 0.875rem;">Estatísticas</p>
+                    <h6 class="mb-3">Linguagens Favoritas</h6>
+                    
+                    <div class="skill-bar">
+                        <div class="skill-bar-label">
+                            <span>Java</span>
+                            <span>100%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-primary" style="width: 100%"></div>
+                        </div>
+                    </div>
+
+                    <div class="skill-bar">
+                        <div class="skill-bar-label">
+                            <span>Python</span>
+                            <span>75%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-info" style="width: 75%"></div>
+                        </div>
+                    </div>
+
+                    <div class="skill-bar">
+                        <div class="skill-bar-label">
+                            <span>Node.js</span>
+                            <span>60%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" style="width: 60%"></div>
+                        </div>
+                    </div>
+
+                    <div class="skill-bar">
+                        <div class="skill-bar-label">
+                            <span>GO</span>
+                            <span>40%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-secondary" style="width: 40%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vagas Section -->
+            <div class="col-lg-6 mb-4">
+                <div class="section-header">
+                    <h5>
+                        <i class="bi bi-calendar-check"></i>
+                        <span class="section-title">Divulgação de Vagas</span>
+                    </h5>
+                    <a href="#" class="section-link">
+                        <span class="link-text">Ver mais</span>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </div>
+
+                <div class="vagas-list">
+                    <div class="vaga-card">
+                        <div class="vaga-info">
+                            <h6>Analista de Suporte</h6>
+                            <p>Empresa: Fanfury Software LTDA</p>
+                            <p>Disponível até 30 de jul de 2025</p>
+                        </div>
+                        <span class="vaga-badge badge-urgente">Urgente</span>
+                    </div>
+
+                    <div class="vaga-card">
+                        <div class="vaga-info">
+                            <h6>Desenvolvedor FullStack</h6>
+                            <p>Empresa: Resolve Software LTDA</p>
+                            <p>Disponível até 31 de jul de 2025</p>
+                        </div>
+                        <span class="vaga-badge badge-disponivel">Disponível</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{% static 'js/login.js' %}"></script>
-    
-    </body>
+    <script>
+        // Menu Hamburguer
+        const hamburgerMenu = document.getElementById('hamburgerMenu');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const sidebarClose = document.getElementById('sidebarClose');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            sidebarOverlay.classList.toggle('active');
+            document.body.classList.toggle('sidebar-open');
+        }
+
+        hamburgerMenu.addEventListener('click', toggleSidebar);
+        sidebarClose.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', toggleSidebar);
+
+        // Fechar sidebar ao clicar em um item do menu (mobile)
+        const menuItems = document.querySelectorAll('.sidebar-menu li');
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 992) {
+                    toggleSidebar();
+                }
+            });
+        });
+    </script>
+</body>
 </html>
