@@ -12,10 +12,13 @@ urlpatterns = [
     path('reset-password/<uidb64>/<token>/', views.reset_password_page_view, name='reset-password'),
     path('dashboard-aluno/', views.dashboard_aluno_page_view, name='dashboard-aluno'),
     path('dashboard-professor/', views.dashboard_professor_page_view, name='dashboard-professor'),
+    path('completar-perfil/', views.completar_perfil_page_view, name='completar-perfil'),
 
     # 2. ROTAS DE API (JSON) - O que o JavaScript chama
     path('api/login/', views.LoginAPIView.as_view(), name='api-login'),
     path('api/register/', views.RegisterAPIView.as_view(), name='api-register'),
     path('api/forgot-password/', views.ForgotPasswordAPIView.as_view(), name='api-forgot-password'),
     path('api/reset-password/', views.ResetPasswordAPIView.as_view(), name='api-reset-password'),
+    path('api/completar-perfil/', views.CompletarPerfilAPIView.as_view(), name='api-completar-perfil'),
+
 ]

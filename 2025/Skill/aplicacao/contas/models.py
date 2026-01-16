@@ -30,3 +30,40 @@ class Cadastro(models.Model):
     def __str__(self):
         # Isso ajuda a identificar o objeto no painel Admin do Django
         return self.nome
+    
+class Habilidade(models.Model):
+    """
+    Representa uma competência técnica (Ex: Java, Python, SQL).
+    """
+    nome = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.nome
+
+class PerfilAluno(models.Model):
+    """
+    Expansão do Aluno: Contém dados profissionais e link com User.
+    """
+    # Relacionamento 1-para-1 com o User do Django (igual ao Cadastro)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil_aluno')
+    
+    resumo = models.TextField(blank=True, help_text="Breve resumo sobre você")
+    linkedin = models.URLField(blank=True, null=True)
+    github = models.URLField(blank=True, null=True)
+    
+    # Relacionamento Muitos-para-Muitos com Habilidade (via tabela intermediária)
+    habilidades = models.ManyToManyField(Habilidade, through='HabilidadeAluno')
+
+    def __str__(self):
+        return f"Perfil de {self.user.username}"
+
+class HabilidadeAluno(models.Model):
+    """
+    Tabela intermediária que guarda o nível de conhecimento (0-100%) da skill.
+    """
+    perfil = models.ForeignKey(PerfilAluno, on_delete=models.CASCADE)
+    habilidade = models.ForeignKey(Habilidade, on_delete=models.CASCADE)
+    nivel = models.IntegerField(default=0, help_text="Nível de 0 a 100")
+
+    class Meta:
+        unique_together = ('perfil', 'habilidade') # Evita duplicatas

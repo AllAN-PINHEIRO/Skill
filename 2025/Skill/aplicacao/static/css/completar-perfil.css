@@ -1,0 +1,42 @@
+/* Ajuste para o card ficar mais largo nesta página específica */
+.login-card {
+  max-width: 800px;
+  /* Garante que a animação de entrada funcione se estiver no login.css */
+  animation: fadeIn 0.6s ease-out; 
+}
+
+/* Estilo dos itens da lista de skills */
+.skill-item {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.skill-item:hover {
+  background: #e9ecef;
+  transform: translateX(5px);
+}
+
+/* Ajuste na lista de rolagem */
+#skills-list-container {
+  min-height: 150px;
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: #fff;
+}
+
+/* Customização da barra de rolagem (opcional, mas fica bonito) */
+#skills-list-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+#skills-list-container::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
+}

@@ -35,8 +35,15 @@ document.addEventListener('DOMContentLoaded', function () {
         // Usamos '==' em vez de '===' para aceitar texto ("1") ou número (1)
         if (data.user_type == 1) {
             console.log("Redirecionando para Painel de Aluno...");
-            redirectUrl = '/auth/dashboard-aluno/'; 
-            console.log("Tipo de Usuário recebido:", data.user_type)
+            if (data.tem_perfil) {
+              // Se TEM perfil, vai para o Dashboard normal
+              console.log("Perfil completo. Redirecionando para Dashboard.");
+              redirectUrl = '/auth/dashboard-aluno/'; 
+            } else {
+              // Se NÃO TEM perfil, vai para a tela de completar cadastro
+              console.log("Perfil incompleto. Redirecionando para Completar Perfil.");
+              redirectUrl = '/auth/completar-perfil/'; 
+            }
         } else if (data.user_type == 2) {
             console.log("Redirecionando para Painel de Professor...");
             redirectUrl = '/auth/dashboard-professor/';

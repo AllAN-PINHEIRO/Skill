@@ -5,6 +5,7 @@ from .models import Cadastro
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
+from .models import Habilidade, PerfilAluno, HabilidadeAluno
 
 # A "Correção": O import deve ser 'is_institutional_email' (minúsculo)
 from .utils import is_institutional_email
@@ -122,3 +123,26 @@ class PasswordResetSerializer(serializers.Serializer):
         # 'set_password' é a forma segura que criptografa a senha
         user.set_password(password)
         user.save()
+
+class HabilidadeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Habilidade
+        fields = ['id', 'nome']
+
+class HabilidadeAlunoSerializer(serializers.ModelSerializer):
+    # Exibe o nome da habilidade (leitura) e aceita o ID (escrita)
+    nome_habilidade = serializers.CharField(source='habilidade.nome', read_only=True)
+    habilidade_id = serializers.PrimaryKeyRelatedField(
+        queryset=Habilidade.objects.all(), source='habilidade', write_only=True
+    )
+
+    class Meta:
+        model = HabilidadeAluno
+        fields = ['habilidade_id', 'nome_habilidade', 'nivel']
+
+class PerfilAlunoSerializer(serializers.ModelSerializer):
+    habilidades = HabilidadeAlunoSerializer(source='habilidadealuno_set', many=True, read_only=True)
+
+    class Meta:
+        model = PerfilAluno
+        fields = ['resumo', 'linkedin', 'github', 'habilidades']

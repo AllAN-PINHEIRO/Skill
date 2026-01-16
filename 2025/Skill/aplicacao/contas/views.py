@@ -3,11 +3,13 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404 # Essencial para MVT
 from django.contrib.auth.models import User
 from .models import Cadastro
+from .models import PerfilAluno, Habilidade, HabilidadeAluno
 
 # --- NOVOS IMPORTS PARA DRF ---
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from .serializers import CadastroSerializer, PasswordResetSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate, login
@@ -52,6 +54,11 @@ def dashboard_aluno_page_view(request):
         if cadastro.tipoDoCadastro != 1:
             print(f"ACESSO NEGADO: Tipo {cadastro.tipoDoCadastro} não é 1 (Aluno). Redirecionando para Home.")
             return redirect('home') 
+        
+        #O 'hasattr' checa se existe a relação OneToOne criada no banco
+        if not hasattr(request.user, 'perfil_aluno'):
+            print("PERFIL INCOMPLETO: Redirecionando para preenchimento.")
+            return redirect('contas:completar-perfil')
 
         print("ACESSO PERMITIDO: Renderizando dashboard-aluno.html")
         context = {
@@ -89,6 +96,26 @@ def dashboard_professor_page_view(request):
     except Exception as e:
         print(f"ERRO CRÍTICO NO DASHBOARD: {e}")
         return redirect('home')
+    
+
+# 1. VIEW DA PÁGINA (HTML)
+@login_required(login_url='/auth/login/')
+def completar_perfil_page_view(request):
+    """
+    Renderiza a página de cadastro de perfil.
+    Passamos as habilidades cadastradas para preencher o <select> no HTML.
+    """
+    # Verifica se já tem perfil para evitar acesso duplicado
+    if hasattr(request.user, 'perfil_aluno'):
+        return redirect('contas:dashboard-aluno')
+
+    # Busca todas as skills do banco para o aluno escolher
+    habilidades = Habilidade.objects.all()
+    
+    context = {
+        'habilidades': habilidades
+    }
+    return render(request, 'completar-perfil.html', context)
 
 # --- VIEWS DE API (DRF) - As novas versões ---
 
@@ -122,6 +149,12 @@ class LoginAPIView(APIView):
 
             try:
                 user_type = user.cadastro.tipoDoCadastro
+                # --- LÓGICA DE VERIFICAÇÃO DE PERFIL ---
+                tem_perfil = False
+                if user_type == 1: # Se for Aluno
+                    # Verifica se existe a relação 'perfil_aluno' criada
+                    tem_perfil = hasattr(user, 'perfil_aluno')
+                # ---------------------------------------
             except Cadastro.DoesNotExist:
                 return Response(
                     {'message': 'Erro: Usuário autenticado mas sem perfil de cadastro.'}, 
@@ -134,7 +167,8 @@ class LoginAPIView(APIView):
                 'message': 'Login bem-sucedido!',
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
-                'user_type': user_type 
+                'user_type': user_type,
+                'tem_perfil': tem_perfil
             })
         
         return Response({'message': 'Email ou senha inválidos.'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -217,3 +251,41 @@ class ResetPasswordAPIView(APIView):
             # 3. Se a validação falhar (senhas não batem, token inválido),
             # o serializer envia os erros.
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+# 2. VIEW DA API (Salvar dados)
+class CompletarPerfilAPIView(APIView):
+    permission_classes = [IsAuthenticated] # Só quem está logado pode acessar
+
+    def post(self, request):
+        user = request.user
+        data = request.data
+
+        try:
+            # 1. Cria o PerfilAluno
+            perfil = PerfilAluno.objects.create(
+                user=user,
+                resumo=data.get('resumo', ''),
+                linkedin=data.get('linkedin', ''),
+                github=data.get('github', '')
+            )
+
+            # 2. Salva as Habilidades
+            skills_data = data.get('skills', []) # Espera uma lista: [{'id': 1, 'nivel': 80}, ...]
+            
+            for skill_item in skills_data:
+                habilidade_id = skill_item.get('id')
+                nivel = skill_item.get('nivel')
+                
+                if habilidade_id and nivel:
+                    habilidade = Habilidade.objects.get(id=habilidade_id)
+                    HabilidadeAluno.objects.create(
+                        perfil=perfil,
+                        habilidade=habilidade,
+                        nivel=nivel
+                    )
+
+            return Response({'message': 'Perfil criado com sucesso!'}, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            print(f"Erro ao salvar perfil: {e}")
+            return Response({'message': 'Erro ao processar dados.'}, status=status.HTTP_400_BAD_REQUEST)
