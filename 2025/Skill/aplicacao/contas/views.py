@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from .serializers import CadastroSerializer, PasswordResetSerializer
+from .serializers import CadastroSerializer, MeuPerfilSerializer, PasswordResetSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate, login
 from django.core.mail import send_mail
@@ -19,6 +19,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.decorators import login_required
 from .utils import is_institutional_email 
+from django.contrib.auth import logout
 
 # --- VIEWS DE PÁGINA (MVT) - Permanecem as mesmas ---
 def homepage_view(request):
@@ -37,37 +38,38 @@ def reset_password_page_view(request, uidb64, token):
     context = {'uidb64': uidb64,'token': token}
     return render(request, 'reset-password.html', context)
 
-@login_required(login_url='/auth/login/') 
-def dashboard_aluno_page_view(request):
+# ==============================================================================
+# 1. A PORTA DE ENTRADA (ANTIGA dashboard_aluno_page_view)
+# Agora ela serve a CASCA (SHELL) do sistema.
+# ==============================================================================
+@login_required(login_url='/auth/login/')
+def dashboard_shell_view(request): # Você pode manter o nome antigo se preferir
     """
-    Serve a página principal (dashboard) do Aluno.
+    Serve a estrutura base (Menu + Topo + JS).
+    O conteúdo do meio será carregado via AJAX depois.
     """
-    # DIAGNÓSTICO: Quem está tentando entrar?
-    print(f"--- TENTATIVA DE ACESSO AO DASHBOARD ALUNO ---")
-    print(f"Usuário: {request.user.email}")
+    print(f"--- ACESSO AO DASHBOARD (SHELL) ---")
     
     try:
         cadastro = get_object_or_404(Cadastro, user=request.user)
-        print(f"Tipo do Cadastro no Banco: {cadastro.tipoDoCadastro}")
         
-        # Verifica o tipo (Lembre-se: 1=Aluno, 2=Professor)
+        # 1. Verificação de Segurança (Só Aluno)
         if cadastro.tipoDoCadastro != 1:
-            print(f"ACESSO NEGADO: Tipo {cadastro.tipoDoCadastro} não é 1 (Aluno). Redirecionando para Home.")
-            return redirect('home') 
-        
-        #O 'hasattr' checa se existe a relação OneToOne criada no banco
-        if not hasattr(request.user, 'perfil_aluno'):
-            print("PERFIL INCOMPLETO: Redirecionando para preenchimento.")
-            return redirect('contas:completar-perfil')
+            print("ACESSO NEGADO: Não é aluno.")
+            return redirect('home')
 
-        print("ACESSO PERMITIDO: Renderizando dashboard-aluno.html")
+        # NOTA: Removemos o 'if not hasattr... redirect' 
+        # Motivo: Se não tiver perfil, a Home vai mostrar o botão "Cadastrar Agora"
+        # e o formulário abrirá dentro do dashboard, sem sair da tela.
+
         context = {
             'nome_usuario': cadastro.nome 
         }
+        # Renderiza a CASCA nova que criamos
         return render(request, 'dashboard-aluno.html', context)
         
     except Exception as e:
-        print(f"ERRO CRÍTICO NO DASHBOARD: {e}")
+        print(f"ERRO: {e}")
         return redirect('home')
 
 
@@ -116,6 +118,58 @@ def completar_perfil_page_view(request):
         'habilidades': habilidades
     }
     return render(request, 'completar-perfil.html', context)
+
+# ==============================================================================
+# 2. OS PEDAÇOS (PARTIALS) - Chamados pelo JavaScript
+# ==============================================================================
+
+# PEDAÇO A: HOME (O Miolo com Gráficos)
+@login_required
+def partial_home_view(request):
+    # Lógica para o Gráfico (que já existia)
+    labels = []
+    data_values = []
+    
+    if hasattr(request.user, 'perfil_aluno'):
+        skills = HabilidadeAluno.objects.filter(perfil=request.user.perfil_aluno).order_by('-nivel')
+        for s in skills:
+            labels.append(s.habilidade.nome)
+            data_values.append(s.nivel)
+            
+    context = {
+        'skill_labels': labels,
+        'skill_data': data_values
+    }
+    return render(request, 'partials/home.html', context)
+
+
+# PEDAÇO B: PERFIL (Visualização)
+@login_required
+def partial_perfil_view(request):
+    # Usa seu serializer para formatar os dados bonitinhos
+    serializer = MeuPerfilSerializer(request.user)
+    return render(request, 'partials/perfil.html', {'dados': serializer.data})
+
+
+# PEDAÇO C: EDITAR/CADASTRAR (ANTIGA completar_perfil_page_view)
+@login_required
+def partial_editar_perfil_view(request):
+    """
+    Antiga 'completar_perfil_page_view'.
+    Agora retorna apenas o <form> HTML para ser injetado no dashboard.
+    """
+    # Busca habilidades para o <select> (Lógica original mantida)
+    habilidades = Habilidade.objects.all()
+    
+    # Se já tiver perfil, mandamos os dados para preencher os campos (Edição)
+    perfil = getattr(request.user, 'perfil_aluno', None)
+    
+    context = {
+        'habilidades': habilidades,
+        'perfil': perfil
+    }
+    # Renderiza apenas o pedaço do formulário
+    return render(request, 'partials/form-perfil.html', context)
 
 # --- VIEWS DE API (DRF) - As novas versões ---
 
@@ -172,6 +226,24 @@ class LoginAPIView(APIView):
             })
         
         return Response({'message': 'Email ou senha inválidos.'}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    # 2. API PARA SAIR (LOGOUT)
+class LogoutAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            # 1. Invalida o refresh token (Opcional, se estiver usando blacklist app)
+            # refresh_token = request.data.get("refresh")
+            # token = RefreshToken(refresh_token)
+            # token.blacklist()
+
+            # 2. Mata a sessão do Django (Importante pois usamos sessão híbrida)
+            logout(request)
+            
+            return Response({'message': 'Logout realizado com sucesso.'}, status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response({'message': 'Erro ao realizar logout.'}, status=status.HTTP_400_BAD_REQUEST)
 
 class RegisterAPIView(APIView):
     def post(self, request):
@@ -289,3 +361,17 @@ class CompletarPerfilAPIView(APIView):
         except Exception as e:
             print(f"Erro ao salvar perfil: {e}")
             return Response({'message': 'Erro ao processar dados.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+# 1. API PARA PEGAR OS DADOS (GET)
+class MeuPerfilAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        try:
+            # Serializa o usuário atual usando o serializer unificado
+            serializer = MeuPerfilSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'message': f'Erro ao recuperar perfil: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
+        

@@ -1,0 +1,23 @@
+<div class="card shadow-sm p-4">
+  <div class="d-flex justify-content-between">
+      <h3>{{ dados.nome }}</h3>
+      <button class="btn btn-primary btn-sm" data-route="editar">Editar Dados</button>
+  </div>
+  <p class="text-muted">{{ dados.campus }} | Matrícula: {{ dados.matricula }}</p>
+  <hr>
+  <h5>Sobre Mim</h5>
+  <p>{{ dados.perfil.resumo|default:"Sem resumo cadastrado." }}</p>
+
+  <h5>Skills</h5>
+  <div class="d-flex gap-2 flex-wrap">
+      {% for s in dados.perfil.habilidades %}
+          <span class="badge bg-success p-2">{{ s.nome_habilidade }} ({{ s.nivel }}%)</span>
+      {% empty %}
+          <span class="text-muted">Nenhuma skill.</span>
+      {% endfor %}
+  </div>
+
+  <div class="mt-4">
+      <button class="btn btn-secondary" data-route="home">Voltar</button>
+  </div>
+</div>

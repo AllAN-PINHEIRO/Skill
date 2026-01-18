@@ -1,0 +1,161 @@
+/* --- Variáveis e Configurações Globais --- */
+:root {
+  --primary-green: #198754;     /* Verde IFBA */
+  --dark-green: #146c43;        /* Verde mais escuro para navbar/hovers */
+  --accent-color: #0dcaf0;      /* Ciano para detalhes */
+  --dark-text: #343a40;
+  --card-bg: #ffffff;
+  --body-bg: #f8f9fa;
+}
+
+body {
+  background-color: var(--body-bg);
+  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+}
+
+/* Navbar customizada */
+.bg-dark-green {
+  background: linear-gradient(135deg, var(--dark-green), var(--primary-green));
+}
+
+/* --- Efeitos de Card "Bolados" --- */
+.card {
+  border: none;
+  border-radius: 15px;
+  /* Sombra inicial suave */
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  transition: all 0.3s ease-in-out;
+  overflow: hidden; /* Para o cabeçalho não vazar */
+}
+
+/* Efeito de "levantar" ao passar o mouse */
+.card.shadow-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(25, 135, 84, 0.15); /* Sombra esverdeada */
+}
+
+
+/* --- Avatar e Cabeçalho do Perfil --- */
+.avatar-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* O ícone principal */
+.avatar-container i {
+  font-size: 110px;
+  /* Gradiente no texto do ícone (funciona no Chrome/Safari) */
+  background: linear-gradient(45deg, var(--primary-green), var(--accent-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Anel decorativo em volta do avatar (opcional) */
+.avatar-container::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  background: linear-gradient(45deg, var(--primary-green), var(--accent-color)) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
+  opacity: 0.7;
+}
+
+
+/* --- Botões de Redes Sociais Customizados --- */
+.btn-social {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: transform 0.2s;
+  color: white;
+  border: none;
+}
+.btn-social:hover { transform: scale(1.1); color: white;}
+.btn-linkedin { background: linear-gradient(45deg, #0077b5, #0e5a8a); }
+.btn-github { background: linear-gradient(45deg, #333, #555); }
+
+
+/* --- ESTATÍSTICAS DE SKILLS (O ponto alto) --- */
+
+.skill-item-container {
+  margin-bottom: 25px;
+}
+
+/* Labels das skills */
+.skill-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--dark-text);
+}
+
+.skill-percentage {
+  color: var(--primary-green);
+  font-weight: 700;
+}
+
+/* A barra de progresso em si */
+.progress {
+  height: 12px;
+  border-radius: 10px;
+  background-color: #e9ecef; /* Fundo cinza claro */
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+/* O preenchimento da barra (animado e com gradiente) */
+.progress-bar-animated-gradient {
+  /* Gradiente da esquerda (verde) para a direita (ciano brilhante) */
+  background: linear-gradient(90deg, var(--primary-green) 0%, var(--accent-color) 100%);
+  border-radius: 10px;
+  /* Animação de entrada */
+  animation: slideInSkill 1.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+  transform-origin: left;
+  /* Listras animadas sutis (opcional) */
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efeito de brilho passando na barra */
+.progress-bar-animated-gradient::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: shine 2.5s infinite;
+}
+
+/* --- Animações Keyframes --- */
+
+/* Faz a barra crescer da esquerda para a direita */
+@keyframes slideInSkill {
+  from { width: 0% !important; opacity: 0.5; }
+}
+
+/* Faz o brilho passar pela barra */
+@keyframes shine {
+  to { left: 100%; }
+}
+
+/* Badge de contagem no header do card de skills */
+#skill-count-badge {
+  font-size: 0.8rem;
+  padding: 0.5em 0.8em;
+  border-radius: 20px;
+  background-color: var(--dark-green) !important;
+}

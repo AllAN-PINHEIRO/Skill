@@ -1,128 +1,110 @@
 document.addEventListener("DOMContentLoaded", function() {
-  const skillSelect = document.getElementById('skill-select');
-  const skillLevel = document.getElementById('skill-level');
-  const btnAdd = document.getElementById('btn-add-skill');
-  const listContainer = document.getElementById('skills-list-container');
-  const emptyMsg = document.getElementById('empty-msg');
-  const form = document.getElementById('perfil-form');
-  const messageDiv = document.getElementById('form-message');
+    
+    const btnAdd = document.getElementById('btn-add');
+    const form = document.getElementById('perfil-form');
+    const listaSkillsUl = document.getElementById('lista-skills');
+    
+    // Array para armazenar temporariamente as skills antes de enviar
+    let skillsParaEnviar = [];
 
-  let skillsAdicionadas = []; // Array para guardar as skills temporariamente
+    // --- FUNÇÃO 1: Adicionar Skill na Lista Visual ---
+    if (btnAdd) {
+        btnAdd.addEventListener('click', () => {
+            const sel = document.getElementById('skill-select');
+            const inputNivel = document.getElementById('skill-level');
+            
+            const skillId = sel.value;
+            const skillNome = sel.options[sel.selectedIndex].text;
+            const nivel = inputNivel.value;
+            
+            // Validações
+            if (!skillId) return alert("Selecione uma habilidade.");
+            if (!nivel || nivel < 0 || nivel > 100) return alert("Digite um nível entre 0 e 100.");
+            
+            // Evita duplicatas na lista
+            if (skillsParaEnviar.find(s => s.id === skillId)) {
+                return alert("Essa habilidade já foi adicionada à lista.");
+            }
 
-  // 1. Função para adicionar Skill na lista visual
-  btnAdd.addEventListener('click', function() {
-      const id = skillSelect.value;
-      // Pega o texto do select (ex: "Java")
-      const nome = skillSelect.options[skillSelect.selectedIndex].text;
-      const nivel = skillLevel.value;
+            // Adiciona ao array lógico
+            skillsParaEnviar.push({ id: skillId, nivel: nivel });
+            
+            // Cria o elemento HTML (Visual)
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center animate-fade-in';
+            li.innerHTML = `
+                <div>
+                    <strong>${skillNome}</strong> 
+                    <span class="badge bg-primary rounded-pill ms-2">${nivel}%</span>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger btn-remove" data-id="${skillId}">X</button>
+            `;
+            
+            // Adiciona evento de remover neste botão específico (Mais seguro que window.remove)
+            li.querySelector('.btn-remove').addEventListener('click', function() {
+                const idToRemove = this.getAttribute('data-id');
+                // Remove do array
+                skillsParaEnviar = skillsParaEnviar.filter(s => s.id !== idToRemove);
+                // Remove do HTML
+                li.remove();
+            });
 
-      if (!id || !nivel) {
-          alert("Selecione uma skill e defina o nível (%)");
-          return;
-      }
+            listaSkillsUl.appendChild(li);
+            
+            // Limpa inputs
+            sel.value = "";
+            inputNivel.value = "";
+        });
+    }
 
-      if (nivel < 0 || nivel > 100) {
-          alert("O nível deve ser entre 0 e 100.");
-          return;
-      }
+    // --- FUNÇÃO 2: Enviar Formulário (Fetch) ---
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btnSubmit = form.querySelector('button[type="submit"]');
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            // AQUI ESTÁ A MELHORIA: Pega a URL de destino direto do HTML
+            const redirectUrl = btnSubmit.getAttribute('data-redirect'); 
 
-      // Verifica se já adicionou essa skill
-      if (skillsAdicionadas.find(s => s.id === id)) {
-          alert("Você já adicionou esta skill.");
-          return;
-      }
+            // Feedback visual (Bloqueia botão)
+            const textoOriginal = btnSubmit.innerText;
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = "Salvando...";
 
-      // Adiciona ao array
-      skillsAdicionadas.push({ id: id, nivel: nivel });
+            const dados = {
+                resumo: document.getElementById('resumo').value,
+                linkedin: document.getElementById('linkedin').value,
+                github: document.getElementById('github').value,
+                skills: skillsParaEnviar
+            };
 
-      // Atualiza HTML
-      renderSkills();
-      
-      // Limpa inputs
-      skillSelect.value = "";
-      skillLevel.value = "";
-  });
+            try {
+                const response = await fetch('/auth/api/completar-perfil/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify(dados)
+                });
 
-  function renderSkills() {
-      // Controla a mensagem de "vazio"
-      if (skillsAdicionadas.length > 0) {
-          emptyMsg.style.display = 'none';
-      } else {
-          emptyMsg.style.display = 'block';
-      }
-      
-      // Filtra para remover a mensagem de vazio do HTML gerado e recria a lista
-      const skillsHtml = skillsAdicionadas.map((skill, index) => {
-          // Busca o nome da skill no select original para exibir na lista
-          const option = document.querySelector(`option[value="${skill.id}"]`);
-          const nomeSkill = option ? option.text : 'Skill';
-
-          return `
-          <div class="skill-item fade-in">
-              <div>
-                  <strong>${nomeSkill}</strong> 
-                  <span class="badge bg-success ms-2">${skill.nivel}%</span>
-              </div>
-              <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeSkill(${index})" title="Remover">
-                  <i class="fas fa-trash"></i>
-              </button>
-          </div>
-          `;
-      }).join('');
-      
-      // Mantém a div de mensagem vazia e adiciona os itens
-      listContainer.innerHTML = `<p class="text-muted text-center small mt-4" id="empty-msg" style="display: ${skillsAdicionadas.length === 0 ? 'block' : 'none'}">Nenhuma habilidade adicionada.</p>` + skillsHtml;
-  }
-
-  // Função global para remover skill (precisa estar no window para o onclick funcionar)
-  window.removeSkill = function(index) {
-      skillsAdicionadas.splice(index, 1);
-      renderSkills();
-  }
-
-  // 2. Envio do Formulário para a API
-  form.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
-      const btn = form.querySelector('button[type="submit"]');
-      
-      // Bloqueia botão
-      btn.disabled = true;
-      const textoOriginal = btn.innerHTML;
-      btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Salvando...';
-
-      const dados = {
-          resumo: document.getElementById('resumo').value,
-          linkedin: document.getElementById('linkedin').value,
-          github: document.getElementById('github').value,
-          skills: skillsAdicionadas // Envia o array de objetos
-      };
-
-      try {
-          const response = await fetch('/auth/api/completar-perfil/', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-                  'X-CSRFToken': csrfToken
-              },
-              body: JSON.stringify(dados)
-          });
-
-          if (response.ok) {
-              // Sucesso: Redireciona para o Dashboard
-              window.location.href = "/auth/dashboard-aluno/";
-          } else {
-              const data = await response.json();
-              messageDiv.innerHTML = `<div class="alert alert-danger">${data.message || 'Erro ao salvar dados.'}</div>`;
-              btn.disabled = false;
-              btn.innerHTML = textoOriginal;
-          }
-      } catch (error) {
-          console.error(error);
-          messageDiv.innerHTML = `<div class="alert alert-danger">Erro de conexão com o servidor.</div>`;
-          btn.disabled = false;
-          btn.innerHTML = textoOriginal;
-      }
-  });
+                if (response.ok) {
+                    // Sucesso! Redireciona para onde o HTML mandou
+                    window.location.href = redirectUrl;
+                } else {
+                    const errorData = await response.json();
+                    alert("Erro ao salvar: " + (errorData.message || "Verifique os dados."));
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerText = textoOriginal;
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Erro de conexão com o servidor.");
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = textoOriginal;
+            }
+        });
+    }
 });

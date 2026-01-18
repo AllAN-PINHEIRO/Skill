@@ -146,3 +146,30 @@ class PerfilAlunoSerializer(serializers.ModelSerializer):
     class Meta:
         model = PerfilAluno
         fields = ['resumo', 'linkedin', 'github', 'habilidades']
+
+class MeuPerfilSerializer(serializers.ModelSerializer):
+    """
+    Serializer de Leitura: Traz TODOS os dados do usuário (User + Cadastro + Perfil).
+    """
+    # Trazemos campos específicos de cada "pedaço" do usuário
+    nome = serializers.CharField(source='cadastro.nome')
+    matricula = serializers.CharField(source='cadastro.matricula')
+    campus = serializers.CharField(source='cadastro.campus')
+    
+    # Reutilizamos o serializer de perfil que já criamos para trazer skills e links
+    perfil = PerfilAlunoSerializer(source='perfil_aluno')
+
+    class Meta:
+        model = User
+        fields = ['email', 'nome', 'matricula', 'campus', 'perfil']
+    
+    def get_perfil(self, obj):
+        try:
+            return {
+                'resumo': obj.perfil_aluno.resumo,
+                'linkedin': obj.perfil_aluno.linkedin,
+                'github': obj.perfil_aluno.github,
+                'habilidades': HabilidadeAlunoSerializer(obj.perfil_aluno.habilidadealuno_set.all(), many=True).data
+            }
+        except:
+            return {}
