@@ -80,36 +80,67 @@ const SPA = {
       }
   },
 
-  // --- 4. Gráfico ---
+  // --- 4. LÓGICA DO GRÁFICO (AGORA É DOUGHNUT) ---
   initChart: function() {
-      const ctx = document.getElementById('skillsChart');
-      const labelsTag = document.getElementById('chart-labels');
-      const dataTag = document.getElementById('chart-data');
+    const ctx = document.getElementById('skillsChart');
+    const labelsTag = document.getElementById('chart-labels');
+    const dataTag = document.getElementById('chart-data');
 
-      if (!ctx || !labelsTag || !dataTag) return;
-      if (this.chartInstance) this.chartInstance.destroy();
+    if (!ctx || !labelsTag || !dataTag) return;
 
-      this.chartInstance = new Chart(ctx, {
-          type: 'radar',
-          data: {
-              labels: JSON.parse(labelsTag.textContent),
-              datasets: [{
-                  label: 'Nível',
-                  data: JSON.parse(dataTag.textContent),
-                  backgroundColor: 'rgba(25, 135, 84, 0.2)',
-                  borderColor: '#198754',
-                  borderWidth: 2,
-                  pointBackgroundColor: '#fff',
-                  pointBorderColor: '#198754'
-              }]
-          },
-          options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              scales: { r: { suggestedMin: 0, suggestedMax: 100, ticks: { display: false } } },
-              plugins: { legend: { display: false } }
-          }
-      });
+    // Limpa gráfico anterior se existir
+    if (this.chartInstance) this.chartInstance.destroy();
+
+    // Pega os dados
+    const labels = JSON.parse(labelsTag.textContent);
+    const dataValues = JSON.parse(dataTag.textContent);
+
+    // Paleta de cores modernas para as fatias
+    const backgroundColors = [
+        '#10b981', // Verde Principal
+        '#3b82f6', // Azul
+        '#f59e0b', // Laranja
+        '#ef4444', // Vermelho
+        '#8b5cf6', // Roxo
+        '#06b6d4'  // Ciano
+    ];
+
+    this.chartInstance = new Chart(ctx, {
+        type: 'doughnut', // <--- MUDANÇA PRINCIPAL AQUI
+        data: {
+            labels: labels,
+            datasets: [{
+                data: dataValues,
+                backgroundColor: backgroundColors.slice(0, labels.length), // Usa tantas cores quantas skills tiver
+                borderWidth: 2,
+                borderColor: '#ffffff', // Borda branca para separar as fatias
+                hoverOffset: 10 // Efeito ao passar o mouse
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%', // Define o tamanho do buraco da "rosquinha"
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom', // Legenda abaixo do gráfico
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20,
+                        font: { family: "'Inter', sans-serif", size: 12 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return ` ${context.label}: ${context.raw}%`;
+                        }
+                    }
+                }
+            }
+        }
+    });
   },
 
   // --- 5. Adicionar Skill (Visual) ---
