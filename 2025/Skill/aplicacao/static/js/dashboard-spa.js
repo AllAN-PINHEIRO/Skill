@@ -218,3 +218,112 @@ const SPA = {
       if(close) close.addEventListener('click', toggleFn);
   }
 };
+
+// --- FUNÇÕES GLOBAIS PARA O MODAL DE DESTAQUE ---
+
+let modalInstancia = null;
+
+// 1. Função para Abrir o Modal (Vazia para criar, preenchida para editar)
+window.abrirModalDestaque = function(id = '', titulo = '', descricao = '', cor = 'gray') {
+    const modalEl = document.getElementById('modalDestaque');
+    modalInstancia = new bootstrap.Modal(modalEl);
+    
+    // Preenche os campos
+    document.getElementById('destaque_id').value = id;
+    document.getElementById('destaque_titulo').value = titulo;
+    document.getElementById('destaque_descricao').value = descricao;
+    
+    // Marca a cor certa
+    if(cor === 'green') document.getElementById('cor_green').checked = true;
+    else document.getElementById('cor_gray').checked = true;
+
+    // Mostra/Esconde botão de excluir
+    const btnExcluir = document.getElementById('btn-excluir-destaque');
+    if (id) {
+        btnExcluir.style.display = 'block';
+        btnExcluir.onclick = () => excluirDestaque(id);
+    } else {
+        btnExcluir.style.display = 'none';
+    }
+
+    modalInstancia.show();
+}
+
+// 2. Lógica de Salvar (Submit do Form)
+document.addEventListener('submit', async function(e) {
+    if (e.target.id === 'form-destaque') {
+        e.preventDefault();
+        
+        const dados = {
+            id: document.getElementById('destaque_id').value,
+            titulo: document.getElementById('destaque_titulo').value,
+            descricao: document.getElementById('destaque_descricao').value,
+            cor: document.querySelector('input[name="destaque_cor"]:checked').value
+        };
+
+        // Pega o token CSRF de qualquer outro form da página ou do cookie
+        const csrfToken = getCookie('csrftoken');
+
+        try {
+            const response = await fetch('/auth/api/destaque/salvar/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify(dados)
+            });
+            
+            if (response.ok) {
+                modalInstancia.hide();
+                // Recarrega a tela de portfólio para mostrar as mudanças
+                SPA.load('portfolio'); 
+            } else {
+                const err = await response.json();
+                alert(err.message || "Erro ao salvar.");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Erro de conexão.");
+        }
+    }
+});
+
+// 3. Função de Excluir
+window.excluirDestaque = async function(id) {
+    if(!confirm("Tem certeza que deseja excluir este card?")) return;
+    
+    const csrfToken = getCookie('csrftoken');
+    
+    try {
+        const response = await fetch(`/auth/api/destaque/excluir/${id}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken }
+        });
+        
+        if (response.ok) {
+            modalInstancia.hide();
+            SPA.load('portfolio');
+        } else {
+            alert("Erro ao excluir.");
+        }
+    } catch (error) {
+        alert("Erro de conexão.");
+    }
+}
+
+// Função auxiliar para pegar CSRF (caso não tenha ainda)
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}

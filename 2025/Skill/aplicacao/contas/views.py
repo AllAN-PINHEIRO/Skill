@@ -1,8 +1,9 @@
 # Imports para MVT (verifique se estão no topo do arquivo)
-from django.http import HttpResponse
+import json
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404 # Essencial para MVT
 from django.contrib.auth.models import User
-from .models import Cadastro
+from .models import Cadastro, HabilidadeDestaque
 from .models import PerfilAluno, Habilidade, HabilidadeAluno
 
 # --- NOVOS IMPORTS PARA DRF ---
@@ -186,6 +187,50 @@ def partial_portfolio_view(request):
         'destaques': destaques
     }
     return render(request, 'partials/portfolio.html', context)
+
+@login_required
+def api_salvar_destaque(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            perfil = request.user.perfil_aluno
+            
+            # Se vier um ID, é EDIÇÃO. Se não, é CRIAÇÃO.
+            destaque_id = data.get('id')
+            
+            if destaque_id:
+                # Atualizar existente
+                destaque = get_object_or_404(HabilidadeDestaque, id=destaque_id, perfil=perfil)
+                destaque.titulo = data.get('titulo')
+                destaque.descricao = data.get('descricao')
+                destaque.cor = data.get('cor')
+                destaque.save()
+            else:
+                # Criar novo (Limite de 4 cards para não quebrar layout)
+                if perfil.habilidades_destaque.count() >= 4:
+                    return JsonResponse({'success': False, 'message': 'Limite de 4 habilidades atingido.'}, status=400)
+                
+                HabilidadeDestaque.objects.create(
+                    perfil=perfil,
+                    titulo=data.get('titulo'),
+                    descricao=data.get('descricao'),
+                    cor=data.get('cor')
+                )
+            
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    return JsonResponse({'success': False}, status=400)
+
+@login_required
+def api_excluir_destaque(request, destaque_id):
+    if request.method == 'POST':
+        try:
+            destaque = get_object_or_404(HabilidadeDestaque, id=destaque_id, perfil=request.user.perfil_aluno)
+            destaque.delete()
+            return JsonResponse({'success': True})
+        except:
+            return JsonResponse({'success': False}, status=400)
 
 # --- VIEWS DE API (DRF) - As novas versões ---
 

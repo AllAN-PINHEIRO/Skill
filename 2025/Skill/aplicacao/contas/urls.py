@@ -26,5 +26,6 @@ urlpatterns = [
     path('api/completar-perfil/', views.CompletarPerfilAPIView.as_view(), name='api-completar-perfil'),
     path('api/meu-perfil/', views.MeuPerfilAPIView.as_view(), name='api-meu-perfil'),
     path('api/logout/', views.LogoutAPIView.as_view(), name='api-logout'),
-    
+    path('api/destaque/salvar/', views.api_salvar_destaque, name='api-salvar-destaque'),
+    path('api/destaque/excluir/<int:destaque_id>/', views.api_excluir_destaque, name='api-excluir-destaque'),
 ]
