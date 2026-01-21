@@ -171,6 +171,22 @@ def partial_editar_perfil_view(request):
     # Renderiza apenas o pedaço do formulário
     return render(request, 'partials/form-perfil.html', context)
 
+@login_required
+def partial_portfolio_view(request):
+    # Pega os dados básicos (reaproveitando o serializer)
+    serializer = MeuPerfilSerializer(request.user)
+    
+    # Pega as habilidades destaque (limite de 4 para não quebrar o layout)
+    destaques = []
+    if hasattr(request.user, 'perfil_aluno'):
+        destaques = request.user.perfil_aluno.habilidades_destaque.all()[:4]
+    
+    context = {
+        'dados': serializer.data,
+        'destaques': destaques
+    }
+    return render(request, 'partials/portfolio.html', context)
+
 # --- VIEWS DE API (DRF) - As novas versões ---
 
 class LoginAPIView(APIView):

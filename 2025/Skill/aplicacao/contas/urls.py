@@ -16,6 +16,7 @@ urlpatterns = [
     path('partial/home/', views.partial_home_view, name='partial-home'),
     path('partial/perfil/', views.partial_perfil_view, name='partial-perfil'),
     path('partial/editar/', views.partial_editar_perfil_view, name='partial-editar'),
+    path('partial/portfolio/', views.partial_portfolio_view, name='partial-portfolio'),
 
     # 2. ROTAS DE API (JSON) - O que o JavaScript chama
     path('api/login/', views.LoginAPIView.as_view(), name='api-login'),

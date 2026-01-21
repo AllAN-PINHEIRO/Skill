@@ -67,3 +67,12 @@ class HabilidadeAluno(models.Model):
 
     class Meta:
         unique_together = ('perfil', 'habilidade') # Evita duplicatas
+
+class HabilidadeDestaque(models.Model):
+    perfil = models.ForeignKey(PerfilAluno, on_delete=models.CASCADE, related_name='habilidades_destaque')
+    titulo = models.CharField(max_length=50) # Ex: "Desenvolvimento Back-end"
+    descricao = models.TextField(max_length=150) # Ex: "Construção de APIs robustas..."
+    cor = models.CharField(max_length=20, default='gray') # 'green' ou 'gray'
+    
+    def __str__(self):
+        return self.titulo

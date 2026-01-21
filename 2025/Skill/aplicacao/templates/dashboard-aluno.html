@@ -38,12 +38,14 @@
                 <button class="btn btn-link text-dark p-0 hamburger-menu" id="hamburgerMenu">
                     <i class="bi bi-list" style="font-size: 1.75rem;"></i>
                 </button>
-                <div class="welcome-text"><h4>👋 Olá, {{ nome_usuario }}!</h4></div>
+                <div class="welcome-text">
+                    <h4>👋 Olá, {{ nome_usuario }}!</h4>
+                </div>
             </div>
-
+        
             <div class="user-profile">
                 <div class="dropdown">
-                    <button class="dropdown-toggle user-avatar" type="button" data-bs-toggle="dropdown">
+                    <button class="dropdown-toggle user-avatar" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         {{ nome_usuario|slice:":1"|upper }}
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">

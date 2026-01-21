@@ -367,3 +367,62 @@ a { text-decoration: none !important; }
     
     .profile-dashboard-grid { grid-template-columns: 1fr; } /* Coluna única no mobile */
 }
+
+/* --- ESTILOS DO PORTFÓLIO (Highlight Skills) --- */
+
+.skills-highlight-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Responsivo: 4 colunas */
+    gap: 1rem;
+}
+
+.skill-highlight-card {
+    border-radius: 8px;
+    padding: 1.25rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    transition: transform 0.2s;
+    min-height: 180px;
+}
+.skill-highlight-card:hover { transform: translateY(-3px); }
+
+/* Variação Verde (Destaque) */
+.card-green {
+    background-color: #5dae60; /* Verde da imagem */
+    color: white;
+}
+.card-green .skill-highlight-title { color: white; }
+.card-green .skill-highlight-desc { color: rgba(255,255,255,0.9); }
+.card-green .skill-icon-box { color: white; border-color: rgba(255,255,255,0.4); }
+
+/* Variação Cinza (Padrão) */
+.card-gray {
+    background-color: #7d7d7d; /* Cinza da imagem */
+    color: white;
+}
+.card-gray .skill-highlight-title { color: white; }
+.card-gray .skill-highlight-desc { color: rgba(255,255,255,0.8); }
+
+/* Elementos Internos do Card */
+.skill-icon-box {
+    font-size: 1.2rem;
+    margin-bottom: 0.75rem;
+    width: fit-content;
+}
+
+.skill-highlight-title {
+    font-weight: 800;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+    letter-spacing: 0.5px;
+}
+
+.skill-highlight-desc {
+    font-size: 0.7rem;
+    line-height: 1.4;
+    margin: 0;
+}

@@ -1,0 +1,136 @@
+<div class="animate-fade-in">
+    
+  <button class="btn btn-link text-muted text-decoration-none mb-3 ps-0" data-route="perfil">
+      <i class="bi bi-arrow-left"></i> Voltar para Perfil
+  </button>
+
+  <div class="profile-dashboard-grid">
+      
+      <div class="left-content">
+          
+          <div class="mb-5">
+              <div class="content-section-header">
+                  <span class="content-section-title"><i class="bi bi-emoji-smile"></i> Sobre Mim</span>
+                  <i class="bi bi-chevron-right text-success"></i>
+              </div>
+              <div class="modern-card p-4 border-0 bg-white">
+                  <p class="text-secondary mb-0" style="line-height: 1.8; font-size: 0.95rem;">
+                      {{ dados.perfil.resumo|default:"Olá! Ainda não escrevi meu resumo profissional. Clique em editar no menu de perfil para adicionar sua biografia."|linebreaksbr }}
+                  </p>
+              </div>
+          </div>
+
+          <div class="mb-5">
+              <div class="content-section-header">
+                  <span class="content-section-title"><i class="bi bi-code-slash"></i> Principais Habilidades</span>
+                  <i class="bi bi-chevron-right text-success"></i>
+              </div>
+              
+              <div class="skills-highlight-grid">
+                  
+                  {% for item in destaques %}
+                      <div class="skill-highlight-card {% if item.cor == 'green' %}card-green{% else %}card-gray{% endif %}">
+                          <div class="skill-icon-box">
+                              <i class="bi bi-code-square"></i> </div>
+                          <h6 class="skill-highlight-title">{{ item.titulo }}</h6>
+                          <p class="skill-highlight-desc">{{ item.descricao }}</p>
+                      </div>
+                  {% empty %}
+                      <div class="skill-highlight-card card-green">
+                          <div class="skill-icon-box"><i class="bi bi-hdd-network"></i></div>
+                          <h6 class="skill-highlight-title">DESENVOLVIMENTO BACK-END</h6>
+                          <p class="skill-highlight-desc">Construção de APIs robustas, integração com bancos de dados e arquiteturas escaláveis usando Java e Spring Boot.</p>
+                      </div>
+
+                      <div class="skill-highlight-card card-gray">
+                          <div class="skill-icon-box"><i class="bi bi-braces"></i></div>
+                          <h6 class="skill-highlight-title">CONSUMO DE API REST</h6>
+                          <p class="skill-highlight-desc">Integração com APIs RESTful utilizando métodos HTTP, autenticação e tratamento de dados.</p>
+                      </div>
+
+                      <div class="skill-highlight-card card-gray">
+                          <div class="skill-icon-box"><i class="bi bi-box-seam"></i></div>
+                          <h6 class="skill-highlight-title">DOCKER</h6>
+                          <p class="skill-highlight-desc">Criação e gerenciamento de containers para ambientes isolados, garantindo portabilidade.</p>
+                      </div>
+
+                      <div class="skill-highlight-card card-gray">
+                          <div class="skill-icon-box"><i class="bi bi-git"></i></div>
+                          <h6 class="skill-highlight-title">GIT & VERSIONAMENTO</h6>
+                          <p class="skill-highlight-desc">Controle de versão eficiente, organização de branches e rastreabilidade de código.</p>
+                      </div>
+                  {% endfor %}
+              </div>
+          </div>
+
+          <div class="row">
+              <div class="col-md-6 mb-4">
+                  <div class="showcase-card">
+                      <div>
+                          <div class="gh-header">
+                              <i class="bi bi-github gh-icon"></i>
+                              <span class="gh-title">GitHub</span>
+                          </div>
+                          <h6 class="fw-bold">SoulCode Academy</h6>
+                          <p class="text-muted small mt-2">Projeto para o desenvolvimento (Front-end) de uma página responsiva...</p>
+                      </div>
+                      <button class="btn-confira">Confira</button>
+                  </div>
+              </div>
+              <div class="col-md-6 mb-4">
+                  <div class="showcase-card">
+                      <div>
+                          <div class="udemy-title">Java COMPLETO: Do Zero ao Profisssional</div>
+                          <small class="text-muted d-block mb-3">Udemy</small>
+                          <ul class="text-muted small ps-3 mb-0"><li>Fundamentos Java, POO.</li><li>77h de curso.</li></ul>
+                      </div>
+                      <button class="btn-confira">Confira</button>
+                  </div>
+              </div>
+          </div>
+
+      </div> 
+      <div class="right-sidebar">
+          <div class="profile-sidebar-card">
+              <div class="sidebar-cover">
+                  </div>
+              
+              <div class="profile-avatar-wrapper">
+                  <div class="profile-avatar-lg">
+                      {{ dados.nome|slice:":1" }}
+                  </div>
+              </div>
+
+              <div class="sidebar-info">
+                  <div class="sidebar-name">{{ dados.nome }}</div>
+                  <div class="sidebar-detail"><span class="sidebar-label">Nº Matricula:</span> {{ dados.matricula }}</div>
+                  <div class="sidebar-detail text-break"><span class="sidebar-label">E-mail:</span> {{ dados.email }}</div>
+                  <div class="sidebar-detail"><span class="sidebar-label">Semestre:</span> Em curso</div>
+                  <div class="sidebar-detail"><span class="sidebar-label">Cidade:</span> Eunápolis - BA</div>
+              </div>
+
+              <div class="sidebar-section">
+                  <div class="sidebar-section-title">Tenho Interesse e XP</div>
+                  <div class="skills-list-simple">
+                      {% for s in dados.perfil.habilidades|slice:":4" %}
+                          <div class="skill-row"><span class="skill-name">{{ s.nome_habilidade }}</span><span class="skill-val">{{ s.nivel }}%</span></div>
+                      {% empty %}
+                           <div class="skill-row"><span class="skill-name">Java</span><span class="skill-val">SQL</span></div>
+                           <div class="skill-row"><span class="skill-name">Python</span><span class="skill-val">Docker</span></div>
+                      {% endfor %}
+                  </div>
+              </div>
+
+              <div class="sidebar-section bg-white">
+                  <div class="sidebar-section-title">Portfólio</div>
+                  <div class="text-center mb-3"><i class="bi bi-globe me-1 text-success"></i> <a href="#" class="text-muted small">meusite.dev.br</a></div>
+                  <div class="social-icons-row">
+                      <a href="{{ dados.perfil.linkedin }}" class="text-success"><i class="bi bi-linkedin"></i></a>
+                      <a href="{{ dados.perfil.github }}" class="text-success"><i class="bi bi-github"></i></a>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+  </div>
+</div>

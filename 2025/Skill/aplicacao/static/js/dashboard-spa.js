@@ -7,7 +7,8 @@ const SPA = {
   routes: {
       'home': '/auth/partial/home/',
       'perfil': '/auth/partial/perfil/',
-      'editar': '/auth/partial/editar/'
+      'editar': '/auth/partial/editar/',
+      'portfolio': '/auth/partial/portfolio/'
   },
   chartInstance: null,
 
