@@ -5,6 +5,7 @@
     </button>
 
     <div class="profile-dashboard-grid">
+        
         <div class="left-content">
             
             <div class="mb-5">
@@ -12,8 +13,8 @@
                     <span class="content-section-title"><i class="bi bi-emoji-smile"></i> Sobre Mim</span>
                 </div>
                 <div class="modern-card p-4 border-0 bg-white">
-                    <p class="text-secondary mb-0">
-                        {{ dados.perfil.resumo|default:"Sem resumo cadastrado."|linebreaksbr }}
+                    <p class="text-secondary mb-0" style="line-height: 1.6;">
+                        {{ dados.perfil.resumo|default:"Sem resumo cadastrado. Clique em editar no perfil para adicionar."|linebreaksbr }}
                     </p>
                 </div>
             </div>
@@ -36,22 +37,150 @@
                             
                             <div class="d-flex justify-content-between">
                                 <div class="skill-icon-box"><i class="bi bi-code-square"></i></div>
-                                <i class="bi bi-pencil-fill opacity-50 small"></i> </div>
+                                <i class="bi bi-pencil-fill opacity-50 small"></i>
+                            </div>
                             
                             <h6 class="skill-highlight-title">{{ item.titulo }}</h6>
                             <p class="skill-highlight-desc">{{ item.descricao }}</p>
                         </div>
                     {% empty %}
                         <div class="text-muted text-center w-100 py-4 border rounded bg-white">
-                            Nenhuma habilidade em destaque. Clique em "Adicionar".
+                            <small>Nenhuma habilidade destaque cadastrada.</small>
                         </div>
                     {% endfor %}
                 </div>
             </div>
 
-            </div> <div class="right-sidebar">
-             <div class="profile-sidebar-card">
-                 </div>
+            <div class="mb-5">
+                <div class="content-section-header justify-content-between">
+                    <span class="content-section-title"><i class="bi bi-award"></i> Cursos e Certificações</span>
+                    <button class="btn btn-sm btn-outline-success" onclick="abrirModalCertificado()">
+                        <i class="bi bi-plus-lg"></i> Adicionar
+                    </button>
+                </div>
+
+                <div class="certificates-slider-container">
+                    {% for cert in certificados %}
+                        <div class="certificate-slide-card" onclick="abrirModalCertificado('{{ cert.id }}', '{{ cert.titulo }}', '{{ cert.instituicao }}', '{{ cert.horas }}')">
+                            <div class="mb-3">
+                                <h6 class="cert-title" title="{{ cert.titulo }}">
+                                    {{ cert.titulo|default:"Sem Título" }}
+                                </h6>
+                                <p class="cert-school">
+                                    {{ cert.instituicao|default:"Instituição" }}
+                                </p>
+                            </div>
+                            <div class="cert-footer">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="cert-icon-circle"><i class="bi bi-mortarboard-fill"></i></div>
+                                    <span class="text-muted small ms-1" style="font-size: 0.75rem;"><i class="bi bi-pencil"></i> Editar</span>
+                                </div>
+                                {% if cert.horas %}
+                                    <span class="cert-badge"><i class="bi bi-clock"></i> {{ cert.horas }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-muted small p-4 border rounded w-100 text-center bg-white">
+                            Nenhum certificado adicionado ainda.
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="mb-5">
+                <div class="content-section-header">
+                    <span class="content-section-title"><i class="bi bi-github"></i> Repositórios GitHub</span>
+                </div>
+                <div class="modern-card p-4 border-1 border-dark bg-white">
+                    <div class="text-center py-4">
+                        <i class="bi bi-github display-4 mb-3"></i>
+                        <h5>Integração GitHub</h5>
+                        <p class="text-muted">A conexão automática com seus repositórios será ativada em breve.</p>
+                        <button class="btn btn-dark disabled rounded-pill px-4">Sincronizar Agora</button>
+                    </div>
+                </div>
+            </div>
+
+        </div> <div class="right-sidebar">
+            <div class="profile-sidebar-card">
+                
+                <div class="sidebar-cover">
+                    <button class="btn-edit-pill" data-route="editar">Editar</button>
+                </div> 
+                
+                <div class="profile-avatar-wrapper">
+                    <div class="profile-avatar-lg">
+                        {{ dados.nome|slice:":1"|upper }}
+                    </div>
+                </div>
+
+                <div class="sidebar-info">
+                    <h4 class="profile-name text-center mb-4">{{ dados.nome }}</h4>
+                    
+                    <div class="px-2">
+                        <div class="sidebar-detail mb-1">
+                            <strong class="text-dark">Nº Matricula:</strong> {{ dados.matricula }}
+                        </div>
+                        <div class="sidebar-detail mb-1 text-break">
+                            <strong class="text-dark">E-mail:</strong> {{ dados.email }}
+                        </div>
+                        <div class="sidebar-detail mb-1">
+                            <strong class="text-dark">Campus:</strong> {{ dados.campus }}
+                        </div>
+                        <div class="sidebar-detail mb-1">
+                            <strong class="text-dark">Cidade:</strong> Eunápolis - BA
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="m-0 opacity-10">
+
+                <div class="sidebar-section border-0">
+                    <div class="sidebar-section-title text-center mb-3">Tenho Interesse e XP</div>
+                    <div class="skills-list-simple px-2">
+                        {% for s in dados.perfil.habilidades|slice:":4" %}
+                            <div class="skill-row mb-2">
+                                <span class="skill-name" style="font-family: monospace;">{{ s.nome_habilidade }}</span>
+                                <span class="skill-val fw-bold text-dark">{{ s.nivel }}%</span>
+                            </div>
+                        {% empty %}
+                            <div class="skill-row mb-2"><span class="skill-name">Java</span><span class="skill-val">SQL</span></div>
+                            <div class="skill-row mb-2"><span class="skill-name">Python</span><span class="skill-val">Docker</span></div>
+                            <div class="skill-row mb-2"><span class="skill-name">Node.js</span><span class="skill-val">TI</span></div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <hr class="m-0 opacity-10">
+
+                <div class="sidebar-section bg-white text-center border-0 pb-4">
+                    <div class="sidebar-section-title mb-1">Portfólio</div>
+                    
+                    <div class="mb-3">
+                        <i class="bi bi-globe me-1 text-success"></i> 
+                        <a href="#" class="text-muted text-decoration-none small">meusite.dev.br</a>
+                    </div>
+
+                    <div class="social-icons-row justify-content-center gap-3">
+                        {% if dados.perfil.linkedin %}
+                            <a href="{{ dados.perfil.linkedin }}" target="_blank" class="text-success fs-4"><i class="bi bi-linkedin"></i></a>
+                        {% else %}
+                             <i class="bi bi-linkedin text-success fs-4 opacity-75"></i>
+                        {% endif %}
+                        
+                        {% if dados.perfil.github %}
+                            <a href="{{ dados.perfil.github }}" target="_blank" class="text-success fs-4"><i class="bi bi-github"></i></a>
+                        {% else %}
+                             <i class="bi bi-github text-success fs-4 opacity-75"></i>
+                        {% endif %}
+
+                        <i class="bi bi-twitter-x text-success fs-4 opacity-75"></i>
+                        <i class="bi bi-instagram text-success fs-4 opacity-75"></i>
+                    </div>
+                </div>
+
+            </div>
         </div>
 
     </div>
@@ -60,40 +189,36 @@
 <div class="modal fade" id="modalDestaque" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg">
-      <div class="modal-header border-0">
-        <h5 class="modal-title fw-bold">Gerenciar Habilidade</h5>
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold">Habilidade Destaque</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <form id="form-destaque">
-            <input type="hidden" id="destaque_id"> <div class="mb-3">
-                <label class="form-label small fw-bold text-muted">TÍTULO (Ex: Docker, Java)</label>
-                <input type="text" id="destaque_titulo" class="form-control" required maxlength="50">
-            </div>
-            
-            <div class="mb-3">
-                <label class="form-label small fw-bold text-muted">DESCRIÇÃO CURTA</label>
-                <textarea id="destaque_descricao" class="form-control" rows="3" required maxlength="150"></textarea>
-            </div>
-            
-            <div class="mb-4">
-                <label class="form-label small fw-bold text-muted">COR DO CARD</label>
-                <div class="d-flex gap-2">
-                    <input type="radio" class="btn-check" name="destaque_cor" id="cor_gray" value="gray" checked>
-                    <label class="btn btn-outline-secondary w-50" for="cor_gray">Cinza (Padrão)</label>
+            <input type="hidden" id="destaque_id">
+            <div class="mb-3"><label class="small fw-bold text-muted">TÍTULO</label><input type="text" id="destaque_titulo" class="form-control" required maxlength="50"></div>
+            <div class="mb-3"><label class="small fw-bold text-muted">DESCRIÇÃO</label><textarea id="destaque_descricao" class="form-control" rows="3" required maxlength="150"></textarea></div>
+            <div class="mb-4"><label class="small fw-bold text-muted">COR</label><div class="d-flex gap-2"><input type="radio" class="btn-check" name="destaque_cor" id="cor_gray" value="gray" checked><label class="btn btn-outline-secondary w-50" for="cor_gray">Cinza</label><input type="radio" class="btn-check" name="destaque_cor" id="cor_green" value="green"><label class="btn btn-outline-success w-50" for="cor_green">Verde</label></div></div>
+            <div class="d-flex justify-content-between pt-2 border-top"><button type="button" class="btn btn-link text-danger text-decoration-none btn-sm px-0" id="btn-excluir-destaque" style="display:none;"><i class="bi bi-trash"></i> Excluir</button><div class="ms-auto"><button type="button" class="btn btn-light btn-sm me-2" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-dark btn-sm px-4">Salvar</button></div></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 
-                    <input type="radio" class="btn-check" name="destaque_cor" id="cor_green" value="green">
-                    <label class="btn btn-outline-success w-50" for="cor_green">Verde (Destaque)</label>
-                </div>
-            </div>
-
-            <div class="d-flex gap-2">
-                <button type="button" class="btn btn-danger me-auto" id="btn-excluir-destaque" style="display:none;">
-                    <i class="bi bi-trash"></i> Excluir
-                </button>
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn btn-dark px-4">Salvar</button>
-            </div>
+<div class="modal fade" id="modalCertificado" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold">Curso / Certificado</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-certificado">
+            <input type="hidden" id="cert_id">
+            <div class="mb-3"><label class="small fw-bold text-muted">NOME DO CURSO</label><input type="text" id="cert_titulo" class="form-control" required></div>
+            <div class="row"><div class="col-8 mb-3"><label class="small fw-bold text-muted">INSTITUIÇÃO</label><input type="text" id="cert_instituicao" class="form-control" required></div><div class="col-4 mb-3"><label class="small fw-bold text-muted">HORAS</label><input type="text" id="cert_horas" class="form-control"></div></div>
+            <div class="d-flex justify-content-between pt-2 border-top"><button type="button" class="btn btn-link text-danger text-decoration-none btn-sm px-0" id="btn-excluir-cert" style="display:none;"><i class="bi bi-trash"></i> Excluir</button><div class="ms-auto"><button type="button" class="btn btn-light btn-sm me-2" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-dark btn-sm px-4">Salvar</button></div></div>
         </form>
       </div>
     </div>

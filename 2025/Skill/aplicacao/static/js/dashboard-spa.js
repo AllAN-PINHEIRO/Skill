@@ -327,3 +327,58 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+
+/* --- LOGICA DO MODAL DE CERTIFICADOS (SLIDER) --- */
+
+let modalCertInstancia = null;
+
+// 1. Abrir Modal Certificado
+window.abrirModalCertificado = function(id = '', titulo = '', instituicao = '', horas = '') {
+    const modalEl = document.getElementById('modalCertificado');
+    if (!modalCertInstancia) modalCertInstancia = new bootstrap.Modal(modalEl);
+    
+    document.getElementById('cert_id').value = id;
+    document.getElementById('cert_titulo').value = titulo;
+    document.getElementById('cert_instituicao').value = instituicao;
+    document.getElementById('cert_horas').value = horas;
+
+    const btnExcluir = document.getElementById('btn-excluir-cert');
+    if (id) {
+        btnExcluir.style.display = 'block';
+        btnExcluir.onclick = function() { excluirCertificado(id); };
+    } else {
+        btnExcluir.style.display = 'none';
+    }
+    modalCertInstancia.show();
+};
+
+// 2. Salvar Certificado
+document.addEventListener('submit', async function(e) {
+    if (e.target.id === 'form-certificado') {
+        e.preventDefault();
+        const dados = {
+            id: document.getElementById('cert_id').value,
+            titulo: document.getElementById('cert_titulo').value,
+            instituicao: document.getElementById('cert_instituicao').value,
+            horas: document.getElementById('cert_horas').value
+        };
+        const csrfToken = getCookie('csrftoken');
+
+        try {
+            await fetch('/auth/api/certificado/salvar/', {
+                method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken}, body: JSON.stringify(dados)
+            });
+            modalCertInstancia.hide();
+            SPA.load('portfolio');
+        } catch(e) { alert("Erro ao salvar."); }
+    }
+});
+
+// 3. Excluir Certificado
+window.excluirCertificado = async function(id) {
+    if(!confirm("Excluir este certificado?")) return;
+    const csrfToken = getCookie('csrftoken');
+    await fetch(`/auth/api/certificado/excluir/${id}/`, { method: 'POST', headers: {'X-CSRFToken': csrfToken} });
+    modalCertInstancia.hide();
+    SPA.load('portfolio');
+};

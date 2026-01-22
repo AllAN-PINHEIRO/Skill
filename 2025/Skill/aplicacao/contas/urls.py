@@ -28,4 +28,6 @@ urlpatterns = [
     path('api/logout/', views.LogoutAPIView.as_view(), name='api-logout'),
     path('api/destaque/salvar/', views.api_salvar_destaque, name='api-salvar-destaque'),
     path('api/destaque/excluir/<int:destaque_id>/', views.api_excluir_destaque, name='api-excluir-destaque'),
+    path('api/certificado/salvar/', views.api_salvar_certificado, name='api-salvar-certificado'),
+    path('api/certificado/excluir/<int:cert_id>/', views.api_excluir_certificado, name='api-excluir-certificado'),
 ]

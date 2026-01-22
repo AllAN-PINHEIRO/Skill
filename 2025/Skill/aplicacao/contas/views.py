@@ -3,7 +3,7 @@ import json
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404 # Essencial para MVT
 from django.contrib.auth.models import User
-from .models import Cadastro, HabilidadeDestaque
+from .models import Cadastro, Certificado, HabilidadeDestaque
 from .models import PerfilAluno, Habilidade, HabilidadeAluno
 
 # --- NOVOS IMPORTS PARA DRF ---
@@ -172,19 +172,24 @@ def partial_editar_perfil_view(request):
     # Renderiza apenas o pedaço do formulário
     return render(request, 'partials/form-perfil.html', context)
 
+# 1. ATUALIZE A VIEW DE LEITURA (partial_portfolio_view)
 @login_required
 def partial_portfolio_view(request):
-    # Pega os dados básicos (reaproveitando o serializer)
     serializer = MeuPerfilSerializer(request.user)
     
-    # Pega as habilidades destaque (limite de 4 para não quebrar o layout)
     destaques = []
-    if hasattr(request.user, 'perfil_aluno'):
-        destaques = request.user.perfil_aluno.habilidades_destaque.all()[:4]
+    certificados = []
     
+    if hasattr(request.user, 'perfil_aluno'):
+        # Pega os 4 destaques
+        destaques = request.user.perfil_aluno.habilidades_destaque.all()[:4]
+        # Pega todos os certificados
+        certificados = request.user.perfil_aluno.certificados.all()
+
     context = {
         'dados': serializer.data,
-        'destaques': destaques
+        'destaques': destaques,
+        'certificados': certificados # <--- PASSAR PARA O HTML
     }
     return render(request, 'partials/portfolio.html', context)
 
@@ -231,6 +236,42 @@ def api_excluir_destaque(request, destaque_id):
             return JsonResponse({'success': True})
         except:
             return JsonResponse({'success': False}, status=400)
+        
+# 2. NOVA API PARA SALVAR CERTIFICADO
+@login_required
+def api_salvar_certificado(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            perfil = request.user.perfil_aluno
+            cert_id = data.get('id')
+            
+            if cert_id: # Edição
+                cert = get_object_or_404(Certificado, id=cert_id, perfil=perfil)
+                cert.titulo = data.get('titulo')
+                cert.instituicao = data.get('instituicao')
+                cert.horas = data.get('horas')
+                cert.save()
+            else: # Criação
+                Certificado.objects.create(
+                    perfil=perfil,
+                    titulo=data.get('titulo'),
+                    instituicao=data.get('instituicao'),
+                    horas=data.get('horas')
+                )
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    return JsonResponse({'success': False}, status=400)
+
+# 3. NOVA API PARA EXCLUIR CERTIFICADO
+@login_required
+def api_excluir_certificado(request, cert_id):
+    if request.method == 'POST':
+        cert = get_object_or_404(Certificado, id=cert_id, perfil=request.user.perfil_aluno)
+        cert.delete()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False}, status=400)
 
 # --- VIEWS DE API (DRF) - As novas versões ---
 

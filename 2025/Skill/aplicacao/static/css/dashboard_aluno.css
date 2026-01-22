@@ -1,428 +1,344 @@
 /* ============================================================
-   DASHBOARD ALUNO - ESTILO COMPLETO (FINAL)
+   DASHBOARD ALUNO - ESTILO COMPLETO E ORGANIZADO
    ============================================================ */
 
-/* --- 1. VARIÁVEIS E RESET GERAL --- */
-:root {
-  --sidebar-bg: #2d3748;     /* Cor escura da sidebar */
-  --bg-main: #f8f9fa;        /* Fundo cinza claro da área principal */
-  --text-dark: #1a202c;      /* Texto principal */
-  --text-muted: #718096;     /* Texto secundário */
-  --primary-color: #10b981;  /* Verde Principal (IFBA/Tema) */
-  --primary-dark: #047857;   /* Verde Escuro para gradientes */
-  --card-radius: 16px;       /* Arredondamento padrão */
-  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); /* Sombra suave */
-  --transition-speed: 0.3s;
-}
-
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  background-color: var(--bg-main);
-  color: var(--text-dark);
-  overflow-x: hidden;
-}
-
-/* Remove sublinhados de links globalmente */
-a { text-decoration: none !important; }
-
-/* Animação suave de entrada */
-.animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-
-/* --- 2. SIDEBAR (MENU LATERAL) --- */
-.sidebar {
-  width: 260px;
-  background-color: var(--sidebar-bg);
-  min-height: 100vh;
-  position: fixed;
-  top: 0; left: 0;
-  padding: 1.5rem 0;
-  z-index: 100;
-  transition: transform var(--transition-speed) ease;
-}
-
-.sidebar-logo {
-  padding: 0 1.5rem 2rem;
-  display: flex; align-items: center; gap: 0.75rem;
-  color: white;
-}
-.sidebar-logo i { color: var(--primary-color); font-size: 1.5rem; }
-.sidebar-logo h5 { margin: 0; font-weight: 700; font-size: 1.1rem; }
-
-.sidebar-menu { list-style: none; padding: 0; margin: 0; }
-.sidebar-menu li { margin-bottom: 0.5rem; padding: 0 1rem; }
-
-/* Links do Menu */
-.sidebar-menu a {
-  color: rgba(255,255,255,0.7) !important;
-  display: flex; align-items: center; gap: 1rem;
-  padding: 0.75rem 1rem;
-  border-radius: 12px;
-  transition: all 0.2s;
-  font-weight: 500;
-}
-
-.sidebar-menu a:hover, .sidebar-menu li.active a {
-  color: white !important;
-  background-color: rgba(255,255,255,0.1);
-}
-.sidebar-menu i { font-size: 1.2rem; }
-
-
-/* --- 3. ÁREA PRINCIPAL E TOPO --- */
-.main-content {
-  margin-left: 260px;
-  padding: 2rem;
-  min-height: 100vh;
-}
-
-/* Barra do Topo */
-.top-bar {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 3rem;
-}
-
-.welcome-text h4 { margin: 0; font-weight: 700; color: var(--text-dark); }
-.welcome-text p { margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.9rem; }
-
-/* Avatar Pequeno do Topo */
-.user-avatar {
-    width: 45px; height: 45px;
-    border-radius: 50%; 
-    background: var(--primary-color); color: white;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 600; border: none; cursor: pointer;
-}
-.user-profile .dropdown-toggle::after { display: none; }
-.user-profile .dropdown-toggle { padding: 0; border: none; background: none; }
-
-
-/* --- 4. CARDS DA HOME (MODERNOS) --- */
-.modern-card {
-  background: white;
-  border-radius: var(--card-radius);
-  box-shadow: var(--card-shadow);
-  border: none;
-  padding: 2rem;
-  height: 100%;
-  transition: transform 0.2s ease;
-}
-
-/* Cards de Navegação (Home) */
-.nav-card {
-    text-align: center;
-    cursor: pointer;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 2.5rem 1rem;
-}
-.nav-card:hover { transform: translateY(-5px); }
-
-.card-illustration-icon {
-    font-size: 3.5rem;
-    margin-bottom: 1.5rem;
-    color: #4a5568; 
-}
-.nav-card h5 { margin: 0; font-weight: 600; }
-
-
-/* --- 5. GRÁFICOS E LISTAS (HOME) --- */
-.section-header {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 1.5rem;
-}
-.section-header h5 {
-  margin: 0; font-weight: 700; font-size: 1.1rem;
-  display: flex; align-items: center; gap: 0.75rem;
-}
-.section-link {
-    color: var(--text-muted) !important;
-    font-size: 0.9rem; display: flex; align-items: center; gap: 0.25rem;
-    transition: color 0.2s;
-}
-.section-link:hover { color: var(--primary-color) !important; }
-
-/* Container do Gráfico */
-.chart-container-wrapper {
-    position: relative;
-    height: 300px;
-    display: flex; align-items: center; justify-content: center;
-}
-
-/* Lista de Vagas */
-.vaga-card-modern {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 1.25rem;
-    margin-bottom: 1rem;
-    display: flex; justify-content: space-between; align-items: flex-start;
-    transition: border-color 0.2s;
-}
-.vaga-card-modern:hover { border-color: var(--primary-color); }
-.vaga-info h6 { margin: 0 0 0.5rem; font-weight: 600; }
-.vaga-info p { margin: 0 0 0.25rem; font-size: 0.85rem; color: var(--text-muted); }
-
-.badge-modern { padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
-.badge-urgente { background: #fef2f2; color: #ef4444; }
-.badge-disponivel { background: #ecfdf5; color: #10b981; }
-
-
-/* ============================================================
-   6. LAYOUT PERFIL (ESTILO DASHBOARD 2.0) - NOVO
-   ============================================================ */
-
-/* Grid Principal do Perfil: Coluna Esquerda Flexível | Direita Fixa */
-.profile-dashboard-grid {
-    display: grid;
-    grid-template-columns: 1fr 340px; 
-    gap: 1.5rem;
-    align-items: start;
-}
-
-/* --- COLUNA ESQUERDA: CARDS DE AÇÃO --- */
-
-/* Cards Grandes (Portfólio / Experiência) */
-.action-cards-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.action-card-large {
-    background: white;
-    border-radius: 16px;
-    border: 1px solid #e2e8f0;
-    padding: 2rem;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    height: 100%;
-    display: flex; flex-direction: column; justify-content: center; align-items: center;
-    min-height: 220px; /* Altura para ficar quadrado */
-    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-}
-
-.action-card-large:hover {
-    transform: translateY(-5px);
-    border-color: var(--primary-color);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-}
-
-.action-card-img {
-    width: 120px; height: auto;
-    margin-bottom: 1.5rem; opacity: 0.9;
-}
-
-.action-card-title {
-    font-family: 'Courier New', monospace; /* Fonte monoespaçada */
-    font-weight: 700; font-size: 1.2rem; letter-spacing: 1px;
+/* ------------------------------------------------------------
+   1. VARIÁVEIS E RESET GERAL
+   ------------------------------------------------------------ */
+   :root {
+    --sidebar-bg: #2d3748;     /* Cor escura da sidebar */
+    --bg-main: #f8f9fa;        /* Fundo cinza claro da área principal */
+    --text-dark: #1a202c;      /* Texto principal */
+    --text-muted: #718096;     /* Texto secundário */
+    --primary-color: #10b981;  /* Verde Principal (IFBA/Tema) */
+    --primary-dark: #047857;   /* Verde Escuro para gradientes */
+    --card-radius: 16px;       /* Arredondamento padrão */
+    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); /* Sombra suave */
+    --transition-speed: 0.3s;
+  }
+  
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-main);
     color: var(--text-dark);
-}
-
-/* --- COLUNA ESQUERDA: PROJETOS E CURSOS --- */
-.content-section-header {
+    overflow-x: hidden;
+  }
+  
+  /* Utilitários Globais */
+  a { text-decoration: none !important; }
+  
+  .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  
+  
+  /* ------------------------------------------------------------
+     2. ESTRUTURA DE LAYOUT (SIDEBAR & MAIN)
+     ------------------------------------------------------------ */
+  
+  /* Sidebar */
+  .sidebar {
+    width: 260px;
+    background-color: var(--sidebar-bg);
+    min-height: 100vh;
+    position: fixed;
+    top: 0; left: 0;
+    padding: 1.5rem 0;
+    z-index: 100;
+    transition: transform var(--transition-speed) ease;
+  }
+  
+  .sidebar-logo {
+    padding: 0 1.5rem 2rem;
+    display: flex; align-items: center; gap: 0.75rem;
+    color: white;
+  }
+  .sidebar-logo i { color: var(--primary-color); font-size: 1.5rem; }
+  .sidebar-logo h5 { margin: 0; font-weight: 700; font-size: 1.1rem; }
+  
+  .sidebar-menu { list-style: none; padding: 0; margin: 0; }
+  .sidebar-menu li { margin-bottom: 0.5rem; padding: 0 1rem; }
+  
+  .sidebar-menu a {
+    color: rgba(255,255,255,0.7) !important;
+    display: flex; align-items: center; gap: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+  
+  .sidebar-menu a:hover, .sidebar-menu li.active a {
+    color: white !important;
+    background-color: rgba(255,255,255,0.1);
+  }
+  .sidebar-menu i { font-size: 1.2rem; }
+  
+  /* Main Content Wrapper */
+  .main-content {
+    margin-left: 260px;
+    padding: 2rem;
+    min-height: 100vh;
+  }
+  
+  /* Top Bar (Cabeçalho) */
+  .top-bar {
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 1rem;
-    border-bottom: 2px solid var(--primary-color);
-    padding-bottom: 0.5rem;
-}
-.content-section-title {
-    font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 0.5rem;
-}
-
-/* Cards Estilo GitHub / Udemy */
-.showcase-card {
+    margin-bottom: 3rem;
+  }
+  
+  .welcome-text h4 { margin: 0; font-weight: 700; color: var(--text-dark); }
+  .welcome-text p { margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.9rem; }
+  
+  /* Avatar Pequeno (Header) */
+  .user-avatar {
+      width: 45px; height: 45px;
+      border-radius: 50%; 
+      background: var(--primary-color); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 600; border: none; cursor: pointer;
+  }
+  .user-profile .dropdown-toggle::after { display: none; }
+  .user-profile .dropdown-toggle { padding: 0; border: none; background: none; }
+  
+  
+  /* ------------------------------------------------------------
+     3. COMPONENTES DA HOME
+     ------------------------------------------------------------ */
+  
+  /* Cards Modernos Gerais */
+  .modern-card {
     background: white;
-    border: 1px solid #1a202c; /* Borda preta fina */
-    border-radius: 12px;
-    padding: 1.5rem;
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow);
+    border: none;
+    padding: 2rem;
     height: 100%;
-    display: flex; flex-direction: column; justify-content: space-between;
-}
-
-.gh-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
-.gh-icon { font-size: 2.5rem; line-height: 1; }
-.gh-title { font-weight: 800; font-size: 1.4rem; letter-spacing: -0.5px; }
-.udemy-title { font-weight: 700; font-size: 1.1rem; margin-bottom: 0.5rem; line-height: 1.3; }
-
-.btn-confira {
-    border: 1px solid #1a202c;
-    background: white; color: #1a202c;
-    border-radius: 20px;
-    padding: 0.25rem 1.5rem;
-    font-size: 0.85rem; font-weight: 600;
-    align-self: center; margin-top: 1rem;
-    transition: 0.2s;
-}
-.btn-confira:hover { background: #1a202c; color: white; }
-
-
-/* --- COLUNA DIREITA: CARD DE PERFIL LATERAL --- */
-.profile-sidebar-card {
-    background: white;
-    border: 1px solid #cbd5e0;
-    border-radius: 12px;
-    overflow: hidden;
-    position: relative;
-}
-
-/* Capa Azul */
-.sidebar-cover {
-    height: 140px;
-    background: #6c8cbf; /* Azul acinzentado */
-    position: relative;
-}
-
-/* Botão Editar (Pill) */
-.btn-edit-pill {
-    position: absolute; top: 15px; right: 15px;
-    background: rgba(0,0,0,0.6); color: white;
-    border-radius: 20px; padding: 0.25rem 1rem;
-    font-size: 0.75rem; font-weight: 600;
-    border: none; cursor: pointer;
-}
-
-/* AVATAR PREMIUM (O MELHORADO) */
-.profile-avatar-wrapper {
-    position: relative;
-    margin-top: -75px; /* Sobe para ficar metade na capa */
-    display: flex; justify-content: center;
-    margin-bottom: 1rem;
-}
-
-.profile-avatar-lg {
-    width: 150px; height: 150px;
-    border-radius: 50%;
-    
-    /* Estilo Premium */
-    border: 5px solid #ffffff;
-    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3); 
-    background: var(--primary-color);
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-    color: white;
-
-    display: flex; align-items: center; justify-content: center;
-    font-size: 4.5rem; font-weight: 700;
-    text-transform: uppercase; letter-spacing: -2px;
-    
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    cursor: default;
-}
-.profile-avatar-lg:hover {
-    transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 15px 35px rgba(16, 185, 129, 0.4);
-}
-
-/* Info do Aluno */
-.sidebar-info { padding: 0 1.5rem 1.5rem; text-align: left; }
-.sidebar-name { font-weight: 800; font-size: 1.2rem; margin-top: 1rem; margin-bottom: 0.25rem; color: #2d3748; }
-.sidebar-detail { font-size: 0.85rem; color: #4a5568; margin-bottom: 0.2rem; line-height: 1.4; }
-.sidebar-label { font-weight: 700; color: #2d3748; }
-
-/* Lista de Skills e Portfólio (Sidebar) */
-.sidebar-section {
-    border-top: 1px solid #e2e8f0;
-    padding: 1rem 1.5rem;
-}
-.sidebar-section-title {
-    font-weight: 700; font-size: 1rem; margin-bottom: 0.75rem; text-align: center;
-}
-
-.skills-list-simple { display: flex; flex-direction: column; gap: 0.5rem; }
-.skill-row { display: flex; justify-content: space-between; font-family: monospace; font-size: 0.9rem; color: #4a5568; }
-.skill-name { color: #a0aec0; } 
-.skill-val { font-weight: 700; color: #2d3748; }
-
-.social-icons-row { display: flex; justify-content: center; gap: 1.5rem; font-size: 1.4rem; }
-
-/* --- Ícones Ilustrativos para os Cards da Home --- */
-.nav-card-img {
-    width: 80px;  /* Tamanho grande e visível */
-    height: 80px;
-    margin-bottom: 1.5rem;
-    object-fit: contain;
-    transition: transform 0.3s ease;
-    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); /* Sombra leve no ícone */
-}
-
-/* Efeito: O ícone cresce um pouquinho quando passa o mouse no card */
-.nav-card:hover .nav-card-img {
-    transform: scale(1.1) rotate(2deg);
-}
-
-
-/* --- 9. RESPONSIVIDADE (MOBILE) --- */
-.hamburger-menu { display: none; border: none; background: none; font-size: 1.5rem; color: var(--text-dark); }
-.sidebar-close { display: none; background: none; border: none; color: white; font-size: 1.5rem; position: absolute; right: 1rem; top: 1.5rem; }
-.sidebar-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 90; }
-
-@media (max-width: 992px) {
-    .sidebar { transform: translateX(-100%); }
-    .sidebar.active { transform: translateX(0); }
-    .main-content { margin-left: 0; padding: 1rem; }
-    .hamburger-menu, .sidebar-close { display: block; }
-    .sidebar-overlay.active { display: block; }
-    
-    .profile-dashboard-grid { grid-template-columns: 1fr; } /* Coluna única no mobile */
-}
-
-/* --- ESTILOS DO PORTFÓLIO (Highlight Skills) --- */
-
-.skills-highlight-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Responsivo: 4 colunas */
-    gap: 1rem;
-}
-
-.skill-highlight-card {
-    border-radius: 8px;
-    padding: 1.25rem;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    transition: transform 0.2s;
-    min-height: 180px;
-}
-.skill-highlight-card:hover { transform: translateY(-3px); }
-
-/* Variação Verde (Destaque) */
-.card-green {
-    background-color: #5dae60; /* Verde da imagem */
-    color: white;
-}
-.card-green .skill-highlight-title { color: white; }
-.card-green .skill-highlight-desc { color: rgba(255,255,255,0.9); }
-.card-green .skill-icon-box { color: white; border-color: rgba(255,255,255,0.4); }
-
-/* Variação Cinza (Padrão) */
-.card-gray {
-    background-color: #7d7d7d; /* Cinza da imagem */
-    color: white;
-}
-.card-gray .skill-highlight-title { color: white; }
-.card-gray .skill-highlight-desc { color: rgba(255,255,255,0.8); }
-
-/* Elementos Internos do Card */
-.skill-icon-box {
-    font-size: 1.2rem;
-    margin-bottom: 0.75rem;
-    width: fit-content;
-}
-
-.skill-highlight-title {
-    font-weight: 800;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    margin-bottom: 0.5rem;
-    line-height: 1.2;
-    letter-spacing: 0.5px;
-}
-
-.skill-highlight-desc {
-    font-size: 0.7rem;
-    line-height: 1.4;
-    margin: 0;
-}
+    transition: transform 0.2s ease;
+  }
+  
+  /* Cards de Navegação (Links Home) */
+  .nav-card {
+      text-align: center;
+      cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 2.5rem 1rem;
+  }
+  .nav-card:hover { transform: translateY(-5px); }
+  
+  .nav-card-img {
+      width: 80px; height: 80px;
+      margin-bottom: 1.5rem;
+      object-fit: contain;
+      transition: transform 0.3s ease;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+  }
+  .nav-card:hover .nav-card-img { transform: scale(1.1) rotate(2deg); }
+  .nav-card h5 { margin: 0; font-weight: 600; }
+  
+  .card-illustration-icon { font-size: 3.5rem; margin-bottom: 1.5rem; color: #4a5568; }
+  
+  /* Gráficos e Seções */
+  .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+  .section-header h5 { margin: 0; font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 0.75rem; }
+  .section-link { color: var(--text-muted) !important; font-size: 0.9rem; display: flex; align-items: center; gap: 0.25rem; transition: color 0.2s; }
+  .section-link:hover { color: var(--primary-color) !important; }
+  
+  .chart-container-wrapper { position: relative; height: 300px; display: flex; align-items: center; justify-content: center; }
+  
+  /* Lista de Vagas */
+  .vaga-card-modern {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      transition: border-color 0.2s;
+  }
+  .vaga-card-modern:hover { border-color: var(--primary-color); }
+  .vaga-info h6 { margin: 0 0 0.5rem; font-weight: 600; }
+  .vaga-info p { margin: 0 0 0.25rem; font-size: 0.85rem; color: var(--text-muted); }
+  
+  .badge-modern { padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+  .badge-urgente { background: #fef2f2; color: #ef4444; }
+  .badge-disponivel { background: #ecfdf5; color: #10b981; }
+  
+  
+  /* ------------------------------------------------------------
+     4. LAYOUT PERFIL E PORTFÓLIO (GRID)
+     ------------------------------------------------------------ */
+  
+  /* Grid Principal: Coluna Esquerda Flexível | Direita Fixa */
+  .profile-dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px; 
+      gap: 1.5rem;
+      align-items: start;
+  }
+  
+  /* Headers de Seção no Perfil */
+  .content-section-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 0.5rem;
+  }
+  .content-section-title { font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 0.5rem; }
+  
+  
+  /* ------------------------------------------------------------
+     5. COMPONENTES DO PORTFÓLIO (ESQUERDA)
+     ------------------------------------------------------------ */
+  
+  /* Cards Grandes de Ação (Portfólio/Experiência) */
+  .action-cards-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+  
+  .action-card-large {
+      background: white;
+      border-radius: 16px; border: 1px solid #e2e8f0;
+      padding: 2rem; text-align: center; cursor: pointer;
+      transition: all 0.2s ease;
+      height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;
+      min-height: 220px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+  }
+  .action-card-large:hover { transform: translateY(-5px); border-color: var(--primary-color); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+  
+  .action-card-img { width: 120px; height: auto; margin-bottom: 1.5rem; opacity: 0.9; }
+  .action-card-title { font-family: 'Courier New', monospace; font-weight: 700; font-size: 1.2rem; letter-spacing: 1px; color: var(--text-dark); }
+  
+  /* Cards GitHub / Udemy */
+  .showcase-card {
+      background: white;
+      border: 1px solid #1a202c; border-radius: 12px;
+      padding: 1.5rem; height: 100%;
+      display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .gh-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+  .gh-icon { font-size: 2.5rem; line-height: 1; }
+  .gh-title { font-weight: 800; font-size: 1.4rem; letter-spacing: -0.5px; }
+  .udemy-title { font-weight: 700; font-size: 1.1rem; margin-bottom: 0.5rem; line-height: 1.3; }
+  
+  .btn-confira {
+      border: 1px solid #1a202c; background: white; color: #1a202c;
+      border-radius: 20px; padding: 0.25rem 1.5rem; font-size: 0.85rem; font-weight: 600;
+      align-self: center; margin-top: 1rem; transition: 0.2s;
+  }
+  .btn-confira:hover { background: #1a202c; color: white; }
+  
+  /* Cards de Habilidades (Verde/Cinza) */
+  .skills-highlight-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+  
+  .skill-highlight-card {
+      border-radius: 8px; padding: 1.25rem; height: 100%; min-height: 180px;
+      display: flex; flex-direction: column; justify-content: flex-start;
+      transition: transform 0.2s;
+  }
+  .skill-highlight-card:hover { transform: translateY(-3px); }
+  
+  .card-green { background-color: #5dae60; color: white; }
+  .card-green .skill-highlight-title { color: white; }
+  .card-green .skill-highlight-desc { color: rgba(255,255,255,0.9); }
+  .card-green .skill-icon-box { color: white; border-color: rgba(255,255,255,0.4); }
+  
+  .card-gray { background-color: #7d7d7d; color: white; }
+  .card-gray .skill-highlight-title { color: white; }
+  .card-gray .skill-highlight-desc { color: rgba(255,255,255,0.8); }
+  
+  .skill-icon-box { font-size: 1.2rem; margin-bottom: 0.75rem; width: fit-content; }
+  .skill-highlight-title { font-weight: 800; font-size: 0.85rem; text-transform: uppercase; margin-bottom: 0.5rem; line-height: 1.2; letter-spacing: 0.5px; }
+  .skill-highlight-desc { font-size: 0.7rem; line-height: 1.4; margin: 0; }
+  
+  /* Slider de Certificados (Estilo Udemy) */
+  .certificates-slider-container {
+      display: flex; gap: 1.5rem; overflow-x: auto;
+      padding: 0.5rem 0.5rem 1.5rem 0.5rem;
+      scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
+  }
+  
+  .certificate-slide-card {
+      min-width: 300px; min-height: 160px;
+      background: white; border: 1px solid #e2e8f0; border-left: 5px solid var(--primary-color);
+      border-radius: 8px; padding: 1.5rem;
+      cursor: pointer; transition: all 0.2s ease;
+      display: flex; flex-direction: column; justify-content: space-between;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  }
+  .certificate-slide-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-color: var(--primary-color); }
+  
+  .cert-title { 
+      font-weight: 700; font-size: 1.1rem; color: var(--text-dark); margin-bottom: 0.25rem; line-height: 1.4;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .cert-school { font-size: 0.9rem; color: var(--text-muted); font-weight: 500; margin-bottom: 1rem; }
+  
+  .cert-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; border-top: 1px solid #f1f5f9; padding-top: 0.75rem; }
+  .cert-icon-circle { width: 35px; height: 35px; background: #f0fdf4; color: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+  .cert-badge { font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 20px; background-color: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; }
+  
+  
+  /* ------------------------------------------------------------
+     6. CARD DE PERFIL LATERAL (DIREITA)
+     ------------------------------------------------------------ */
+  .profile-sidebar-card {
+      background: white; border: 1px solid #cbd5e0; border-radius: 12px;
+      overflow: hidden; position: relative;
+  }
+  
+  .sidebar-cover { height: 140px; background: #6c8cbf; position: relative; }
+  
+  .btn-edit-pill {
+      position: absolute; top: 15px; right: 15px;
+      background: rgba(0,0,0,0.6); color: white;
+      border-radius: 20px; padding: 0.25rem 1rem; font-size: 0.75rem; font-weight: 600;
+      border: none; cursor: pointer;
+  }
+  
+  .profile-avatar-wrapper { position: relative; margin-top: -75px; display: flex; justify-content: center; margin-bottom: 1rem; }
+  
+  .profile-avatar-lg {
+      width: 150px; height: 150px; border-radius: 50%;
+      border: 5px solid #ffffff; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3); 
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+      color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 4.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: -2px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: default;
+  }
+  .profile-avatar-lg:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 15px 35px rgba(16, 185, 129, 0.4); }
+  
+  .sidebar-info { padding: 0 1.5rem 1.5rem; text-align: left; }
+  .sidebar-name { font-weight: 800; font-size: 1.2rem; margin-top: 1rem; margin-bottom: 0.25rem; color: #2d3748; }
+  .sidebar-detail { font-size: 0.85rem; color: #4a5568; margin-bottom: 0.2rem; line-height: 1.4; }
+  .sidebar-label { font-weight: 700; color: #2d3748; }
+  
+  .sidebar-section { border-top: 1px solid #e2e8f0; padding: 1rem 1.5rem; }
+  .sidebar-section-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.75rem; text-align: center; }
+  
+  .skills-list-simple { display: flex; flex-direction: column; gap: 0.5rem; }
+  .skill-row { display: flex; justify-content: space-between; font-family: monospace; font-size: 0.9rem; color: #4a5568; }
+  .skill-name { color: #a0aec0; } 
+  .skill-val { font-weight: 700; color: #2d3748; }
+  
+  .social-icons-row { display: flex; justify-content: center; gap: 1.5rem; font-size: 1.4rem; }
+  
+  
+  /* ------------------------------------------------------------
+     7. RESPONSIVIDADE (MOBILE)
+     ------------------------------------------------------------ */
+  /* Deixado no final para garantir override dos estilos anteriores */
+  
+  .hamburger-menu { display: none; border: none; background: none; font-size: 1.5rem; color: var(--text-dark); }
+  .sidebar-close { display: none; background: none; border: none; color: white; font-size: 1.5rem; position: absolute; right: 1rem; top: 1.5rem; }
+  .sidebar-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 90; }
+  
+  @media (max-width: 992px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.active { transform: translateX(0); }
+      .main-content { margin-left: 0; padding: 1rem; }
+      
+      .hamburger-menu, .sidebar-close { display: block; }
+      .sidebar-overlay.active { display: block; }
+      
+      .profile-dashboard-grid { grid-template-columns: 1fr; } /* Coluna única no mobile */
+      .action-cards-row { grid-template-columns: 1fr; } /* Cards empilhados no mobile */
+  }
