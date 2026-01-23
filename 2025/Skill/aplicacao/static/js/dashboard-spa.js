@@ -1,384 +1,345 @@
-document.addEventListener("DOMContentLoaded", () => {
-  SPA.init();
+/* ============================================================
+   DASHBOARD SPA - VERSÃO COM EDIÇÃO DE SKILLS
+   ============================================================ */
+
+   document.addEventListener("DOMContentLoaded", () => {
+    SPA.init();
 });
 
 const SPA = {
-  // Mapa de Rotas
-  routes: {
-      'home': '/auth/partial/home/',
-      'perfil': '/auth/partial/perfil/',
-      'editar': '/auth/partial/editar/',
-      'portfolio': '/auth/partial/portfolio/'
-  },
-  chartInstance: null,
+    // Mapa de Rotas
+    routes: {
+        'home': '/auth/partial/home/',
+        'perfil': '/auth/partial/perfil/',
+        'editar': '/auth/partial/editar/',
+        'portfolio': '/auth/partial/portfolio/'
+    },
+    chartInstance: null,
 
-  // --- 1. Inicialização ---
-  init: function() {
-      this.setupGlobalListeners();
-      this.load('home'); // Carrega Home ao abrir
-      this.setupSidebarMobile();
-  },
+    init: function() {
+        this.setupGlobalListeners();
+        this.load('home');
+        this.setupSidebarMobile();
+    },
 
-  // --- 2. Listeners Globais (Event Delegation) ---
-  setupGlobalListeners: function() {
-      document.body.addEventListener('click', (e) => {
-          // Navegação (data-route)
-          const routeLink = e.target.closest('[data-route]');
-          if (routeLink) {
-              e.preventDefault();
-              const page = routeLink.getAttribute('data-route');
-              this.load(page);
-              
-              // Atualiza classe 'active' do menu
-              document.querySelectorAll('.sidebar-menu li').forEach(li => li.classList.remove('active'));
-              if(routeLink.tagName === 'LI') routeLink.classList.add('active');
-              return;
-          }
-
-          // Logout
-          if (e.target.closest('#header-logout-btn') || e.target.closest('#btn-logout-sidebar')) {
-              e.preventDefault();
-              this.handleLogout();
-              return;
-          }
-
-          // Botão Adicionar Skill (Formulário)
-          if (e.target.closest('#btn-add-temp')) {
-              this.handleAddSkillVisual();
-          }
-      });
-
-      // Envio de Formulário
-      document.body.addEventListener('submit', (e) => {
-          if (e.target.id === 'form-ajax') {
-              e.preventDefault();
-              this.handleFormSubmit(e.target);
-          }
-      });
-  },
-
-  // --- 3. Carregamento AJAX ---
-  load: async function(pageKey) {
-      const container = document.getElementById('conteudo-dinamico');
-      const url = this.routes[pageKey];
-
-      if (!url) return;
-
-      container.innerHTML = `<div class="d-flex justify-content-center mt-5"><div class="spinner-border text-success"></div></div>`;
-
-      try {
-          const response = await fetch(url);
-          if (response.status === 403) { window.location.href = "/auth/login/"; return; }
-          
-          const html = await response.text();
-          container.innerHTML = html;
-
-          if (pageKey === 'home') this.initChart();
-
-      } catch (error) {
-          console.error(error);
-          container.innerHTML = `<div class="alert alert-danger">Erro ao carregar conteúdo.</div>`;
-      }
-  },
-
-  // --- 4. LÓGICA DO GRÁFICO (AGORA É DOUGHNUT) ---
-  initChart: function() {
-    const ctx = document.getElementById('skillsChart');
-    const labelsTag = document.getElementById('chart-labels');
-    const dataTag = document.getElementById('chart-data');
-
-    if (!ctx || !labelsTag || !dataTag) return;
-
-    // Limpa gráfico anterior se existir
-    if (this.chartInstance) this.chartInstance.destroy();
-
-    // Pega os dados
-    const labels = JSON.parse(labelsTag.textContent);
-    const dataValues = JSON.parse(dataTag.textContent);
-
-    // Paleta de cores modernas para as fatias
-    const backgroundColors = [
-        '#10b981', // Verde Principal
-        '#3b82f6', // Azul
-        '#f59e0b', // Laranja
-        '#ef4444', // Vermelho
-        '#8b5cf6', // Roxo
-        '#06b6d4'  // Ciano
-    ];
-
-    this.chartInstance = new Chart(ctx, {
-        type: 'doughnut', // <--- MUDANÇA PRINCIPAL AQUI
-        data: {
-            labels: labels,
-            datasets: [{
-                data: dataValues,
-                backgroundColor: backgroundColors.slice(0, labels.length), // Usa tantas cores quantas skills tiver
-                borderWidth: 2,
-                borderColor: '#ffffff', // Borda branca para separar as fatias
-                hoverOffset: 10 // Efeito ao passar o mouse
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '65%', // Define o tamanho do buraco da "rosquinha"
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'bottom', // Legenda abaixo do gráfico
-                    labels: {
-                        usePointStyle: true,
-                        padding: 20,
-                        font: { family: "'Inter', sans-serif", size: 12 }
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return ` ${context.label}: ${context.raw}%`;
-                        }
-                    }
-                }
+    setupGlobalListeners: function() {
+        document.body.addEventListener('click', (e) => {
+            // 1. Navegação
+            const routeLink = e.target.closest('[data-route]');
+            if (routeLink) {
+                e.preventDefault();
+                const page = routeLink.getAttribute('data-route');
+                this.load(page);
+                
+                document.querySelectorAll('.sidebar-menu li').forEach(li => li.classList.remove('active'));
+                const liPai = routeLink.closest('li');
+                if(liPai) liPai.classList.add('active');
+                return;
             }
-        }
-    });
-  },
 
-  // --- 5. Adicionar Skill (Visual) ---
-  handleAddSkillVisual: function() {
-      const sel = document.getElementById('skill-select');
-      const lvl = document.getElementById('skill-level');
-      const lista = document.getElementById('lista-skills-temp');
+            // 2. Logout
+            if (e.target.closest('#header-logout-btn') || e.target.closest('#btn-logout-sidebar')) {
+                e.preventDefault();
+                this.handleLogout();
+                return;
+            }
 
-      if (sel.value && lvl.value) {
-          const li = document.createElement('li');
-          li.className = "list-group-item d-flex justify-content-between align-items-center skill-item-data";
-          li.dataset.id = sel.value;
-          li.dataset.nivel = lvl.value;
-          li.innerHTML = `${sel.options[sel.selectedIndex].text} <span class="badge bg-primary rounded-pill">${lvl.value}%</span> <button type="button" class="btn btn-sm text-danger ms-2" onclick="this.parentElement.remove()">X</button>`;
-          lista.appendChild(li);
-          sel.value = ""; lvl.value = "";
-      } else {
-          alert("Preencha skill e nível.");
-      }
-  },
+            // 3. Botão Adicionar Skill
+            if (e.target.closest('#btn-add-temp')) {
+                e.preventDefault();
+                SPA.handleAddSkillVisual(); 
+            }
+        });
 
-  // --- 6. Envio Form API ---
-  handleFormSubmit: async function(form) {
-      const btn = form.querySelector('button[type="submit"]');
-      const originalText = btn.innerText;
-      btn.disabled = true; btn.innerText = "Salvando...";
+        // 4. Submit de Forms
+        document.body.addEventListener('submit', (e) => {
+            if (e.target.id === 'form-ajax') {
+                e.preventDefault();
+                this.handleFormSubmit(e.target);
+            }
+        });
+    },
 
-      let skillsArr = [];
-      document.querySelectorAll('.skill-item-data').forEach(item => {
-          skillsArr.push({ id: item.dataset.id, nivel: item.dataset.nivel });
-      });
-
-      const dados = {
-          resumo: document.getElementById('resumo').value,
-          linkedin: document.getElementById('linkedin').value,
-          github: document.getElementById('github').value,
-          skills: skillsArr
-      };
-      const csrf = form.querySelector('[name=csrfmiddlewaretoken]').value;
-
-      try {
-          const res = await fetch('/auth/api/completar-perfil/', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
-              body: JSON.stringify(dados)
-          });
-
-          if (res.ok) this.load('home');
-          else { alert('Erro ao salvar.'); btn.disabled = false; btn.innerText = originalText; }
-      } catch (err) {
-          alert('Erro conexão.'); btn.disabled = false; btn.innerText = originalText;
-      }
-  },
-
-  // --- 7. Logout ---
-  handleLogout: async function() {
-      if (!confirm("Sair do sistema?")) return;
-      try {
-          const getCookie = (name) => { let v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)'); return v ? v[2] : null; };
-          await fetch('/auth/api/logout/', { method: 'POST', headers: { 'X-CSRFToken': getCookie('csrftoken') } });
-      } finally {
-          localStorage.removeItem('accessToken');
-          window.location.href = "/";
-      }
-  },
-
-  // --- 8. Mobile Sidebar ---
-  setupSidebarMobile: function() {
-      const toggle = document.getElementById('hamburgerMenu');
-      const close = document.getElementById('sidebarClose');
-      const sidebar = document.getElementById('sidebar');
-      const toggleFn = () => { sidebar.classList.toggle('active'); document.body.classList.toggle('sidebar-open'); };
-      if(toggle) toggle.addEventListener('click', toggleFn);
-      if(close) close.addEventListener('click', toggleFn);
-  }
-};
-
-// --- FUNÇÕES GLOBAIS PARA O MODAL DE DESTAQUE ---
-
-let modalInstancia = null;
-
-// 1. Função para Abrir o Modal (Vazia para criar, preenchida para editar)
-window.abrirModalDestaque = function(id = '', titulo = '', descricao = '', cor = 'gray') {
-    const modalEl = document.getElementById('modalDestaque');
-    modalInstancia = new bootstrap.Modal(modalEl);
-    
-    // Preenche os campos
-    document.getElementById('destaque_id').value = id;
-    document.getElementById('destaque_titulo').value = titulo;
-    document.getElementById('destaque_descricao').value = descricao;
-    
-    // Marca a cor certa
-    if(cor === 'green') document.getElementById('cor_green').checked = true;
-    else document.getElementById('cor_gray').checked = true;
-
-    // Mostra/Esconde botão de excluir
-    const btnExcluir = document.getElementById('btn-excluir-destaque');
-    if (id) {
-        btnExcluir.style.display = 'block';
-        btnExcluir.onclick = () => excluirDestaque(id);
-    } else {
-        btnExcluir.style.display = 'none';
-    }
-
-    modalInstancia.show();
-}
-
-// 2. Lógica de Salvar (Submit do Form)
-document.addEventListener('submit', async function(e) {
-    if (e.target.id === 'form-destaque') {
-        e.preventDefault();
+    load: async function(pageKey) {
+        const container = document.getElementById('conteudo-dinamico');
+        const url = this.routes[pageKey];
+        if (!url) return;
         
-        const dados = {
-            id: document.getElementById('destaque_id').value,
-            titulo: document.getElementById('destaque_titulo').value,
-            descricao: document.getElementById('destaque_descricao').value,
-            cor: document.querySelector('input[name="destaque_cor"]:checked').value
-        };
+        container.innerHTML = `<div class="d-flex justify-content-center mt-5"><div class="spinner-border text-success"></div></div>`;
+        
+        try {
+            const response = await fetch(url);
+            if (response.status === 403) { window.location.href = "/auth/login/"; return; }
+            const html = await response.text();
+            container.innerHTML = html;
+            if (pageKey === 'home') this.initChart();
+        } catch (error) {
+            if(window.showToast) showToast("Erro ao carregar conteúdo.", "danger");
+        }
+    },
 
-        // Pega o token CSRF de qualquer outro form da página ou do cookie
-        const csrfToken = getCookie('csrftoken');
+    initChart: function() {
+        const ctx = document.getElementById('skillsChart');
+        if (!ctx) return; 
+
+        const labelsTag = document.getElementById('chart-labels');
+        const dataTag = document.getElementById('chart-data');
+        if (!labelsTag || !dataTag) return;
+
+        let labels = [], dataValues = [];
+        try {
+            labels = JSON.parse(labelsTag.textContent);
+            dataValues = JSON.parse(dataTag.textContent);
+        } catch(e) { console.error(e); return; }
+
+        if (this.chartInstance) this.chartInstance.destroy();
+
+        const backgroundColors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
+        
+        if (typeof Chart !== 'undefined') {
+            this.chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{ data: dataValues, backgroundColor: backgroundColors.slice(0, labels.length), borderWidth: 2, borderColor: '#ffffff', hoverOffset: 10 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '65%',
+                    plugins: { legend: { display: true, position: 'bottom', labels: { usePointStyle: true, padding: 20 } } }
+                }
+            });
+        }
+    },
+
+    // --- FUNÇÃO DE ADICIONAR VISUALMENTE (ATUALIZADA COM BOTÃO EDITAR) ---
+    handleAddSkillVisual: function() {
+        const sel = document.getElementById('skill-select');
+        const lvl = document.getElementById('skill-level');
+        const lista = document.getElementById('lista-skills-temp');
+
+        if (sel && lvl && sel.value && lvl.value) {
+            // Verifica se a skill já existe na lista visual para não duplicar
+            const existe = Array.from(lista.children).some(li => li.dataset.id === sel.value);
+            if(existe) {
+                if(window.showToast) showToast("Essa habilidade já está na lista. Edite-a em vez de adicionar.", "warning");
+                return;
+            }
+
+            const li = document.createElement('li');
+            li.className = "list-group-item d-flex justify-content-between align-items-center skill-item-data";
+            li.dataset.id = sel.value;
+            li.dataset.nivel = lvl.value;
+            
+            const nomeSkill = sel.options[sel.selectedIndex].text;
+            
+            // HTML IGUAL AO DO TEMPLATE DJANGO
+            li.innerHTML = `
+                <span class="fw-500">
+                    ${nomeSkill} 
+                    <span class="badge bg-primary rounded-pill ms-2">${lvl.value}%</span>
+                </span>
+                <div>
+                    <button type="button" class="btn btn-sm text-primary border-0 me-1" title="Editar" onclick="SPA.editSkillVisual(this)">
+                        <i class="bi bi-pencil-fill"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm text-danger border-0" title="Remover" onclick="this.closest('li').remove()">
+                        <i class="bi bi-trash-fill"></i>
+                    </button>
+                </div>
+            `;
+            
+            lista.appendChild(li);
+            sel.value = ""; lvl.value = ""; // Limpa campos
+        } else {
+            if(window.showToast) showToast("Selecione uma habilidade e a porcentagem.", "warning");
+        }
+    },
+
+    // --- NOVA FUNÇÃO: EDITAR SKILL (RETORNA PARA OS INPUTS) ---
+    editSkillVisual: function(btn) {
+        const li = btn.closest('li');
+        const id = li.dataset.id;
+        const nivel = li.dataset.nivel;
+
+        // Joga os valores de volta para os inputs
+        const sel = document.getElementById('skill-select');
+        const lvl = document.getElementById('skill-level');
+        
+        sel.value = id;
+        lvl.value = nivel;
+
+        // Remove da lista (para o usuário clicar em "+" de novo com o valor corrigido)
+        li.remove();
+
+        // Foca no input de nível para agilizar
+        lvl.focus();
+    },
+
+    handleFormSubmit: async function(form) {
+        const btn = form.querySelector('button[type="submit"]');
+        const originalText = btn.innerText;
+        btn.disabled = true; btn.innerText = "Salvando...";
+
+        let skillsArr = [];
+        document.querySelectorAll('.skill-item-data').forEach(item => {
+            skillsArr.push({ id: item.dataset.id, nivel: item.dataset.nivel });
+        });
+
+        const dados = {
+            resumo: document.getElementById('resumo').value,
+            linkedin: document.getElementById('linkedin').value,
+            github: document.getElementById('github').value,
+            skills: skillsArr
+        };
+        const csrf = form.querySelector('[name=csrfmiddlewaretoken]').value;
 
         try {
-            const response = await fetch('/auth/api/destaque/salvar/', {
+            const res = await fetch('/auth/api/completar-perfil/', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
                 body: JSON.stringify(dados)
             });
-            
-            if (response.ok) {
-                modalInstancia.hide();
-                // Recarrega a tela de portfólio para mostrar as mudanças
-                SPA.load('portfolio'); 
+
+            if (res.ok) {
+                if(window.showToast) showToast("Perfil salvo com sucesso!");
+                this.load('home'); 
             } else {
-                const err = await response.json();
-                alert(err.message || "Erro ao salvar.");
+                if(window.showToast) showToast("Erro ao salvar.", "danger");
+                btn.disabled = false; btn.innerText = originalText;
             }
-        } catch (error) {
-            console.error(error);
-            alert("Erro de conexão.");
+        } catch (err) {
+            if(window.showToast) showToast("Erro de conexão.", "danger");
+            btn.disabled = false; btn.innerText = originalText;
         }
+    },
+
+    handleLogout: async function() {
+        if(window.abrirConfirmacao) {
+            abrirConfirmacao(async () => {
+                try { const csrf = getCookie('csrftoken'); await fetch('/auth/api/logout/', { method: 'POST', headers: { 'X-CSRFToken': csrf } }); } 
+                finally { localStorage.removeItem('accessToken'); window.location.href = "/"; }
+            });
+        } else { if(confirm("Sair?")) window.location.href = "/"; }
+    },
+
+    setupSidebarMobile: function() { 
+        const toggle = document.getElementById('hamburgerMenu');
+        const close = document.getElementById('sidebarClose');
+        const sidebar = document.getElementById('sidebar');
+        const toggleFn = () => { sidebar.classList.toggle('active'); document.body.classList.toggle('sidebar-open'); };
+        if(toggle) toggle.addEventListener('click', toggleFn);
+        if(close) close.addEventListener('click', toggleFn);
+    }
+};
+
+/* --- MANTENHA AS FUNÇÕES DE TOAST, MODAL E COOKIE ABAIXO (IGUAIS AO ANTERIOR) --- */
+/* (Estou omitindo aqui para não ficar gigante, mas você deve manter o bloco final do arquivo anterior) */
+// ... (Copie o bloco de Toast, ModalConfirmacao e Modais Portfolio do arquivo anterior e cole aqui) ...
+
+// ============================================================
+// COLE AQUI O RESTANTE DO ARQUIVO ANTERIOR (A PARTIR DA LINHA 165)
+// ============================================================
+// (Vou colar aqui para garantir que você tenha tudo em um só bloco se preferir)
+
+window.showToast = function(mensagem, tipo = 'success') {
+    const container = document.getElementById('toastContainer');
+    if (!container) return; 
+    let bgClass = 'bg-success';
+    if (tipo === 'danger') bgClass = 'bg-danger';
+    if (tipo === 'warning') bgClass = 'bg-warning text-dark';
+    const toastId = 'toast_' + Date.now();
+    const html = `<div id="${toastId}" class="toast align-items-center text-white ${bgClass} border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true"><div class="d-flex"><div class="toast-body fs-6">${tipo === 'success' ? '<i class="bi bi-check-circle-fill me-2"></i>' : '<i class="bi bi-exclamation-triangle-fill me-2"></i>'}${mensagem}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div>`;
+    container.insertAdjacentHTML('beforeend', html);
+    const toastElement = document.getElementById(toastId);
+    const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
+    toast.show();
+    toastElement.addEventListener('hidden.bs.toast', () => { toastElement.remove(); });
+};
+
+let modalConfirmacaoInstancia = null;
+let acaoConfirmadaCallback = null;
+window.abrirConfirmacao = function(callbackAcao) {
+    const modalEl = document.getElementById('modalConfirmacaoDelete');
+    if (!modalConfirmacaoInstancia) modalConfirmacaoInstancia = new bootstrap.Modal(modalEl);
+    acaoConfirmadaCallback = callbackAcao;
+    modalConfirmacaoInstancia.show();
+};
+document.addEventListener('DOMContentLoaded', () => {
+    const btnConfirma = document.getElementById('btnConfirmarExclusao');
+    if(btnConfirma) {
+        btnConfirma.addEventListener('click', () => {
+            if (acaoConfirmadaCallback) acaoConfirmadaCallback();
+            if (modalConfirmacaoInstancia) modalConfirmacaoInstancia.hide();
+        });
     }
 });
 
-// 3. Função de Excluir
-window.excluirDestaque = async function(id) {
-    if(!confirm("Tem certeza que deseja excluir este card?")) return;
-    
-    const csrfToken = getCookie('csrftoken');
-    
-    try {
-        const response = await fetch(`/auth/api/destaque/excluir/${id}/`, {
-            method: 'POST',
-            headers: { 'X-CSRFToken': csrfToken }
-        });
-        
-        if (response.ok) {
-            modalInstancia.hide();
-            SPA.load('portfolio');
-        } else {
-            alert("Erro ao excluir.");
-        }
-    } catch (error) {
-        alert("Erro de conexão.");
-    }
-}
-
-// Função auxiliar para pegar CSRF (caso não tenha ainda)
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-/* --- LOGICA DO MODAL DE CERTIFICADOS (SLIDER) --- */
-
+/* MODAIS PORTFOLIO */
+let modalInstancia = null;
 let modalCertInstancia = null;
 
-// 1. Abrir Modal Certificado
-window.abrirModalCertificado = function(id = '', titulo = '', instituicao = '', horas = '') {
-    const modalEl = document.getElementById('modalCertificado');
-    if (!modalCertInstancia) modalCertInstancia = new bootstrap.Modal(modalEl);
-    
-    document.getElementById('cert_id').value = id;
-    document.getElementById('cert_titulo').value = titulo;
-    document.getElementById('cert_instituicao').value = instituicao;
-    document.getElementById('cert_horas').value = horas;
-
-    const btnExcluir = document.getElementById('btn-excluir-cert');
+window.abrirModalDestaque = function(id = '', titulo = '', descricao = '', cor = 'gray') {
+    const modalEl = document.getElementById('modalDestaque');
+    const form = document.getElementById('form-destaque');
+    form.reset(); document.getElementById('destaque_id').value = ""; 
+    if (!modalInstancia) modalInstancia = new bootstrap.Modal(modalEl);
     if (id) {
-        btnExcluir.style.display = 'block';
-        btnExcluir.onclick = function() { excluirCertificado(id); };
-    } else {
-        btnExcluir.style.display = 'none';
+        document.getElementById('destaque_id').value = id;
+        document.getElementById('destaque_titulo').value = titulo;
+        document.getElementById('destaque_descricao').value = descricao;
+        if(cor === 'green') document.getElementById('cor_green').checked = true; else document.getElementById('cor_gray').checked = true;
     }
+    const btnExcluir = document.getElementById('btn-excluir-destaque');
+    if (id) { btnExcluir.style.display = 'block'; btnExcluir.onclick = function() { abrirConfirmacao(() => excluirDestaque(id)); }; }
+    else { btnExcluir.style.display = 'none'; }
+    modalInstancia.show();
+};
+
+window.abrirModalCertificado = function(elemento) {
+    const modalEl = document.getElementById('modalCertificado');
+    const form = document.getElementById('form-certificado');
+    form.reset(); document.getElementById('cert_id').value = ""; 
+    if (!modalCertInstancia) modalCertInstancia = new bootstrap.Modal(modalEl);
+    const btnExcluir = document.getElementById('btn-excluir-cert');
+    if (elemento && elemento.dataset && elemento.dataset.id) {
+        document.getElementById('cert_id').value = elemento.dataset.id;
+        document.getElementById('cert_titulo').value = elemento.dataset.titulo;
+        document.getElementById('cert_instituicao').value = elemento.dataset.instituicao;
+        document.getElementById('cert_horas').value = elemento.dataset.horas;
+        btnExcluir.style.display = 'block';
+        const id = elemento.dataset.id;
+        btnExcluir.onclick = function() { abrirConfirmacao(() => excluirCertificado(id)); };
+    } else { btnExcluir.style.display = 'none'; }
     modalCertInstancia.show();
 };
 
-// 2. Salvar Certificado
 document.addEventListener('submit', async function(e) {
+    const csrfToken = getCookie('csrftoken');
+    if (e.target.id === 'form-destaque') {
+        e.preventDefault();
+        const titulo = document.getElementById('destaque_titulo').value.trim();
+        if(!titulo) return showToast("O título é obrigatório.", "warning");
+        const dados = { id: document.getElementById('destaque_id').value, titulo: titulo, descricao: document.getElementById('destaque_descricao').value, cor: document.querySelector('input[name="destaque_cor"]:checked').value };
+        try { await fetch('/auth/api/destaque/salvar/', { method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken}, body: JSON.stringify(dados) }); modalInstancia.hide(); SPA.load('portfolio'); showToast("Habilidade salva!"); } catch(err) { showToast("Erro ao salvar.", "danger"); }
+    }
     if (e.target.id === 'form-certificado') {
         e.preventDefault();
-        const dados = {
-            id: document.getElementById('cert_id').value,
-            titulo: document.getElementById('cert_titulo').value,
-            instituicao: document.getElementById('cert_instituicao').value,
-            horas: document.getElementById('cert_horas').value
-        };
-        const csrfToken = getCookie('csrftoken');
-
-        try {
-            await fetch('/auth/api/certificado/salvar/', {
-                method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken}, body: JSON.stringify(dados)
-            });
-            modalCertInstancia.hide();
-            SPA.load('portfolio');
-        } catch(e) { alert("Erro ao salvar."); }
+        const titulo = document.getElementById('cert_titulo').value.trim();
+        const instituicao = document.getElementById('cert_instituicao').value.trim();
+        if (!titulo || !instituicao) { showToast("Preencha Nome e Instituição.", "warning"); return; }
+        const dados = { id: document.getElementById('cert_id').value, titulo: titulo, instituicao: instituicao, horas: document.getElementById('cert_horas').value };
+        try { await fetch('/auth/api/certificado/salvar/', { method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken}, body: JSON.stringify(dados) }); modalCertInstancia.hide(); SPA.load('portfolio'); showToast("Certificado salvo!"); } catch(err) { showToast("Erro ao salvar.", "danger"); }
     }
 });
 
-// 3. Excluir Certificado
-window.excluirCertificado = async function(id) {
-    if(!confirm("Excluir este certificado?")) return;
-    const csrfToken = getCookie('csrftoken');
-    await fetch(`/auth/api/certificado/excluir/${id}/`, { method: 'POST', headers: {'X-CSRFToken': csrfToken} });
-    modalCertInstancia.hide();
-    SPA.load('portfolio');
+window.excluirDestaque = async function(id) { 
+    const csrfToken = getCookie('csrftoken'); 
+    await fetch(`/auth/api/destaque/excluir/${id}/`, { method: 'POST', headers: {'X-CSRFToken': csrfToken} }); 
+    modalInstancia.hide(); SPA.load('portfolio'); showToast("Habilidade excluída.");
 };
+window.excluirCertificado = async function(id) { 
+    const csrfToken = getCookie('csrftoken'); 
+    await fetch(`/auth/api/certificado/excluir/${id}/`, { method: 'POST', headers: {'X-CSRFToken': csrfToken} }); 
+    modalCertInstancia.hide(); SPA.load('portfolio'); showToast("Certificado removido.");
+};
+function getCookie(name) { let cookieValue = null; if (document.cookie && document.cookie !== '') { const cookies = document.cookie.split(';'); for (let i = 0; i < cookies.length; i++) { const cookie = cookies[i].trim(); if (cookie.substring(0, name.length + 1) === (name + '=')) { cookieValue = decodeURIComponent(cookie.substring(name.length + 1)); break; } } } return cookieValue; }

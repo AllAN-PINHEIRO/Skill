@@ -3,8 +3,7 @@ import json
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404 # Essencial para MVT
 from django.contrib.auth.models import User
-from .models import Cadastro, Certificado, HabilidadeDestaque
-from .models import PerfilAluno, Habilidade, HabilidadeAluno
+from .models import PerfilAluno, Habilidade, HabilidadeAluno, Cadastro, Certificado, HabilidadeDestaque
 
 # --- NOVOS IMPORTS PARA DRF ---
 from rest_framework.views import APIView
@@ -124,22 +123,43 @@ def completar_perfil_page_view(request):
 # 2. OS PEDAÇOS (PARTIALS) - Chamados pelo JavaScript
 # ==============================================================================
 
-# PEDAÇO A: HOME (O Miolo com Gráficos)
 @login_required
 def partial_home_view(request):
-    # Lógica para o Gráfico (que já existia)
     labels = []
     data_values = []
+    tem_skills = False
+    
+    # Debug: Imprime no terminal do VSCode/CMD
+    print(f"--- CARREGANDO HOME PARA: {request.user.email} ---")
     
     if hasattr(request.user, 'perfil_aluno'):
-        skills = HabilidadeAluno.objects.filter(perfil=request.user.perfil_aluno).order_by('-nivel')
-        for s in skills:
-            labels.append(s.habilidade.nome)
-            data_values.append(s.nivel)
-            
+        perfil = request.user.perfil_aluno
+        
+        # Busca skills ordenadas pelo nível (maior para menor)
+        skills = HabilidadeAluno.objects.filter(perfil=perfil).order_by('-nivel')
+        
+        print(f"Skills encontradas no Banco: {skills.count()}") # Debug
+        
+        if skills.exists():
+            tem_skills = True
+            for s in skills:
+                # Adiciona o nome
+                labels.append(s.habilidade.nome)
+                
+                # IMPORTANTE: Converte para Inteiro (int) para o gráfico entender
+                try:
+                    nivel_int = int(s.nivel)
+                except:
+                    nivel_int = 0
+                data_values.append(nivel_int)
+                
+                print(f"Skill: {s.habilidade.nome} - Nível: {nivel_int}") # Debug
+
+    # Preparando JSON seguro
     context = {
-        'skill_labels': labels,
-        'skill_data': data_values
+        'skill_labels': json.dumps(labels),
+        'skill_data': json.dumps(data_values),
+        'tem_skills': tem_skills
     }
     return render(request, 'partials/home.html', context)
 
@@ -244,34 +264,58 @@ def api_salvar_certificado(request):
         try:
             data = json.loads(request.body)
             perfil = request.user.perfil_aluno
+            
+            # Pega o ID enviado pelo Javascript
             cert_id = data.get('id')
             
-            if cert_id: # Edição
+            # Limpeza: Título e Instituição são obrigatórios
+            titulo = data.get('titulo', '').strip()
+            instituicao = data.get('instituicao', '').strip()
+            horas = data.get('horas', '').strip()
+
+            if not titulo or not instituicao:
+                return JsonResponse({'success': False, 'message': 'Preencha o nome do curso e a instituição.'}, status=400)
+
+            # LÓGICA DE DECISÃO (CRIAR vs EDITAR)
+            
+            if cert_id and str(cert_id).strip() != "":
+                # --- CENÁRIO 1: EDIÇÃO (Tem ID) ---
+                # O get_object_or_404 garante que o certificado pertence mesmo ao usuário logado (segurança)
                 cert = get_object_or_404(Certificado, id=cert_id, perfil=perfil)
-                cert.titulo = data.get('titulo')
-                cert.instituicao = data.get('instituicao')
-                cert.horas = data.get('horas')
+                
+                cert.titulo = titulo
+                cert.instituicao = instituicao
+                cert.horas = horas
                 cert.save()
-            else: # Criação
+            else:
+                # --- CENÁRIO 2: CRIAÇÃO (ID Vazio) ---
                 Certificado.objects.create(
                     perfil=perfil,
-                    titulo=data.get('titulo'),
-                    instituicao=data.get('instituicao'),
-                    horas=data.get('horas')
+                    titulo=titulo,
+                    instituicao=instituicao,
+                    horas=horas
                 )
+            
             return JsonResponse({'success': True})
+            
         except Exception as e:
+            # Retorna o erro exato para ajudar no debug
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
-    return JsonResponse({'success': False}, status=400)
+            
+    return JsonResponse({'success': False, 'message': 'Método não permitido'}, status=405)
 
-# 3. NOVA API PARA EXCLUIR CERTIFICADO
+# Não esqueça da função de excluir também
 @login_required
 def api_excluir_certificado(request, cert_id):
     if request.method == 'POST':
-        cert = get_object_or_404(Certificado, id=cert_id, perfil=request.user.perfil_aluno)
-        cert.delete()
-        return JsonResponse({'success': True})
-    return JsonResponse({'success': False}, status=400)
+        try:
+            # Garante que só exclui se pertencer ao usuário logado
+            cert = get_object_or_404(Certificado, id=cert_id, perfil=request.user.perfil_aluno)
+            cert.delete()
+            return JsonResponse({'success': True})
+        except Exception as e:
+             return JsonResponse({'success': False, 'message': str(e)}, status=400)
+    return JsonResponse({'success': False}, status=405)
 
 # --- VIEWS DE API (DRF) - As novas versões ---
 
@@ -427,42 +471,51 @@ class ResetPasswordAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 # 2. VIEW DA API (Salvar dados)
-class CompletarPerfilAPIView(APIView):
-    permission_classes = [IsAuthenticated] # Só quem está logado pode acessar
-
-    def post(self, request):
-        user = request.user
-        data = request.data
-
+@login_required
+def api_completar_perfil(request):
+    if request.method == 'POST':
         try:
-            # 1. Cria o PerfilAluno
-            perfil = PerfilAluno.objects.create(
-                user=user,
-                resumo=data.get('resumo', ''),
-                linkedin=data.get('linkedin', ''),
-                github=data.get('github', '')
-            )
+            data = json.loads(request.body)
+            user = request.user
 
-            # 2. Salva as Habilidades
-            skills_data = data.get('skills', []) # Espera uma lista: [{'id': 1, 'nivel': 80}, ...]
+            # 1. get_or_create: A mágica que corrige o erro.
+            # Se o perfil existe, ele pega. Se não, ele cria.
+            perfil, created = PerfilAluno.objects.get_or_create(user=user)
+
+            # 2. Atualiza os dados básicos
+            perfil.resumo = data.get('resumo', '')
+            perfil.linkedin = data.get('linkedin', '')
+            perfil.github = data.get('github', '')
+            perfil.save()
+
+            # 3. Atualiza as Skills (Apaga as velhas e cria as novas)
+            skills_data = data.get('skills', [])
             
-            for skill_item in skills_data:
-                habilidade_id = skill_item.get('id')
-                nivel = skill_item.get('nivel')
-                
-                if habilidade_id and nivel:
-                    habilidade = Habilidade.objects.get(id=habilidade_id)
-                    HabilidadeAluno.objects.create(
-                        perfil=perfil,
-                        habilidade=habilidade,
-                        nivel=nivel
-                    )
+            if skills_data:
+                # Limpa skills anteriores para não duplicar (ex: ter 2x Java)
+                HabilidadeAluno.objects.filter(perfil=perfil).delete()
 
-            return Response({'message': 'Perfil criado com sucesso!'}, status=status.HTTP_201_CREATED)
+                for skill_item in skills_data:
+                    habilidade_id = skill_item.get('id')
+                    nivel = skill_item.get('nivel')
+                    
+                    if habilidade_id and nivel:
+                        # Busca o objeto Habilidade (Java, Python...)
+                        habilidade_obj = Habilidade.objects.get(id=habilidade_id)
+                        
+                        HabilidadeAluno.objects.create(
+                            perfil=perfil,
+                            habilidade=habilidade_obj,
+                            nivel=nivel
+                        )
+
+            return JsonResponse({'success': True, 'message': 'Perfil salvo com sucesso!'})
 
         except Exception as e:
-            print(f"Erro ao salvar perfil: {e}")
-            return Response({'message': 'Erro ao processar dados.'}, status=status.HTTP_400_BAD_REQUEST)
+            print(f"Erro ao salvar perfil: {e}") # Log no terminal
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+    return JsonResponse({'success': False, 'message': 'Método não permitido'}, status=405)
         
 # 1. API PARA PEGAR OS DADOS (GET)
 class MeuPerfilAPIView(APIView):

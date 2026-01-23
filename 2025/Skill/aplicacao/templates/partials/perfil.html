@@ -9,16 +9,27 @@
                 <small class="text-muted">{% now "d M Y, l" %}</small>
             </div>
 
-            <div class="action-cards-row">
-                <div class="action-card-large" data-route="portfolio">
-                    <img src="https://cdn-icons-png.flaticon.com/512/2683/2683274.png" class="action-card-img" alt="Portfolio">
-                    <div class="action-card-title">Portfólio</div>
+            <div class="action-cards-row" style="grid-template-columns: 1fr;">
+                
+                <div class="action-card-large d-flex flex-row align-items-center justify-content-start px-5" 
+                     data-route="portfolio" 
+                     style="min-height: 180px; gap: 2rem;">
+                    
+                    <img src="https://cdn-icons-png.flaticon.com/512/2683/2683274.png" 
+                         class="action-card-img mb-0" 
+                         style="width: 90px; height: 90px;" 
+                         alt="Portfolio">
+                    
+                    <div class="text-start">
+                        <div class="action-card-title fs-2">Meu Portfólio</div>
+                        <p class="text-muted mb-0 mt-1">
+                            Gerencie seus projetos, adicione certificados e organize seus destaques profissionais.
+                        </p>
+                    </div>
+                    
+                    <i class="bi bi-arrow-right-circle text-success ms-auto display-5 opacity-50"></i>
                 </div>
 
-                <div class="action-card-large">
-                    <img src="https://cdn-icons-png.flaticon.com/512/1005/1005141.png" class="action-card-img" alt="Experiência">
-                    <div class="action-card-title">Experiência</div>
-                </div>
             </div>
 
             <div class="row">
@@ -64,7 +75,9 @@
                 </div>
             </div>
 
-        </div> <div class="right-sidebar">
+        </div> 
+        
+        <div class="right-sidebar">
             
             <div class="profile-sidebar-card">
                 <div class="sidebar-cover">
@@ -138,5 +151,6 @@
                 </div>
 
             </div>
-        </div> </div>
+        </div> 
+    </div>
 </div>

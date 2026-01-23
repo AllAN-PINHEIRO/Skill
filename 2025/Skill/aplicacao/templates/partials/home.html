@@ -23,57 +23,60 @@
 
 </div>
 
-<div class="row">
-    <div class="col-lg-6 mb-4">
-        <div class="section-header">
-            <h5><i class="bi bi-pie-chart"></i> Índice de Skills</h5>
-            {% if skill_labels %}
-                <button class="btn btn-sm btn-outline-secondary section-link" data-route="editar">
-                    Editar <i class="bi bi-chevron-right"></i>
-                </button>
-            {% else %}
-                <button class="btn btn-sm btn-success" data-route="editar">Cadastrar Agora</button>
-            {% endif %}
-        </div>
-        
-        <div class="modern-card p-4">
-            {% if skill_labels %}
-                <div class="chart-container-wrapper">
-                    <canvas id="skillsChart"></canvas>
-                </div>
-            {% else %}
-                <div class="text-center py-5 text-muted">
-                    <i class="bi bi-bar-chart opacity-25" style="font-size: 4rem;"></i>
-                    <p class="mt-3">Nenhuma skill cadastrada para gerar o gráfico.</p>
-                </div>
-            {% endif %}
+<div class="animate-fade-in">
+    <div class="section-header">
+        <h5><i class="bi bi-pie-chart-fill text-success"></i> Índice de Skills</h5>
+        <a href="#" class="section-link" data-route="portfolio">Ver detalhado <i class="bi bi-chevron-right"></i></a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="modern-card">
+                
+                {% if tem_skills %}
+                    <div class="chart-container-wrapper">
+                        <canvas id="skillsChart"></canvas>
+                    </div>
+                    
+                    <script id="chart-labels" type="application/json">{{ skill_labels|safe }}</script>
+                    <script id="chart-data" type="application/json">{{ skill_data|safe }}</script>
+
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-bar-chart-line text-muted" style="font-size: 3rem;"></i>
+                        <h6 class="mt-3 text-muted fw-bold">Nenhuma skill cadastrada</h6>
+                        <p class="small text-muted mb-4">Adicione suas habilidades no perfil para gerar o gráfico.</p>
+                        <button class="btn btn-sm btn-outline-success rounded-pill px-4" data-route="editar">
+                            Cadastrar Agora
+                        </button>
+                    </div>
+                {% endif %}
+
+            </div>
         </div>
     </div>
 
-    <div class="col-lg-6">
-        <div class="section-header">
-            <h5><i class="bi bi-briefcase"></i> Divulgação de Vagas</h5>
-            <a href="#" class="section-link">Ver mais <i class="bi bi-chevron-right"></i></a>
-        </div>
+    <div class="section-header mt-5">
+        <h5><i class="bi bi-briefcase-fill text-primary"></i> Divulgação de Vagas</h5>
+        <a href="#" class="section-link">Ver mais <i class="bi bi-chevron-right"></i></a>
+    </div>
 
-        <div class="vagas-list">
-            <div class="vaga-card-modern">
-                <div class="vaga-info">
-                    <h6>Analista de Suporte</h6>
-                    <p>Empresa: Fanfury Software LTDA</p>
-                    <p class="small text-muted">Disponível até 30 de jul de 2025</p>
-                </div>
-                <span class="badge-modern badge-urgente">Urgente</span>
-            </div>
-            <div class="vaga-card-modern">
-                <div class="vaga-info">
-                    <h6>Desenvolvedor FullStack</h6>
-                    <p>Empresa: Resolve Software LTDA</p>
-                    <p class="small text-muted">Disponível até 31 de jul de 2025</p>
-                </div>
-                <span class="badge-modern badge-disponivel">Disponível</span>
-            </div>
+    <div class="vaga-card-modern">
+        <div class="vaga-info">
+            <h6>Analista de Suporte</h6>
+            <p>Empresa: Fanfury Software LTDA</p>
+            <p>Disponível até 30 de jul de 2025</p>
         </div>
+        <span class="badge-modern badge-urgente">Urgente</span>
+    </div>
+
+    <div class="vaga-card-modern">
+        <div class="vaga-info">
+            <h6>Desenvolvedor FullStack</h6>
+            <p>Empresa: Resolve Software LTDA</p>
+            <p>Disponível até 31 de jul de 2025</p>
+        </div>
+        <span class="badge-modern badge-disponivel">Disponível</span>
     </div>
 </div>
 

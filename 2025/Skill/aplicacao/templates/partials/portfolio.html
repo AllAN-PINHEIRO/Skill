@@ -61,7 +61,13 @@
 
                 <div class="certificates-slider-container">
                     {% for cert in certificados %}
-                        <div class="certificate-slide-card" onclick="abrirModalCertificado('{{ cert.id }}', '{{ cert.titulo }}', '{{ cert.instituicao }}', '{{ cert.horas }}')">
+                        <div class="certificate-slide-card" 
+                             onclick="abrirModalCertificado(this)"
+                             data-id="{{ cert.id }}"
+                             data-titulo="{{ cert.titulo }}"
+                             data-instituicao="{{ cert.instituicao }}"
+                             data-horas="{{ cert.horas|default:'' }}">
+                            
                             <div class="mb-3">
                                 <h6 class="cert-title" title="{{ cert.titulo }}">
                                     {{ cert.titulo|default:"Sem Título" }}
@@ -70,10 +76,13 @@
                                     {{ cert.instituicao|default:"Instituição" }}
                                 </p>
                             </div>
+
                             <div class="cert-footer">
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="cert-icon-circle"><i class="bi bi-mortarboard-fill"></i></div>
-                                    <span class="text-muted small ms-1" style="font-size: 0.75rem;"><i class="bi bi-pencil"></i> Editar</span>
+                                    <span class="text-muted small ms-1" style="font-size: 0.75rem;">
+                                        <i class="bi bi-pencil"></i> Editar
+                                    </span>
                                 </div>
                                 {% if cert.horas %}
                                     <span class="cert-badge"><i class="bi bi-clock"></i> {{ cert.horas }}</span>
@@ -147,7 +156,6 @@
                         {% empty %}
                             <div class="skill-row mb-2"><span class="skill-name">Java</span><span class="skill-val">SQL</span></div>
                             <div class="skill-row mb-2"><span class="skill-name">Python</span><span class="skill-val">Docker</span></div>
-                            <div class="skill-row mb-2"><span class="skill-name">Node.js</span><span class="skill-val">TI</span></div>
                         {% endfor %}
                     </div>
                 </div>
@@ -174,7 +182,6 @@
                         {% else %}
                              <i class="bi bi-github text-success fs-4 opacity-75"></i>
                         {% endif %}
-
                         <i class="bi bi-twitter-x text-success fs-4 opacity-75"></i>
                         <i class="bi bi-instagram text-success fs-4 opacity-75"></i>
                     </div>

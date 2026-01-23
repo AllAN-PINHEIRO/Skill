@@ -1,61 +1,87 @@
-<div class="row justify-content-center animate-fade-in">
-    <div class="col-lg-8">
-        <div class="modern-card p-4 border-0">
+<div class="animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-person-lines-fill text-primary"></i> Editar Perfil</h5>
+        <button class="btn btn-sm btn-outline-secondary" data-route="home">Cancelar</button>
+    </div>
+
+    <form id="form-ajax">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            <label class="form-label fw-bold small text-muted">Resumo Profissional</label>
+            <textarea id="resumo" class="form-control" rows="3" placeholder="Fale um pouco sobre você...">{{ perfil.resumo|default:'' }}</textarea>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">LinkedIn</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-linkedin text-primary"></i></span>
+                    <input type="url" id="linkedin" class="form-control" placeholder="https://linkedin.com/in/..." value="{{ perfil.linkedin|default:'' }}">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">GitHub</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-github text-dark"></i></span>
+                    <input type="url" id="github" class="form-control" placeholder="https://github.com/..." value="{{ perfil.github|default:'' }}">
+                </div>
+            </div>
+        </div>
+
+        <hr class="opacity-10 my-4">
+
+        <div class="mb-3">
+            <label class="form-label fw-bold small text-muted mb-3">Habilidades Técnicas</label>
             
-            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
-                <h4 class="text-success fw-bold m-0"><i class="bi bi-pencil-square"></i> Editar Perfil</h4>
-                <button class="btn btn-outline-secondary btn-sm" data-route="perfil">
-                    Cancelar
-                </button>
+            <div class="d-flex gap-2 mb-3">
+                <select id="skill-select" class="form-select">
+                    <option value="" selected disabled>Selecione uma habilidade...</option>
+                    {% for hab in habilidades %}
+                        <option value="{{ hab.id }}">{{ hab.nome }}</option>
+                    {% endfor %}
+                </select>
+                <input type="number" id="skill-level" class="form-control w-25" placeholder="%" min="1" max="100">
+                <button type="button" id="btn-add-temp" class="btn btn-success px-3"><i class="bi bi-plus-lg"></i></button>
             </div>
 
-            <form id="form-ajax">
-                {% csrf_token %}
-                
-                <div class="mb-4">
-                    <label class="form-label fw-bold text-secondary">Resumo Profissional</label>
-                    <textarea id="resumo" class="form-control bg-light" rows="4" placeholder="Escreva um pouco sobre suas experiências e objetivos...">{{ perfil.resumo|default:"" }}</textarea>
-                    <div class="form-text">Isso aparecerá no topo do seu perfil.</div>
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-6 mb-3 mb-md-0">
-                        <label class="form-label fw-bold text-secondary"><i class="bi bi-linkedin"></i> LinkedIn (URL)</label>
-                        <input id="linkedin" type="url" class="form-control" placeholder="https://linkedin.com/in/..." value="{{ perfil.linkedin|default:'' }}">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold text-secondary"><i class="bi bi-github"></i> GitHub (URL)</label>
-                        <input id="github" type="url" class="form-control" placeholder="https://github.com/..." value="{{ perfil.github|default:'' }}">
-                    </div>
-                </div>
-
-                <hr class="text-muted opacity-25 my-4">
-
-                <h5 class="fw-bold text-secondary mb-3">Gerenciar Habilidades</h5>
-                <div class="card bg-light border-0 p-3 mb-3">
-                    <div class="input-group">
-                        <select id="skill-select" class="form-select border-0 shadow-sm">
-                            <option value="" selected disabled>Selecione uma habilidade...</option>
-                            {% for skill in habilidades %}
-                                <option value="{{ skill.id }}">{{ skill.nome }}</option>
-                            {% endfor %}
-                        </select>
-                        <input type="number" id="skill-level" class="form-control border-0 shadow-sm" placeholder="Nível %" max="100" style="max-width: 100px;">
-                        <button type="button" class="btn btn-success shadow-sm" id="btn-add-temp">
-                            <i class="bi bi-plus-lg"></i> Adicionar
-                        </button>
-                    </div>
-                </div>
-
-                <ul id="lista-skills-temp" class="list-group list-group-flush mb-4 rounded-3">
-                    </ul>
-
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-success btn-lg shadow-sm">
-                        <i class="bi bi-check-lg"></i> Salvar Alterações
-                    </button>
-                </div>
-            </form>
+            <ul id="lista-skills-temp" class="list-group shadow-sm">
+                {% if perfil %}
+                    {% for ha in perfil.habilidadealuno_set.all %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center skill-item-data" 
+                            data-id="{{ ha.habilidade.id }}" 
+                            data-nivel="{{ ha.nivel }}">
+                            
+                            <span class="fw-500">
+                                {{ ha.habilidade.nome }} 
+                                <span class="badge bg-primary rounded-pill ms-2">{{ ha.nivel }}%</span>
+                            </span>
+            
+                            <div>
+                                <button type="button" class="btn btn-sm text-primary border-0 me-1" 
+                                        title="Editar" onclick="SPA.editSkillVisual(this)">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </button>
+                                
+                                <button type="button" class="btn btn-sm text-danger border-0" 
+                                        title="Remover" onclick="this.closest('li').remove()">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                            </div>
+                        </li>
+                    {% endfor %}
+                {% endif %}
+            </ul>
+            <div class="form-text small mt-2 text-muted">
+                <i class="bi bi-info-circle"></i> Para editar, clique no lápis, ajuste o valor acima e adicione novamente.
+            </div>
+            <div class="form-text small mt-2">Adicione skills na lista acima antes de salvar.</div>
         </div>
-    </div>
+
+        <div class="d-grid mt-5">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="bi bi-check2-circle"></i> Salvar Alterações
+            </button>
+        </div>
+    </form>
 </div>
