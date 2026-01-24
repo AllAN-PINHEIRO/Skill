@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import api_github_repos # Não esqueça de importar
 
 app_name = 'contas'
 
@@ -30,4 +31,5 @@ urlpatterns = [
     path('api/destaque/excluir/<int:destaque_id>/', views.api_excluir_destaque, name='api-excluir-destaque'),
     path('api/certificado/salvar/', views.api_salvar_certificado, name='api-salvar-certificado'),
     path('api/certificado/excluir/<int:cert_id>/', views.api_excluir_certificado, name='api-excluir-certificado'),
+    path('api/github/repos/', api_github_repos, name='api_github_repos'),
 ]

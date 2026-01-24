@@ -72,7 +72,15 @@ const SPA = {
             if (response.status === 403) { window.location.href = "/auth/login/"; return; }
             const html = await response.text();
             container.innerHTML = html;
+            
             if (pageKey === 'home') this.initChart();
+
+            // --- CORREÇÃO AQUI: Chamar o GitHub nas páginas certas ---
+            if (pageKey === 'perfil' || pageKey === 'portfolio') {
+                this.loadGithubRepos();
+            }
+            // ---------------------------------------------------------
+
         } catch (error) {
             if(window.showToast) showToast("Erro ao carregar conteúdo.", "danger");
         }
@@ -225,7 +233,106 @@ const SPA = {
         const toggleFn = () => { sidebar.classList.toggle('active'); document.body.classList.toggle('sidebar-open'); };
         if(toggle) toggle.addEventListener('click', toggleFn);
         if(close) close.addEventListener('click', toggleFn);
-    }
+    },
+
+    // NOVA FUNÇÃO: Carrega e desenha o carrossel do GitHub
+    loadGithubRepos: async function() {
+        const container = document.getElementById('github-card-container');
+        if (!container) return; // Se não estiver na página certa, sai
+
+        try {
+            const response = await fetch('/auth/api/github/repos/');
+            const data = await response.json();
+
+            if (data.success && data.repos.length > 0) {
+                // Monta o HTML do Carrossel (Igual ao de Certificados)
+                let carouselHtml = `
+                    <div id="carouselGithub" class="carousel slide h-100" data-bs-ride="false">
+                        <div class="carousel-inner h-100">
+                `;
+
+                data.repos.forEach((repo, index) => {
+                    const activeClass = index === 0 ? 'active' : '';
+                    
+                    // Define cor da linguagem
+                    let langColor = '#6c757d';
+                    if (repo.language === 'Python') langColor = '#3572A5';
+                    if (repo.language === 'JavaScript') langColor = '#f1e05a';
+                    if (repo.language === 'HTML') langColor = '#e34c26';
+                    if (repo.language === 'Java') langColor = '#b07219';
+
+                    carouselHtml += `
+                        <div class="carousel-item ${activeClass} h-100">
+                            <div class="cert-slide-content">
+                                <div>
+                                    <div class="gh-header mb-2">
+                                        <i class="bi bi-github fs-2 line-height-1"></i>
+                                        <span class="gh-title" style="font-size:1.2rem">${repo.name}</span>
+                                    </div>
+                                    
+                                    <p class="text-muted small mb-3" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5; min-height: 4.5em;">
+                                        ${repo.description}
+                                    </p>
+
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="d-flex align-items-center">
+                                            <span style="width: 10px; height: 10px; background-color: ${langColor}; border-radius: 50%; margin-right: 6px;"></span>
+                                            <span class="small fw-bold text-muted">${repo.language}</span>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-star-fill text-warning small me-1"></i>
+                                            <span class="small text-muted">${repo.stars}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="text-end w-100 mt-3">
+                                    <a href="${repo.url}" target="_blank" class="btn-card-confira">Ver Código</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                carouselHtml += `</div>`; // Fecha carousel-inner
+
+                // Adiciona Setas se tiver mais de 1 repo
+                if (data.repos.length > 1) {
+                    carouselHtml += `
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselGithub" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselGithub" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        </button>
+                    `;
+                }
+
+                carouselHtml += `</div>`; // Fecha carousel principal
+                container.innerHTML = carouselHtml;
+
+            } else {
+                // Tratamento de erros/vazio
+                let msg = "Nenhum repositório público.";
+                let btnHtml = `<button class="btn-card-confira mt-3" onclick="SPA.load('editar')">Configurar</button>`;
+                
+                if(data.message === 'no_link') { msg = "Adicione seu GitHub no perfil."; }
+                else if(data.message === 'user_not_found') { msg = "Usuário GitHub não encontrado."; }
+
+                container.innerHTML = `
+                    <div class="d-flex flex-column align-items-center justify-content-center h-100 text-center p-3">
+                        <i class="bi bi-github display-4 mb-2 opacity-25"></i>
+                        <h6 class="fw-bold mb-1">GitHub</h6>
+                        <p class="small text-muted mb-0">${msg}</p>
+                        ${btnHtml}
+                    </div>
+                `;
+            }
+        } catch (err) {
+            console.error(err);
+            container.innerHTML = `<div class="d-flex align-items-center justify-content-center h-100 text-muted small">Erro ao carregar GitHub.</div>`;
+        }
+    },
 };
 
 
@@ -315,7 +422,7 @@ window.abrirModalDestaque = function(id = '', titulo = '', descricao = '', cor =
     modalInstancia.show();
 };
 
-// ATUALIZE ESTA FUNÇÃO NO SEU ARQUIVO JS
+// --- Modal Certificado (Atualizado com Objeto e HTML) ---
 window.abrirModalCertificado = function(elemento) {
     const modalEl = document.getElementById('modalCertificado');
     const form = document.getElementById('form-certificado');
@@ -326,12 +433,12 @@ window.abrirModalCertificado = function(elemento) {
     if (!modalCertInstancia) modalCertInstancia = new bootstrap.Modal(modalEl);
     const btnExcluir = document.getElementById('btn-excluir-cert');
 
-    // VERIFICAÇÃO ROBUSTA (Aceita elemento HTML ou Objeto direto)
+    // Verifica se veio um elemento HTML ou um Objeto direto (do carrossel)
     let dataset = null;
     if (elemento && elemento.dataset) {
-        dataset = elemento.dataset; // Veio do HTML (data-id=...)
+        dataset = elemento.dataset; 
     } else if (elemento && elemento.id) {
-        // Compatibilidade caso venha de outro lugar
+        // Compatibilidade caso venha de um objeto JS puro
         dataset = elemento; 
     }
 
@@ -370,7 +477,7 @@ document.addEventListener('submit', async function(e) {
         } catch(err) { showToast("Erro ao salvar.", "danger"); }
     }
 
-    // Salvar Certificado (COM LINK)
+    // Salvar Certificado
     if (e.target.id === 'form-certificado') {
         e.preventDefault();
         const titulo = document.getElementById('cert_titulo').value.trim();
@@ -383,7 +490,6 @@ document.addEventListener('submit', async function(e) {
             titulo: titulo, 
             instituicao: instituicao, 
             horas: document.getElementById('cert_horas').value,
-            // Envia o link para a API
             link: document.getElementById('cert_link').value
         };
 

@@ -3,6 +3,7 @@ import json
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404 # Essencial para MVT
 from django.contrib.auth.models import User
+import requests
 from .models import PerfilAluno, Habilidade, HabilidadeAluno, Cadastro, Certificado, HabilidadeDestaque
 
 # --- NOVOS IMPORTS PARA DRF ---
@@ -318,6 +319,47 @@ def api_excluir_certificado(request, cert_id):
         except Exception as e:
              return JsonResponse({'success': False, 'message': str(e)}, status=400)
     return JsonResponse({'success': False}, status=405)
+
+@login_required
+def api_github_repos(request):
+    try:
+        perfil = request.user.perfil_aluno
+        github_url = perfil.github
+        
+        if not github_url:
+            return JsonResponse({'success': False, 'message': 'GitHub não cadastrado.'})
+
+        # 1. Extrair o username da URL (aceita formatos variados)
+        # Ex: https://github.com/usuario/ -> usuario
+        username = github_url.rstrip('/').split('/')[-1]
+        
+        if not username:
+             return JsonResponse({'success': False, 'message': 'Username inválido.'})
+
+        # 2. Consumir API do GitHub (Buscando repos públicos)
+        url_api = f"https://api.github.com/users/{username}/repos?sort=updated&per_page=6"
+        response = requests.get(url_api, timeout=5)
+
+        if response.status_code == 200:
+            repos_raw = response.json()
+            repos_clean = []
+            
+            for repo in repos_raw:
+                repos_clean.append({
+                    'name': repo['name'],
+                    'description': repo['description'] or "Sem descrição.",
+                    'language': repo['language'] or "Outros",
+                    'stars': repo['stargazers_count'],
+                    'url': repo['html_url'],
+                    'updated_at': repo['updated_at']
+                })
+            
+            return JsonResponse({'success': True, 'repos': repos_clean})
+        else:
+            return JsonResponse({'success': False, 'message': 'Usuário GitHub não encontrado.'})
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
 
 # --- VIEWS DE API (DRF) - As novas versões ---
 

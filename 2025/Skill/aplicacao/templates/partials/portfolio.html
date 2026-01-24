@@ -13,10 +13,21 @@
                 <small class="text-muted">{% now "d M Y, l" %}</small>
             </div>
 
+            <div class="action-cards-row mb-4" style="grid-template-columns: 1fr;">
+                <div class="action-card-large d-flex flex-column flex-md-row align-items-center justify-content-center justify-content-md-start p-4 p-md-5" 
+                     style="gap: 2rem; background: #fff; border: 1px solid #e2e8f0; cursor: default;">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2683/2683274.png" class="action-card-img mb-0" style="width: 80px; height: 80px;" alt="Portfolio">
+                    <div class="text-center text-md-start">
+                        <div class="action-card-title fs-3">Meu Portfólio</div>
+                        <p class="text-muted mb-0 mt-1 small">Gerencie seus projetos e certificados completos aqui.</p>
+                    </div>
+                </div>
+            </div>
+
             <div class="mb-5">
                 <div class="content-section-header">
                     <span class="content-section-title"><i class="bi bi-person-lines-fill"></i> Resumo Profissional</span>
-                    <button class="btn btn-sm btn-outline-success text-decoration-none" data-route="editar">Editar</button>
+                    <button class="btn btn-link btn-sm p-0 text-decoration-none" data-route="editar">Editar</button>
                 </div>
                 <div class="modern-card p-4 border-0 shadow-sm">
                     {% if dados.perfil.resumo %}
@@ -57,63 +68,36 @@
             <div class="row mb-5">
                 
                 <div class="col-lg-6 mb-4 mb-lg-0">
-                    <div class="content-section-header mb-3">
-                        <span class="content-section-title"><i class="bi bi-github"></i> GitHub Principal</span>
-                    </div>
-
-                    <div class="equal-height-card">
-                        <div>
-                            <div class="gh-header">
-                                <i class="bi bi-github gh-icon"></i>
-                                <span class="gh-title">Integração</span>
-                            </div>
-                            <h6 class="fw-bold mb-2">SoulCode Academy</h6>
-                            <p class="text-muted small" style="line-height: 1.5;">
-                                Projeto para o desenvolvimento (Front-end) de uma página responsiva para uma academia (fictícia)...
-                            </p>
-                        </div>
-                        
-                        <div class="text-end w-100">
-                            <button class="btn-card-confira">Confira</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6">
-                    <div class="content-section-header justify-content-between mb-2">
+                    <div class="content-section-header justify-content-between mb-3">
                         <span class="content-section-title"><i class="bi bi-award"></i> Certificados</span>
-                        <button class="btn btn-sm btn-outline-success" onclick="abrirModalCertificado()">
-                            <i class="bi bi-plus-lg"></i> Novo
-                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="abrirModalCertificado()"><i class="bi bi-plus-lg"></i> Novo</button>
                     </div>
-
+                    
                     <div class="equal-height-card position-relative">
-                        
                         {% if certificados %}
-                            <div id="carouselCertificados" class="carousel slide h-100" data-bs-ride="false"> <div class="carousel-inner h-100">
-                                    
+                            <div id="carouselCertificadosPort" class="carousel slide h-100" data-bs-ride="false">
+                                <div class="carousel-inner h-100">
                                     {% for cert in certificados %}
                                     <div class="carousel-item {% if forloop.first %}active{% endif %} h-100">
-                                        
                                         <div class="cert-slide-content">
-                                            
-                                            <div class="btn-edit-corner" 
-                                                 title="Editar" 
-                                                 onclick="abrirModalCertificado()">
+                                            <div class="btn-edit-corner" title="Editar" 
+                                                 onclick="abrirModalCertificado(this)"
+                                                 data-id="{{ cert.id }}"
+                                                 data-titulo="{{ cert.titulo }}"
+                                                 data-instituicao="{{ cert.instituicao }}"
+                                                 data-horas="{{ cert.horas|default:'' }}"
+                                                 data-link_certificado="{{ cert.link_certificado|default:'' }}">
                                                 <i class="bi bi-pencil-fill small"></i>
                                             </div>
-
                                             <div>
                                                 <h5 class="cert-title">{{ cert.titulo }}</h5>
                                                 <small class="cert-school">{{ cert.instituicao }}</small>
-                                                
                                                 <ul class="cert-details-list mt-3">
                                                     {% if cert.horas %}<li>Carga horária: {{ cert.horas }}h</li>{% endif %}
                                                     <li>Concluído</li>
                                                     {% if cert.link_certificado %}<li>Certificado digital disponível</li>{% endif %}
                                                 </ul>
                                             </div>
-
                                             <div class="text-end w-100 mt-3">
                                                 {% if cert.link_certificado %}
                                                     <a href="{{ cert.link_certificado }}" target="_blank" class="btn-card-confira">Visualizar</a>
@@ -124,30 +108,34 @@
                                         </div>
                                     </div>
                                     {% endfor %}
-
                                 </div>
-
                                 {% if certificados|length > 1 %}
-                                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselCertificados" data-bs-slide="prev">
-                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                        <span class="visually-hidden">Anterior</span>
-                                    </button>
-                                    <button class="carousel-control-next" type="button" data-bs-target="#carouselCertificados" data-bs-slide="next">
-                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                        <span class="visually-hidden">Próximo</span>
-                                    </button>
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselCertificadosPort" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#carouselCertificadosPort" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
                                 {% endif %}
                             </div>
-
                         {% else %}
                             <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
                                 <i class="bi bi-award display-4 mb-2 opacity-25"></i>
-                                <p class="small mb-0">Nenhum certificado cadastrado.</p>
+                                <p class="small mb-0">Nenhum certificado.</p>
                             </div>
                         {% endif %}
-
                     </div>
                 </div>
+
+                <div class="col-lg-6">
+                    <div class="content-section-header mb-3">
+                        <span class="content-section-title"><i class="bi bi-github"></i> GitHub Principal</span>
+                    </div>
+
+                    <div id="github-card-container" class="equal-height-card position-relative">
+                        <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
+                            <div class="spinner-border text-success mb-2" role="status" style="width: 2rem; height: 2rem;"></div>
+                            <p class="small mb-0">Sincronizando repositórios...</p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </div> 
@@ -173,6 +161,7 @@
                         {% endfor %}
                     </div>
                 </div>
+                
                 <div class="sidebar-section bg-white border-top-0 pt-0 pb-4">
                     <div class="sidebar-section-title mt-3 text-dark">Portfólio</div>
                     <div class="d-flex align-items-center justify-content-center gap-2 mb-3 text-muted">
@@ -190,89 +179,33 @@
         </div> 
     </div>
 </div>
-
 <div class="modal fade" id="modalDestaque" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg">
-      <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title fw-bold">Habilidade Destaque</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
+      <div class="modal-header border-0 pb-0"><h5 class="modal-title fw-bold">Habilidade Destaque</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
       <div class="modal-body">
         <form id="form-destaque">
             <input type="hidden" id="destaque_id">
-            <div class="mb-3">
-                <label class="small fw-bold text-muted">TÍTULO</label>
-                <input type="text" id="destaque_titulo" class="form-control" required maxlength="50">
-            </div>
-            <div class="mb-3">
-                <label class="small fw-bold text-muted">DESCRIÇÃO</label>
-                <textarea id="destaque_descricao" class="form-control" rows="3" required maxlength="150"></textarea>
-            </div>
-            <div class="mb-4">
-                <label class="small fw-bold text-muted">COR</label>
-                <div class="d-flex gap-2">
-                    <input type="radio" class="btn-check" name="destaque_cor" id="cor_gray" value="gray" checked>
-                    <label class="btn btn-outline-secondary w-50" for="cor_gray">Cinza</label>
-                    <input type="radio" class="btn-check" name="destaque_cor" id="cor_green" value="green">
-                    <label class="btn btn-outline-success w-50" for="cor_green">Verde</label>
-                </div>
-            </div>
-            <div class="d-flex justify-content-between pt-2 border-top">
-                <button type="button" class="btn btn-link text-danger text-decoration-none btn-sm px-0" id="btn-excluir-destaque" style="display:none;">
-                    <i class="bi bi-trash"></i> Excluir
-                </button>
-                <div class="ms-auto">
-                    <button type="button" class="btn btn-light btn-sm me-2" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-dark btn-sm px-4">Salvar</button>
-                </div>
-            </div>
+            <div class="mb-3"><label class="small fw-bold text-muted">TÍTULO</label><input type="text" id="destaque_titulo" class="form-control" required maxlength="50"></div>
+            <div class="mb-3"><label class="small fw-bold text-muted">DESCRIÇÃO</label><textarea id="destaque_descricao" class="form-control" rows="3" required maxlength="150"></textarea></div>
+            <div class="mb-4"><label class="small fw-bold text-muted">COR</label><div class="d-flex gap-2"><input type="radio" class="btn-check" name="destaque_cor" id="cor_gray" value="gray" checked><label class="btn btn-outline-secondary w-50" for="cor_gray">Cinza</label><input type="radio" class="btn-check" name="destaque_cor" id="cor_green" value="green"><label class="btn btn-outline-success w-50" for="cor_green">Verde</label></div></div>
+            <div class="d-flex justify-content-between pt-2 border-top"><button type="button" class="btn btn-link text-danger text-decoration-none btn-sm px-0" id="btn-excluir-destaque" style="display:none;"><i class="bi bi-trash"></i> Excluir</button><div class="ms-auto"><button type="button" class="btn btn-light btn-sm me-2" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-dark btn-sm px-4">Salvar</button></div></div>
         </form>
       </div>
     </div>
   </div>
 </div>
-
 <div class="modal fade" id="modalCertificado" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg">
-      <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title fw-bold">Curso / Certificado</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
+      <div class="modal-header border-0 pb-0"><h5 class="modal-title fw-bold">Curso / Certificado</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
       <div class="modal-body">
         <form id="form-certificado">
             <input type="hidden" id="cert_id">
-            <div class="mb-3">
-                <label class="small fw-bold text-muted">NOME DO CURSO</label>
-                <input type="text" id="cert_titulo" class="form-control" required>
-            </div>
-            <div class="row">
-                <div class="col-8 mb-3">
-                    <label class="small fw-bold text-muted">INSTITUIÇÃO</label>
-                    <input type="text" id="cert_instituicao" class="form-control" required>
-                </div>
-                <div class="col-4 mb-3">
-                    <label class="small fw-bold text-muted">HORAS</label>
-                    <input type="text" id="cert_horas" class="form-control">
-                </div>
-            </div>
-            <div class="mb-3">
-                <label class="small fw-bold text-muted">LINK DO CERTIFICADO (URL)</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-link-45deg"></i></span>
-                    <input type="url" id="cert_link" class="form-control border-start-0" placeholder="https://...">
-                </div>
-            </div>
-            <div class="d-flex justify-content-between pt-2 border-top">
-                <button type="button" class="btn btn-link text-danger text-decoration-none btn-sm px-0" id="btn-excluir-cert" style="display:none;">
-                    <i class="bi bi-trash"></i> Excluir
-                </button>
-                <div class="ms-auto">
-                    <button type="button" class="btn btn-light btn-sm me-2" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-dark btn-sm px-4">Salvar</button>
-                </div>
-            </div>
+            <div class="mb-3"><label class="small fw-bold text-muted">NOME DO CURSO</label><input type="text" id="cert_titulo" class="form-control" required></div>
+            <div class="row"><div class="col-8 mb-3"><label class="small fw-bold text-muted">INSTITUIÇÃO</label><input type="text" id="cert_instituicao" class="form-control" required></div><div class="col-4 mb-3"><label class="small fw-bold text-muted">HORAS</label><input type="text" id="cert_horas" class="form-control"></div></div>
+            <div class="mb-3"><label class="small fw-bold text-muted">LINK DO CERTIFICADO (URL)</label><div class="input-group"><span class="input-group-text bg-light border-end-0"><i class="bi bi-link-45deg"></i></span><input type="url" id="cert_link" class="form-control border-start-0" placeholder="https://..."></div></div>
+            <div class="d-flex justify-content-between pt-2 border-top"><button type="button" class="btn btn-link text-danger text-decoration-none btn-sm px-0" id="btn-excluir-cert" style="display:none;"><i class="bi bi-trash"></i> Excluir</button><div class="ms-auto"><button type="button" class="btn btn-light btn-sm me-2" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-dark btn-sm px-4">Salvar</button></div></div>
         </form>
       </div>
     </div>
