@@ -9,68 +9,108 @@
                 <small class="text-muted">{% now "d M Y, l" %}</small>
             </div>
 
-            <div class="action-cards-row" style="grid-template-columns: 1fr;">
-                
-                <div class="action-card-large d-flex flex-row align-items-center justify-content-start px-5" 
+            <div class="action-cards-row mb-5" style="grid-template-columns: 1fr;">
+                <div class="action-card-large d-flex flex-column flex-md-row align-items-center justify-content-center justify-content-md-start p-4 p-md-5" 
                      data-route="portfolio" 
-                     style="min-height: 180px; gap: 2rem;">
-                    
-                    <img src="https://cdn-icons-png.flaticon.com/512/2683/2683274.png" 
-                         class="action-card-img mb-0" 
-                         style="width: 90px; height: 90px;" 
-                         alt="Portfolio">
-                    
-                    <div class="text-start">
-                        <div class="action-card-title fs-2">Meu Portfólio</div>
-                        <p class="text-muted mb-0 mt-1">
-                            Gerencie seus projetos, adicione certificados e organize seus destaques profissionais.
-                        </p>
+                     style="gap: 2rem; cursor: pointer;">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2683/2683274.png" class="action-card-img mb-0" style="width: 80px; height: 80px;" alt="Portfolio">
+                    <div class="text-center text-md-start">
+                        <div class="action-card-title fs-3">Meu Portfólio</div>
+                        <p class="text-muted mb-0 mt-1 small">Gerencie seus projetos e certificados completos clicando aqui.</p>
                     </div>
-                    
-                    <i class="bi bi-arrow-right-circle text-success ms-auto display-5 opacity-50"></i>
+                    <i class="bi bi-arrow-right-circle text-success ms-auto display-5 opacity-50 d-none d-md-block"></i>
                 </div>
-
             </div>
 
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <div class="content-section-header">
-                        <span class="content-section-title"><i class="bi bi-laptop"></i> Projetos</span>
-                        <i class="bi bi-chevron-right text-success"></i>
+            <div class="row mb-5">
+                
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <div class="content-section-header mb-3">
+                        <span class="content-section-title"><i class="bi bi-github"></i> GitHub Principal</span>
                     </div>
-                    
-                    <div class="showcase-card">
+
+                    <div class="equal-height-card">
                         <div>
                             <div class="gh-header">
                                 <i class="bi bi-github gh-icon"></i>
-                                <span class="gh-title">GitHub</span>
+                                <span class="gh-title">Integração</span>
                             </div>
-                            <h6 class="fw-bold">SoulCode Academy</h6>
-                            <p class="text-muted small mt-2" style="line-height: 1.4;">
+                            <h6 class="fw-bold mb-2">SoulCode Academy</h6>
+                            <p class="text-muted small" style="line-height: 1.5;">
                                 Projeto para o desenvolvimento (Front-end) de uma página responsiva para uma academia (fictícia)...
                             </p>
                         </div>
-                        <button class="btn-confira">Confira</button>
+                        
+                        <div class="text-end w-100">
+                            <button class="btn-card-confira">Confira</button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="col-md-6 mb-4">
-                    <div class="content-section-header">
-                        <span class="content-section-title"><i class="bi bi-mortarboard"></i> Cursos e Certificações</span>
-                        <i class="bi bi-chevron-right text-success"></i>
+                <div class="col-lg-6">
+                    <div class="content-section-header justify-content-between mb-3">
+                        <span class="content-section-title"><i class="bi bi-award"></i> Certificados</span>
                     </div>
 
-                    <div class="showcase-card">
-                        <div>
-                            <div class="udemy-title">Java COMPLETO: Do Zero ao Profisssional</div>
-                            <small class="text-muted d-block mb-3">Udemy</small>
-                            
-                            <ul class="text-muted small ps-3 mb-0" style="list-style-type: disc;">
-                                <li class="mb-1">Fundamentos em Java, POO, Spring Boot e muito mais.</li>
-                                <li>77h de curso</li>
-                            </ul>
-                        </div>
-                        <button class="btn-confira">Confira</button>
+                    <div class="equal-height-card position-relative">
+                        
+                        {% if certificados %}
+                            <div id="carouselCertificados" class="carousel slide h-100" data-bs-ride="false"> <div class="carousel-inner h-100">
+                                    
+                                    {% for cert in certificados %}
+                                    <div class="carousel-item {% if forloop.first %}active{% endif %} h-100">
+                                        
+                                        <div class="cert-slide-content">
+                                            
+                                            <div class="btn-edit-corner" 
+                                                 title="Editar" 
+                                                 onclick="abrirModalCertificado()">
+                                                <i class="bi bi-pencil-fill small"></i>
+                                            </div>
+
+                                            <div>
+                                                <h5 class="cert-title">{{ cert.titulo }}</h5>
+                                                <small class="cert-school">{{ cert.instituicao }}</small>
+                                                
+                                                <ul class="cert-details-list mt-3">
+                                                    {% if cert.horas %}<li>Carga horária: {{ cert.horas }}h</li>{% endif %}
+                                                    <li>Concluído</li>
+                                                    {% if cert.link_certificado %}<li>Certificado digital disponível</li>{% endif %}
+                                                </ul>
+                                            </div>
+
+                                            <div class="text-end w-100 mt-3">
+                                                {% if cert.link_certificado %}
+                                                    <a href="{{ cert.link_certificado }}" target="_blank" class="btn-card-confira">Visualizar</a>
+                                                {% else %}
+                                                    <button class="btn-card-confira opacity-50" disabled>Sem Link</button>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+
+                                </div>
+
+                                {% if certificados|length > 1 %}
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselCertificados" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Anterior</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#carouselCertificados" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Próximo</span>
+                                    </button>
+                                {% endif %}
+                            </div>
+
+                        {% else %}
+                            <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
+                                <i class="bi bi-award display-4 mb-2 opacity-25"></i>
+                                <p class="small mb-0">Nenhum certificado cadastrado.</p>
+                            </div>
+                        {% endif %}
+
                     </div>
                 </div>
             </div>
@@ -78,79 +118,102 @@
         </div> 
         
         <div class="right-sidebar">
-            
             <div class="profile-sidebar-card">
                 <div class="sidebar-cover">
                     <button class="btn-edit-pill" data-route="editar">Editar</button>
                 </div>
-                
                 <div class="profile-avatar-wrapper">
-                    <div class="profile-avatar-lg">
-                        {{ dados.nome|slice:":1" }}
-                    </div>
+                    <div class="profile-avatar-lg">{{ dados.nome|slice:":1" }}</div>
                 </div>
-
                 <div class="sidebar-info">
                     <div class="sidebar-name">{{ dados.nome }}</div>
-                    
-                    <div class="sidebar-detail">
-                        <span class="sidebar-label">Nº Matricula:</span> {{ dados.matricula }}
-                    </div>
-                    <div class="sidebar-detail text-break">
-                        <span class="sidebar-label">E-mail:</span> {{ dados.email }}
-                    </div>
-                    <div class="sidebar-detail">
-                        <span class="sidebar-label">Campus:</span> {{ dados.campus }}
-                    </div>
-                    <div class="sidebar-detail">
-                        <span class="sidebar-label">Cidade:</span> Eunápolis - BA
-                    </div>
+                    <div class="sidebar-detail"><span class="fw-bold">Matrícula:</span> {{ dados.matricula }}</div>
+                    <div class="sidebar-detail text-break"><span class="fw-bold">Email:</span> {{ dados.email }}</div>
+                    <div class="sidebar-detail"><span class="fw-bold">Campus:</span> {{ dados.campus }}</div>
+                    <div class="sidebar-detail"><span class="fw-bold">Cidade:</span> Eunápolis - BA</div>
                 </div>
 
                 <div class="sidebar-section">
                     <div class="sidebar-section-title">Tenho Interesse e XP</div>
                     <div class="skills-list-simple">
                         {% for s in dados.perfil.habilidades|slice:":4" %}
-                            <div class="skill-row">
-                                <span class="skill-name">{{ s.nome_habilidade }}</span>
-                                <span class="skill-val">{{ s.nivel }}%</span>
-                            </div>
+                            <div class="skill-row"><span class="skill-name">{{ s.nome_habilidade }}</span><span class="skill-val">{{ s.nivel }}%</span></div>
                         {% empty %}
-                            <div class="skill-row"><span class="skill-name">Java</span><span class="skill-val">SQL</span></div>
-                            <div class="skill-row"><span class="skill-name">Python</span><span class="skill-val">Docker</span></div>
-                            <div class="skill-row"><span class="skill-name">Node.js</span><span class="skill-val">TI</span></div>
-                            <div class="skill-row"><span class="skill-name">Go</span><span class="skill-val">Redes</span></div>
+                            <div class="text-center text-muted small">Sem skills</div>
                         {% endfor %}
                     </div>
                 </div>
 
-                <div class="sidebar-section bg-white">
-                    <div class="sidebar-section-title">Portfólio</div>
+                <div class="sidebar-section bg-white border-top-0 pt-0 pb-4">
+                    <div class="sidebar-section-title mt-3 text-dark">Portfólio</div>
                     
-                    <div class="text-center mb-3">
-                        <i class="bi bi-globe me-1 text-success"></i> 
-                        <a href="#" class="text-muted small text-decoration-none">meusite.dev.br</a>
+                    <div class="d-flex align-items-center justify-content-center gap-2 mb-3 text-muted">
+                        <i class="bi bi-globe2 text-success fs-5"></i>
+                        <a href="#" class="text-muted text-decoration-none">meusite.dev.br</a>
                     </div>
 
                     <div class="social-icons-row">
                         {% if dados.perfil.linkedin %}
-                            <a href="{{ dados.perfil.linkedin }}" class="text-success"><i class="bi bi-linkedin"></i></a>
+                            <a href="{{ dados.perfil.linkedin }}" target="_blank"><i class="bi bi-linkedin"></i></a>
                         {% else %}
-                            <a href="#" class="text-success opacity-50"><i class="bi bi-linkedin"></i></a>
+                            <a href="#" class="opacity-50"><i class="bi bi-linkedin"></i></a>
                         {% endif %}
-
                         {% if dados.perfil.github %}
-                            <a href="{{ dados.perfil.github }}" class="text-success"><i class="bi bi-github"></i></a>
+                            <a href="{{ dados.perfil.github }}" target="_blank"><i class="bi bi-github"></i></a>
                         {% else %}
-                            <a href="#" class="text-success opacity-50"><i class="bi bi-github"></i></a>
+                            <a href="#" class="opacity-50"><i class="bi bi-github"></i></a>
                         {% endif %}
-                        
-                        <a href="#" class="text-success opacity-50"><i class="bi bi-twitter-x"></i></a>
-                        <a href="#" class="text-success opacity-50"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="opacity-50"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" class="opacity-50"><i class="bi bi-instagram"></i></a>
                     </div>
                 </div>
 
             </div>
         </div> 
     </div>
+</div>
+<div class="modal fade" id="modalCertificado" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold">Curso / Certificado</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-certificado">
+            <input type="hidden" id="cert_id">
+            <div class="mb-3">
+                <label class="small fw-bold text-muted">NOME DO CURSO</label>
+                <input type="text" id="cert_titulo" class="form-control" required>
+            </div>
+            <div class="row">
+                <div class="col-8 mb-3">
+                    <label class="small fw-bold text-muted">INSTITUIÇÃO</label>
+                    <input type="text" id="cert_instituicao" class="form-control" required>
+                </div>
+                <div class="col-4 mb-3">
+                    <label class="small fw-bold text-muted">HORAS</label>
+                    <input type="text" id="cert_horas" class="form-control">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="small fw-bold text-muted">LINK DO CERTIFICADO (URL)</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-link-45deg"></i></span>
+                    <input type="url" id="cert_link" class="form-control border-start-0" placeholder="https://...">
+                </div>
+            </div>
+            <div class="d-flex justify-content-between pt-2 border-top">
+                <button type="button" class="btn btn-link text-danger text-decoration-none btn-sm px-0" id="btn-excluir-cert" style="display:none;">
+                    <i class="bi bi-trash"></i> Excluir
+                </button>
+                <div class="ms-auto">
+                    <button type="button" class="btn btn-light btn-sm me-2" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-dark btn-sm px-4">Salvar</button>
+                </div>
+            </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

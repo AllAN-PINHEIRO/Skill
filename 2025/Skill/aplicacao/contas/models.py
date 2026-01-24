@@ -82,7 +82,7 @@ class Certificado(models.Model):
     titulo = models.CharField(max_length=100)       # Ex: Java Completo
     instituicao = models.CharField(max_length=50)   # Ex: Udemy
     horas = models.CharField(max_length=20, blank=True, null=True) # Ex: 77h
-    link = models.URLField(blank=True, null=True)   # Link do certificado
+    link_certificado = models.URLField(max_length=500, blank=True, null=True)
     
     def __str__(self):
         return self.titulo

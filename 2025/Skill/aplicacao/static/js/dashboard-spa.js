@@ -1,5 +1,5 @@
 /* ============================================================
-   DASHBOARD SPA - VERSÃO COM EDIÇÃO DE SKILLS
+   DASHBOARD SPA - VERSÃO FINAL (COMPLETA)
    ============================================================ */
 
    document.addEventListener("DOMContentLoaded", () => {
@@ -44,7 +44,7 @@ const SPA = {
                 return;
             }
 
-            // 3. Botão Adicionar Skill
+            // 3. Botão Adicionar Skill (Visual)
             if (e.target.closest('#btn-add-temp')) {
                 e.preventDefault();
                 SPA.handleAddSkillVisual(); 
@@ -111,17 +111,17 @@ const SPA = {
         }
     },
 
-    // --- FUNÇÃO DE ADICIONAR VISUALMENTE (ATUALIZADA COM BOTÃO EDITAR) ---
+    // --- FUNÇÃO DE ADICIONAR VISUALMENTE ---
     handleAddSkillVisual: function() {
         const sel = document.getElementById('skill-select');
         const lvl = document.getElementById('skill-level');
         const lista = document.getElementById('lista-skills-temp');
 
         if (sel && lvl && sel.value && lvl.value) {
-            // Verifica se a skill já existe na lista visual para não duplicar
+            // Evita duplicatas visuais
             const existe = Array.from(lista.children).some(li => li.dataset.id === sel.value);
             if(existe) {
-                if(window.showToast) showToast("Essa habilidade já está na lista. Edite-a em vez de adicionar.", "warning");
+                if(window.showToast) showToast("Habilidade já está na lista. Edite-a.", "warning");
                 return;
             }
 
@@ -132,7 +132,6 @@ const SPA = {
             
             const nomeSkill = sel.options[sel.selectedIndex].text;
             
-            // HTML IGUAL AO DO TEMPLATE DJANGO
             li.innerHTML = `
                 <span class="fw-500">
                     ${nomeSkill} 
@@ -155,26 +154,23 @@ const SPA = {
         }
     },
 
-    // --- NOVA FUNÇÃO: EDITAR SKILL (RETORNA PARA OS INPUTS) ---
+    // --- EDITAR SKILL (RETORNA PARA OS INPUTS) ---
     editSkillVisual: function(btn) {
         const li = btn.closest('li');
         const id = li.dataset.id;
         const nivel = li.dataset.nivel;
 
-        // Joga os valores de volta para os inputs
         const sel = document.getElementById('skill-select');
         const lvl = document.getElementById('skill-level');
         
         sel.value = id;
         lvl.value = nivel;
 
-        // Remove da lista (para o usuário clicar em "+" de novo com o valor corrigido)
         li.remove();
-
-        // Foca no input de nível para agilizar
         lvl.focus();
     },
 
+    // --- SUBMIT DO PERFIL ---
     handleFormSubmit: async function(form) {
         const btn = form.querySelector('button[type="submit"]');
         const originalText = btn.innerText;
@@ -232,23 +228,32 @@ const SPA = {
     }
 };
 
-/* --- MANTENHA AS FUNÇÕES DE TOAST, MODAL E COOKIE ABAIXO (IGUAIS AO ANTERIOR) --- */
-/* (Estou omitindo aqui para não ficar gigante, mas você deve manter o bloco final do arquivo anterior) */
-// ... (Copie o bloco de Toast, ModalConfirmacao e Modais Portfolio do arquivo anterior e cole aqui) ...
 
-// ============================================================
-// COLE AQUI O RESTANTE DO ARQUIVO ANTERIOR (A PARTIR DA LINHA 165)
-// ============================================================
-// (Vou colar aqui para garantir que você tenha tudo em um só bloco se preferir)
+/* ============================================================
+   SISTEMA DE NOTIFICAÇÕES E CONFIRMAÇÃO
+   ============================================================ */
 
 window.showToast = function(mensagem, tipo = 'success') {
     const container = document.getElementById('toastContainer');
     if (!container) return; 
+
     let bgClass = 'bg-success';
     if (tipo === 'danger') bgClass = 'bg-danger';
     if (tipo === 'warning') bgClass = 'bg-warning text-dark';
+
     const toastId = 'toast_' + Date.now();
-    const html = `<div id="${toastId}" class="toast align-items-center text-white ${bgClass} border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true"><div class="d-flex"><div class="toast-body fs-6">${tipo === 'success' ? '<i class="bi bi-check-circle-fill me-2"></i>' : '<i class="bi bi-exclamation-triangle-fill me-2"></i>'}${mensagem}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div>`;
+    const html = `
+        <div id="${toastId}" class="toast align-items-center text-white ${bgClass} border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body fs-6">
+                    ${tipo === 'success' ? '<i class="bi bi-check-circle-fill me-2"></i>' : '<i class="bi bi-exclamation-triangle-fill me-2"></i>'}
+                    ${mensagem}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    `;
+
     container.insertAdjacentHTML('beforeend', html);
     const toastElement = document.getElementById(toastId);
     const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
@@ -258,12 +263,14 @@ window.showToast = function(mensagem, tipo = 'success') {
 
 let modalConfirmacaoInstancia = null;
 let acaoConfirmadaCallback = null;
+
 window.abrirConfirmacao = function(callbackAcao) {
     const modalEl = document.getElementById('modalConfirmacaoDelete');
     if (!modalConfirmacaoInstancia) modalConfirmacaoInstancia = new bootstrap.Modal(modalEl);
     acaoConfirmadaCallback = callbackAcao;
     modalConfirmacaoInstancia.show();
 };
+
 document.addEventListener('DOMContentLoaded', () => {
     const btnConfirma = document.getElementById('btnConfirmarExclusao');
     if(btnConfirma) {
@@ -274,72 +281,130 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-/* MODAIS PORTFOLIO */
+
+/* ============================================================
+   LÓGICA DOS MODAIS (PORTFÓLIO)
+   ============================================================ */
+
 let modalInstancia = null;
 let modalCertInstancia = null;
 
+// --- Modal Destaque ---
 window.abrirModalDestaque = function(id = '', titulo = '', descricao = '', cor = 'gray') {
     const modalEl = document.getElementById('modalDestaque');
     const form = document.getElementById('form-destaque');
-    form.reset(); document.getElementById('destaque_id').value = ""; 
+    
+    form.reset(); 
+    document.getElementById('destaque_id').value = ""; 
+
     if (!modalInstancia) modalInstancia = new bootstrap.Modal(modalEl);
+    
     if (id) {
         document.getElementById('destaque_id').value = id;
         document.getElementById('destaque_titulo').value = titulo;
         document.getElementById('destaque_descricao').value = descricao;
         if(cor === 'green') document.getElementById('cor_green').checked = true; else document.getElementById('cor_gray').checked = true;
     }
+
     const btnExcluir = document.getElementById('btn-excluir-destaque');
-    if (id) { btnExcluir.style.display = 'block'; btnExcluir.onclick = function() { abrirConfirmacao(() => excluirDestaque(id)); }; }
+    if (id) { 
+        btnExcluir.style.display = 'block'; 
+        btnExcluir.onclick = function() { abrirConfirmacao(() => excluirDestaque(id)); }; 
+    }
     else { btnExcluir.style.display = 'none'; }
     modalInstancia.show();
 };
 
+// ATUALIZE ESTA FUNÇÃO NO SEU ARQUIVO JS
 window.abrirModalCertificado = function(elemento) {
     const modalEl = document.getElementById('modalCertificado');
     const form = document.getElementById('form-certificado');
-    form.reset(); document.getElementById('cert_id').value = ""; 
+
+    form.reset(); 
+    document.getElementById('cert_id').value = ""; 
+
     if (!modalCertInstancia) modalCertInstancia = new bootstrap.Modal(modalEl);
     const btnExcluir = document.getElementById('btn-excluir-cert');
-    if (elemento && elemento.dataset && elemento.dataset.id) {
-        document.getElementById('cert_id').value = elemento.dataset.id;
-        document.getElementById('cert_titulo').value = elemento.dataset.titulo;
-        document.getElementById('cert_instituicao').value = elemento.dataset.instituicao;
-        document.getElementById('cert_horas').value = elemento.dataset.horas;
+
+    // VERIFICAÇÃO ROBUSTA (Aceita elemento HTML ou Objeto direto)
+    let dataset = null;
+    if (elemento && elemento.dataset) {
+        dataset = elemento.dataset; // Veio do HTML (data-id=...)
+    } else if (elemento && elemento.id) {
+        // Compatibilidade caso venha de outro lugar
+        dataset = elemento; 
+    }
+
+    if (dataset && dataset.id) {
+        document.getElementById('cert_id').value = dataset.id;
+        document.getElementById('cert_titulo').value = dataset.titulo;
+        document.getElementById('cert_instituicao').value = dataset.instituicao;
+        document.getElementById('cert_horas').value = dataset.horas;
+        document.getElementById('cert_link').value = dataset.link || "";
+
         btnExcluir.style.display = 'block';
-        const id = elemento.dataset.id;
-        btnExcluir.onclick = function() { abrirConfirmacao(() => excluirCertificado(id)); };
-    } else { btnExcluir.style.display = 'none'; }
+        const id = dataset.id;
+        btnExcluir.onclick = function() { 
+            abrirConfirmacao(() => excluirCertificado(id)); 
+        };
+    } else {
+        btnExcluir.style.display = 'none';
+    }
     modalCertInstancia.show();
 };
 
+// --- SUBMIT DOS MODAIS ---
 document.addEventListener('submit', async function(e) {
     const csrfToken = getCookie('csrftoken');
+
+    // Salvar Destaque
     if (e.target.id === 'form-destaque') {
         e.preventDefault();
         const titulo = document.getElementById('destaque_titulo').value.trim();
         if(!titulo) return showToast("O título é obrigatório.", "warning");
+
         const dados = { id: document.getElementById('destaque_id').value, titulo: titulo, descricao: document.getElementById('destaque_descricao').value, cor: document.querySelector('input[name="destaque_cor"]:checked').value };
-        try { await fetch('/auth/api/destaque/salvar/', { method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken}, body: JSON.stringify(dados) }); modalInstancia.hide(); SPA.load('portfolio'); showToast("Habilidade salva!"); } catch(err) { showToast("Erro ao salvar.", "danger"); }
+        try { 
+            await fetch('/auth/api/destaque/salvar/', { method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken}, body: JSON.stringify(dados) }); 
+            modalInstancia.hide(); SPA.load('portfolio'); showToast("Habilidade salva!"); 
+        } catch(err) { showToast("Erro ao salvar.", "danger"); }
     }
+
+    // Salvar Certificado (COM LINK)
     if (e.target.id === 'form-certificado') {
         e.preventDefault();
         const titulo = document.getElementById('cert_titulo').value.trim();
         const instituicao = document.getElementById('cert_instituicao').value.trim();
+        
         if (!titulo || !instituicao) { showToast("Preencha Nome e Instituição.", "warning"); return; }
-        const dados = { id: document.getElementById('cert_id').value, titulo: titulo, instituicao: instituicao, horas: document.getElementById('cert_horas').value };
-        try { await fetch('/auth/api/certificado/salvar/', { method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken}, body: JSON.stringify(dados) }); modalCertInstancia.hide(); SPA.load('portfolio'); showToast("Certificado salvo!"); } catch(err) { showToast("Erro ao salvar.", "danger"); }
+
+        const dados = { 
+            id: document.getElementById('cert_id').value, 
+            titulo: titulo, 
+            instituicao: instituicao, 
+            horas: document.getElementById('cert_horas').value,
+            // Envia o link para a API
+            link: document.getElementById('cert_link').value
+        };
+
+        try { 
+            await fetch('/auth/api/certificado/salvar/', { method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken}, body: JSON.stringify(dados) }); 
+            modalCertInstancia.hide(); SPA.load('portfolio'); showToast("Certificado salvo!"); 
+        } catch(err) { showToast("Erro ao salvar.", "danger"); }
     }
 });
 
+// --- EXCLUIR ---
 window.excluirDestaque = async function(id) { 
     const csrfToken = getCookie('csrftoken'); 
     await fetch(`/auth/api/destaque/excluir/${id}/`, { method: 'POST', headers: {'X-CSRFToken': csrfToken} }); 
     modalInstancia.hide(); SPA.load('portfolio'); showToast("Habilidade excluída.");
 };
+
 window.excluirCertificado = async function(id) { 
     const csrfToken = getCookie('csrftoken'); 
     await fetch(`/auth/api/certificado/excluir/${id}/`, { method: 'POST', headers: {'X-CSRFToken': csrfToken} }); 
     modalCertInstancia.hide(); SPA.load('portfolio'); showToast("Certificado removido.");
 };
+
 function getCookie(name) { let cookieValue = null; if (document.cookie && document.cookie !== '') { const cookies = document.cookie.split(';'); for (let i = 0; i < cookies.length; i++) { const cookie = cookies[i].trim(); if (cookie.substring(0, name.length + 1) === (name + '=')) { cookieValue = decodeURIComponent(cookie.substring(name.length + 1)); break; } } } return cookieValue; }

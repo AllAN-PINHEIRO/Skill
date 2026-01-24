@@ -34,15 +34,15 @@
         <div class="mb-3">
             <label class="form-label fw-bold small text-muted mb-3">Habilidades Técnicas</label>
             
-            <div class="d-flex gap-2 mb-3">
-                <select id="skill-select" class="form-select">
+            <div class="d-flex flex-column flex-md-row gap-2 mb-3">
+                <select id="skill-select" class="form-select w-100">
                     <option value="" selected disabled>Selecione uma habilidade...</option>
                     {% for hab in habilidades %}
                         <option value="{{ hab.id }}">{{ hab.nome }}</option>
                     {% endfor %}
                 </select>
-                <input type="number" id="skill-level" class="form-control w-25" placeholder="%" min="1" max="100">
-                <button type="button" id="btn-add-temp" class="btn btn-success px-3"><i class="bi bi-plus-lg"></i></button>
+                <input type="number" id="skill-level" class="form-control w-100 w-md-25" placeholder="%" min="1" max="100">
+                <button type="button" id="btn-add-temp" class="btn btn-success px-3 w-100 w-md-auto"><i class="bi bi-plus-lg"></i></button>
             </div>
 
             <ul id="lista-skills-temp" class="list-group shadow-sm">

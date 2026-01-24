@@ -169,7 +169,15 @@ def partial_home_view(request):
 def partial_perfil_view(request):
     # Usa seu serializer para formatar os dados bonitinhos
     serializer = MeuPerfilSerializer(request.user)
-    return render(request, 'partials/perfil.html', {'dados': serializer.data})
+    # --- NOVO: BUSCA OS CERTIFICADOS PARA O SLIDER ---
+    certificados = []
+    if hasattr(request.user, 'perfil_aluno'):
+        certificados = request.user.perfil_aluno.certificados.all().order_by('-id')
+        
+    return render(request, 'partials/perfil.html', {
+        'dados': serializer.data,
+        'certificados': certificados # <--- PASSAR PARA O HTML
+    })
 
 
 # PEDAÇO C: EDITAR/CADASTRAR (ANTIGA completar_perfil_page_view)
@@ -265,44 +273,38 @@ def api_salvar_certificado(request):
             data = json.loads(request.body)
             perfil = request.user.perfil_aluno
             
-            # Pega o ID enviado pelo Javascript
             cert_id = data.get('id')
-            
-            # Limpeza: Título e Instituição são obrigatórios
             titulo = data.get('titulo', '').strip()
             instituicao = data.get('instituicao', '').strip()
             horas = data.get('horas', '').strip()
+            # --- NOVO: PEGAR O LINK ---
+            link = data.get('link', '').strip() 
 
             if not titulo or not instituicao:
                 return JsonResponse({'success': False, 'message': 'Preencha o nome do curso e a instituição.'}, status=400)
 
-            # LÓGICA DE DECISÃO (CRIAR vs EDITAR)
-            
             if cert_id and str(cert_id).strip() != "":
-                # --- CENÁRIO 1: EDIÇÃO (Tem ID) ---
-                # O get_object_or_404 garante que o certificado pertence mesmo ao usuário logado (segurança)
+                # EDIÇÃO
                 cert = get_object_or_404(Certificado, id=cert_id, perfil=perfil)
-                
                 cert.titulo = titulo
                 cert.instituicao = instituicao
                 cert.horas = horas
+                cert.link_certificado = link # Salva o link
                 cert.save()
             else:
-                # --- CENÁRIO 2: CRIAÇÃO (ID Vazio) ---
+                # CRIAÇÃO
                 Certificado.objects.create(
                     perfil=perfil,
                     titulo=titulo,
                     instituicao=instituicao,
-                    horas=horas
+                    horas=horas,
+                    link_certificado=link # Salva o link
                 )
             
             return JsonResponse({'success': True})
-            
         except Exception as e:
-            # Retorna o erro exato para ajudar no debug
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
-            
-    return JsonResponse({'success': False, 'message': 'Método não permitido'}, status=405)
+    return JsonResponse({'success': False}, status=405)
 
 # Não esqueça da função de excluir também
 @login_required

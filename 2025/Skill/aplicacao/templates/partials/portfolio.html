@@ -1,5 +1,5 @@
 <div class="animate-fade-in">
-    
+
     <button class="btn btn-link text-muted text-decoration-none mb-3 ps-0" data-route="perfil">
         <i class="bi bi-arrow-left"></i> Voltar para Perfil
     </button>
@@ -8,188 +8,186 @@
         
         <div class="left-content">
             
+            <div class="mb-4">
+                <h3 class="fw-bold mb-0">👋 Bem-Vindo, {{ dados.nome }}</h3>
+                <small class="text-muted">{% now "d M Y, l" %}</small>
+            </div>
+
             <div class="mb-5">
                 <div class="content-section-header">
-                    <span class="content-section-title"><i class="bi bi-emoji-smile"></i> Sobre Mim</span>
+                    <span class="content-section-title"><i class="bi bi-person-lines-fill"></i> Resumo Profissional</span>
+                    <button class="btn btn-sm btn-outline-success text-decoration-none" data-route="editar">Editar</button>
                 </div>
-                <div class="modern-card p-4 border-0 bg-white">
-                    <p class="text-secondary mb-0" style="line-height: 1.6;">
-                        {{ dados.perfil.resumo|default:"Sem resumo cadastrado. Clique em editar no perfil para adicionar."|linebreaksbr }}
-                    </p>
+                <div class="modern-card p-4 border-0 shadow-sm">
+                    {% if dados.perfil.resumo %}
+                        <p class="text-muted mb-0" style="line-height: 1.6;">{{ dados.perfil.resumo }}</p>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <p class="text-muted small mb-2">Você ainda não escreveu um resumo.</p>
+                            <button class="btn btn-sm btn-outline-primary rounded-pill" data-route="editar">Escrever Agora</button>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
 
             <div class="mb-5">
                 <div class="content-section-header justify-content-between">
-                    <span class="content-section-title"><i class="bi bi-code-slash"></i> Principais Habilidades</span>
-                    
+                    <span class="content-section-title"><i class="bi bi-star-fill text-warning"></i> Destaques</span>
                     {% if destaques|length < 4 %}
-                    <button class="btn btn-sm btn-outline-success" onclick="abrirModalDestaque()">
-                        <i class="bi bi-plus-lg"></i> Adicionar
-                    </button>
+                    <button class="btn btn-sm btn-outline-success" onclick="abrirModalDestaque()"><i class="bi bi-plus-lg"></i> Adicionar</button>
                     {% endif %}
                 </div>
-                
                 <div class="skills-highlight-grid">
                     {% for item in destaques %}
                         <div class="skill-highlight-card cursor-pointer {% if item.cor == 'green' %}card-green{% else %}card-gray{% endif %}"
                              onclick="abrirModalDestaque('{{ item.id }}', '{{ item.titulo }}', '{{ item.descricao }}', '{{ item.cor }}')">
-                            
                             <div class="d-flex justify-content-between">
                                 <div class="skill-icon-box"><i class="bi bi-code-square"></i></div>
                                 <i class="bi bi-pencil-fill opacity-50 small"></i>
                             </div>
-                            
                             <h6 class="skill-highlight-title">{{ item.titulo }}</h6>
                             <p class="skill-highlight-desc">{{ item.descricao }}</p>
                         </div>
                     {% empty %}
-                        <div class="text-muted text-center w-100 py-4 border rounded bg-white">
-                            <small>Nenhuma habilidade destaque cadastrada.</small>
-                        </div>
+                        <div class="text-muted text-center w-100 py-4 border rounded bg-white"><small>Nenhum destaque cadastrado.</small></div>
                     {% endfor %}
                 </div>
             </div>
 
-            <div class="mb-5">
-                <div class="content-section-header justify-content-between">
-                    <span class="content-section-title"><i class="bi bi-award"></i> Cursos e Certificações</span>
-                    <button class="btn btn-sm btn-outline-success" onclick="abrirModalCertificado()">
-                        <i class="bi bi-plus-lg"></i> Adicionar
-                    </button>
+            <div class="row mb-5">
+                
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <div class="content-section-header mb-3">
+                        <span class="content-section-title"><i class="bi bi-github"></i> GitHub Principal</span>
+                    </div>
+
+                    <div class="equal-height-card">
+                        <div>
+                            <div class="gh-header">
+                                <i class="bi bi-github gh-icon"></i>
+                                <span class="gh-title">Integração</span>
+                            </div>
+                            <h6 class="fw-bold mb-2">SoulCode Academy</h6>
+                            <p class="text-muted small" style="line-height: 1.5;">
+                                Projeto para o desenvolvimento (Front-end) de uma página responsiva para uma academia (fictícia)...
+                            </p>
+                        </div>
+                        
+                        <div class="text-end w-100">
+                            <button class="btn-card-confira">Confira</button>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="certificates-slider-container">
-                    {% for cert in certificados %}
-                        <div class="certificate-slide-card" 
-                             onclick="abrirModalCertificado(this)"
-                             data-id="{{ cert.id }}"
-                             data-titulo="{{ cert.titulo }}"
-                             data-instituicao="{{ cert.instituicao }}"
-                             data-horas="{{ cert.horas|default:'' }}">
-                            
-                            <div class="mb-3">
-                                <h6 class="cert-title" title="{{ cert.titulo }}">
-                                    {{ cert.titulo|default:"Sem Título" }}
-                                </h6>
-                                <p class="cert-school">
-                                    {{ cert.instituicao|default:"Instituição" }}
-                                </p>
-                            </div>
+                <div class="col-lg-6">
+                    <div class="content-section-header justify-content-between mb-2">
+                        <span class="content-section-title"><i class="bi bi-award"></i> Certificados</span>
+                        <button class="btn btn-sm btn-outline-success" onclick="abrirModalCertificado()">
+                            <i class="bi bi-plus-lg"></i> Novo
+                        </button>
+                    </div>
 
-                            <div class="cert-footer">
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="cert-icon-circle"><i class="bi bi-mortarboard-fill"></i></div>
-                                    <span class="text-muted small ms-1" style="font-size: 0.75rem;">
-                                        <i class="bi bi-pencil"></i> Editar
-                                    </span>
+                    <div class="equal-height-card position-relative">
+                        
+                        {% if certificados %}
+                            <div id="carouselCertificados" class="carousel slide h-100" data-bs-ride="false"> <div class="carousel-inner h-100">
+                                    
+                                    {% for cert in certificados %}
+                                    <div class="carousel-item {% if forloop.first %}active{% endif %} h-100">
+                                        
+                                        <div class="cert-slide-content">
+                                            
+                                            <div class="btn-edit-corner" 
+                                                 title="Editar" 
+                                                 onclick="abrirModalCertificado()">
+                                                <i class="bi bi-pencil-fill small"></i>
+                                            </div>
+
+                                            <div>
+                                                <h5 class="cert-title">{{ cert.titulo }}</h5>
+                                                <small class="cert-school">{{ cert.instituicao }}</small>
+                                                
+                                                <ul class="cert-details-list mt-3">
+                                                    {% if cert.horas %}<li>Carga horária: {{ cert.horas }}h</li>{% endif %}
+                                                    <li>Concluído</li>
+                                                    {% if cert.link_certificado %}<li>Certificado digital disponível</li>{% endif %}
+                                                </ul>
+                                            </div>
+
+                                            <div class="text-end w-100 mt-3">
+                                                {% if cert.link_certificado %}
+                                                    <a href="{{ cert.link_certificado }}" target="_blank" class="btn-card-confira">Visualizar</a>
+                                                {% else %}
+                                                    <button class="btn-card-confira opacity-50" disabled>Sem Link</button>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+
                                 </div>
-                                {% if cert.horas %}
-                                    <span class="cert-badge"><i class="bi bi-clock"></i> {{ cert.horas }}</span>
+
+                                {% if certificados|length > 1 %}
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselCertificados" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Anterior</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#carouselCertificados" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Próximo</span>
+                                    </button>
                                 {% endif %}
                             </div>
-                        </div>
-                    {% empty %}
-                        <div class="text-muted small p-4 border rounded w-100 text-center bg-white">
-                            Nenhum certificado adicionado ainda.
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
 
-            <div class="mb-5">
-                <div class="content-section-header">
-                    <span class="content-section-title"><i class="bi bi-github"></i> Repositórios GitHub</span>
-                </div>
-                <div class="modern-card p-4 border-1 border-dark bg-white">
-                    <div class="text-center py-4">
-                        <i class="bi bi-github display-4 mb-3"></i>
-                        <h5>Integração GitHub</h5>
-                        <p class="text-muted">A conexão automática com seus repositórios será ativada em breve.</p>
-                        <button class="btn btn-dark disabled rounded-pill px-4">Sincronizar Agora</button>
-                    </div>
-                </div>
-            </div>
-
-        </div> <div class="right-sidebar">
-            <div class="profile-sidebar-card">
-                
-                <div class="sidebar-cover">
-                    <button class="btn-edit-pill" data-route="editar">Editar</button>
-                </div> 
-                
-                <div class="profile-avatar-wrapper">
-                    <div class="profile-avatar-lg">
-                        {{ dados.nome|slice:":1"|upper }}
-                    </div>
-                </div>
-
-                <div class="sidebar-info">
-                    <h4 class="profile-name text-center mb-4">{{ dados.nome }}</h4>
-                    
-                    <div class="px-2">
-                        <div class="sidebar-detail mb-1">
-                            <strong class="text-dark">Nº Matricula:</strong> {{ dados.matricula }}
-                        </div>
-                        <div class="sidebar-detail mb-1 text-break">
-                            <strong class="text-dark">E-mail:</strong> {{ dados.email }}
-                        </div>
-                        <div class="sidebar-detail mb-1">
-                            <strong class="text-dark">Campus:</strong> {{ dados.campus }}
-                        </div>
-                        <div class="sidebar-detail mb-1">
-                            <strong class="text-dark">Cidade:</strong> Eunápolis - BA
-                        </div>
-                    </div>
-                </div>
-
-                <hr class="m-0 opacity-10">
-
-                <div class="sidebar-section border-0">
-                    <div class="sidebar-section-title text-center mb-3">Tenho Interesse e XP</div>
-                    <div class="skills-list-simple px-2">
-                        {% for s in dados.perfil.habilidades|slice:":4" %}
-                            <div class="skill-row mb-2">
-                                <span class="skill-name" style="font-family: monospace;">{{ s.nome_habilidade }}</span>
-                                <span class="skill-val fw-bold text-dark">{{ s.nivel }}%</span>
+                        {% else %}
+                            <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
+                                <i class="bi bi-award display-4 mb-2 opacity-25"></i>
+                                <p class="small mb-0">Nenhum certificado cadastrado.</p>
                             </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+
+        </div> 
+        
+        <div class="right-sidebar">
+            <div class="profile-sidebar-card">
+                <div class="sidebar-cover"><button class="btn-edit-pill" data-route="editar">Editar</button></div>
+                <div class="profile-avatar-wrapper"><div class="profile-avatar-lg">{{ dados.nome|slice:":1" }}</div></div>
+                <div class="sidebar-info">
+                    <div class="sidebar-name">{{ dados.nome }}</div>
+                    <div class="sidebar-detail"><span class="fw-bold">Matrícula:</span> {{ dados.matricula }}</div>
+                    <div class="sidebar-detail text-break"><span class="fw-bold">Email:</span> {{ dados.email }}</div>
+                    <div class="sidebar-detail"><span class="fw-bold">Campus:</span> {{ dados.campus }}</div>
+                    <div class="sidebar-detail"><span class="fw-bold">Cidade:</span> Eunápolis - BA</div>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Tenho Interesse e XP</div>
+                    <div class="skills-list-simple">
+                        {% for s in dados.perfil.habilidades|slice:":4" %}
+                            <div class="skill-row"><span class="skill-name">{{ s.nome_habilidade }}</span><span class="skill-val">{{ s.nivel }}%</span></div>
                         {% empty %}
-                            <div class="skill-row mb-2"><span class="skill-name">Java</span><span class="skill-val">SQL</span></div>
-                            <div class="skill-row mb-2"><span class="skill-name">Python</span><span class="skill-val">Docker</span></div>
+                            <div class="text-center text-muted small">Sem skills</div>
                         {% endfor %}
                     </div>
                 </div>
-                
-                <hr class="m-0 opacity-10">
-
-                <div class="sidebar-section bg-white text-center border-0 pb-4">
-                    <div class="sidebar-section-title mb-1">Portfólio</div>
-                    
-                    <div class="mb-3">
-                        <i class="bi bi-globe me-1 text-success"></i> 
-                        <a href="#" class="text-muted text-decoration-none small">meusite.dev.br</a>
+                <div class="sidebar-section bg-white border-top-0 pt-0 pb-4">
+                    <div class="sidebar-section-title mt-3 text-dark">Portfólio</div>
+                    <div class="d-flex align-items-center justify-content-center gap-2 mb-3 text-muted">
+                        <i class="bi bi-globe2 text-success fs-5"></i>
+                        <a href="#" class="text-muted text-decoration-none">meusite.dev.br</a>
                     </div>
-
-                    <div class="social-icons-row justify-content-center gap-3">
-                        {% if dados.perfil.linkedin %}
-                            <a href="{{ dados.perfil.linkedin }}" target="_blank" class="text-success fs-4"><i class="bi bi-linkedin"></i></a>
-                        {% else %}
-                             <i class="bi bi-linkedin text-success fs-4 opacity-75"></i>
-                        {% endif %}
-                        
-                        {% if dados.perfil.github %}
-                            <a href="{{ dados.perfil.github }}" target="_blank" class="text-success fs-4"><i class="bi bi-github"></i></a>
-                        {% else %}
-                             <i class="bi bi-github text-success fs-4 opacity-75"></i>
-                        {% endif %}
-                        <i class="bi bi-twitter-x text-success fs-4 opacity-75"></i>
-                        <i class="bi bi-instagram text-success fs-4 opacity-75"></i>
+                    <div class="social-icons-row">
+                        {% if dados.perfil.linkedin %}<a href="{{ dados.perfil.linkedin }}" target="_blank"><i class="bi bi-linkedin"></i></a>{% else %}<a href="#" class="opacity-50"><i class="bi bi-linkedin"></i></a>{% endif %}
+                        {% if dados.perfil.github %}<a href="{{ dados.perfil.github }}" target="_blank"><i class="bi bi-github"></i></a>{% else %}<a href="#" class="opacity-50"><i class="bi bi-github"></i></a>{% endif %}
+                        <a href="#" class="opacity-50"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" class="opacity-50"><i class="bi bi-instagram"></i></a>
                     </div>
                 </div>
-
             </div>
-        </div>
-
+        </div> 
     </div>
 </div>
 
@@ -203,10 +201,32 @@
       <div class="modal-body">
         <form id="form-destaque">
             <input type="hidden" id="destaque_id">
-            <div class="mb-3"><label class="small fw-bold text-muted">TÍTULO</label><input type="text" id="destaque_titulo" class="form-control" required maxlength="50"></div>
-            <div class="mb-3"><label class="small fw-bold text-muted">DESCRIÇÃO</label><textarea id="destaque_descricao" class="form-control" rows="3" required maxlength="150"></textarea></div>
-            <div class="mb-4"><label class="small fw-bold text-muted">COR</label><div class="d-flex gap-2"><input type="radio" class="btn-check" name="destaque_cor" id="cor_gray" value="gray" checked><label class="btn btn-outline-secondary w-50" for="cor_gray">Cinza</label><input type="radio" class="btn-check" name="destaque_cor" id="cor_green" value="green"><label class="btn btn-outline-success w-50" for="cor_green">Verde</label></div></div>
-            <div class="d-flex justify-content-between pt-2 border-top"><button type="button" class="btn btn-link text-danger text-decoration-none btn-sm px-0" id="btn-excluir-destaque" style="display:none;"><i class="bi bi-trash"></i> Excluir</button><div class="ms-auto"><button type="button" class="btn btn-light btn-sm me-2" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-dark btn-sm px-4">Salvar</button></div></div>
+            <div class="mb-3">
+                <label class="small fw-bold text-muted">TÍTULO</label>
+                <input type="text" id="destaque_titulo" class="form-control" required maxlength="50">
+            </div>
+            <div class="mb-3">
+                <label class="small fw-bold text-muted">DESCRIÇÃO</label>
+                <textarea id="destaque_descricao" class="form-control" rows="3" required maxlength="150"></textarea>
+            </div>
+            <div class="mb-4">
+                <label class="small fw-bold text-muted">COR</label>
+                <div class="d-flex gap-2">
+                    <input type="radio" class="btn-check" name="destaque_cor" id="cor_gray" value="gray" checked>
+                    <label class="btn btn-outline-secondary w-50" for="cor_gray">Cinza</label>
+                    <input type="radio" class="btn-check" name="destaque_cor" id="cor_green" value="green">
+                    <label class="btn btn-outline-success w-50" for="cor_green">Verde</label>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between pt-2 border-top">
+                <button type="button" class="btn btn-link text-danger text-decoration-none btn-sm px-0" id="btn-excluir-destaque" style="display:none;">
+                    <i class="bi bi-trash"></i> Excluir
+                </button>
+                <div class="ms-auto">
+                    <button type="button" class="btn btn-light btn-sm me-2" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-dark btn-sm px-4">Salvar</button>
+                </div>
+            </div>
         </form>
       </div>
     </div>
@@ -223,9 +243,36 @@
       <div class="modal-body">
         <form id="form-certificado">
             <input type="hidden" id="cert_id">
-            <div class="mb-3"><label class="small fw-bold text-muted">NOME DO CURSO</label><input type="text" id="cert_titulo" class="form-control" required></div>
-            <div class="row"><div class="col-8 mb-3"><label class="small fw-bold text-muted">INSTITUIÇÃO</label><input type="text" id="cert_instituicao" class="form-control" required></div><div class="col-4 mb-3"><label class="small fw-bold text-muted">HORAS</label><input type="text" id="cert_horas" class="form-control"></div></div>
-            <div class="d-flex justify-content-between pt-2 border-top"><button type="button" class="btn btn-link text-danger text-decoration-none btn-sm px-0" id="btn-excluir-cert" style="display:none;"><i class="bi bi-trash"></i> Excluir</button><div class="ms-auto"><button type="button" class="btn btn-light btn-sm me-2" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-dark btn-sm px-4">Salvar</button></div></div>
+            <div class="mb-3">
+                <label class="small fw-bold text-muted">NOME DO CURSO</label>
+                <input type="text" id="cert_titulo" class="form-control" required>
+            </div>
+            <div class="row">
+                <div class="col-8 mb-3">
+                    <label class="small fw-bold text-muted">INSTITUIÇÃO</label>
+                    <input type="text" id="cert_instituicao" class="form-control" required>
+                </div>
+                <div class="col-4 mb-3">
+                    <label class="small fw-bold text-muted">HORAS</label>
+                    <input type="text" id="cert_horas" class="form-control">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="small fw-bold text-muted">LINK DO CERTIFICADO (URL)</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-link-45deg"></i></span>
+                    <input type="url" id="cert_link" class="form-control border-start-0" placeholder="https://...">
+                </div>
+            </div>
+            <div class="d-flex justify-content-between pt-2 border-top">
+                <button type="button" class="btn btn-link text-danger text-decoration-none btn-sm px-0" id="btn-excluir-cert" style="display:none;">
+                    <i class="bi bi-trash"></i> Excluir
+                </button>
+                <div class="ms-auto">
+                    <button type="button" class="btn btn-light btn-sm me-2" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-dark btn-sm px-4">Salvar</button>
+                </div>
+            </div>
         </form>
       </div>
     </div>

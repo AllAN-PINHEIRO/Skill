@@ -125,18 +125,108 @@ a { text-decoration: none !important; }
 .skill-highlight-title { font-weight: 800; font-size: 0.85rem; text-transform: uppercase; margin-bottom: 0.5rem; line-height: 1.2; letter-spacing: 0.5px; }
 .skill-highlight-desc { font-size: 0.7rem; line-height: 1.4; margin: 0; }
 
-/* Slider Certificados */
-.certificates-slider-container { display: flex; gap: 1.5rem; overflow-x: auto; padding: 0.5rem 0.5rem 1.5rem 0.5rem; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
-.certificate-slide-card {
-    min-width: 300px; min-height: 160px; background: white; border: 1px solid #e2e8f0; border-left: 5px solid var(--primary-color);
-    border-radius: 8px; padding: 1.5rem; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+/* --- SLIDER DE CERTIFICADOS (ESTILO UDEMY / IMAGEM ENVIADA) --- */
+
+.certificates-slider-container {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  padding: 0.5rem 0.5rem 1.5rem 0.5rem;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e0 #f8f9fa;
 }
-.certificate-slide-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-color: var(--primary-color); }
-.cert-title { font-weight: 700; font-size: 1.1rem; color: var(--text-dark); margin-bottom: 0.25rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.cert-school { font-size: 0.9rem; color: var(--text-muted); font-weight: 500; margin-bottom: 1rem; }
-.cert-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; border-top: 1px solid #f1f5f9; padding-top: 0.75rem; }
-.cert-icon-circle { width: 35px; height: 35px; background: #f0fdf4; color: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
-.cert-badge { font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 20px; background-color: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; }
+
+/* O NOVO CARD (Estilo da Imagem) */
+.certificate-slide-card {
+  /* Mais largo para parecer o da imagem */
+  min-width: 350px; 
+  max-width: 350px;
+  height: 200px; /* Altura fixa para alinhar botão no fundo */
+  
+  background: white;
+  /* Borda fina e escura igual da imagem */
+  border: 1px solid #1a202c; 
+  border-radius: 12px;
+  padding: 1.5rem;
+  
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+}
+
+.certificate-slide-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+}
+
+/* Título do Curso (Igual da imagem) */
+.cert-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #1a202c;
+  margin-bottom: 0.25rem;
+  line-height: 1.3;
+  
+  /* Limita a 2 linhas */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Nome da Instituição */
+.cert-school {
+  font-size: 0.85rem;
+  color: #718096;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+/* Lista de Detalhes (Bolinhas) */
+.cert-details-list {
+  list-style-type: disc;
+  padding-left: 1.2rem;
+  margin-bottom: 0;
+  font-size: 0.8rem;
+  color: #4a5568;
+}
+
+/* Botão "Confira" (Oval) */
+.btn-card-confira {
+  border: 1px solid #1a202c;
+  background: white;
+  color: #1a202c;
+  border-radius: 20px;
+  padding: 0.3rem 1.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  align-self: flex-end; /* Joga para a direita/fim */
+  transition: 0.2s;
+  text-decoration: none !important;
+  display: inline-block;
+}
+
+.btn-card-confira:hover {
+  background: #1a202c;
+  color: white;
+}
+
+/* Botão de Editar (Pequeno no topo) */
+.btn-edit-corner {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  color: #a0aec0;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.btn-edit-corner:hover { color: #1a202c; }
 
 /* --- 6. SIDEBAR PROFILE CARD --- */
 .profile-sidebar-card { background: white; border: 1px solid #cbd5e0; border-radius: 12px; overflow: hidden; position: relative; }
@@ -163,6 +253,86 @@ a { text-decoration: none !important; }
 .hamburger-menu { display: none; border: none; background: none; font-size: 1.5rem; color: var(--text-dark); }
 .sidebar-close { display: none; background: none; border: none; color: white; font-size: 1.5rem; position: absolute; right: 1rem; top: 1.5rem; }
 .sidebar-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 90; }
+
+/* --- 4. CARDS ESPECÍFICOS (GITHUB E CERTIFICADOS) --- */
+
+/* Classe para garantir que ambos tenham a mesma altura */
+.equal-height-card {
+  background: white;
+  border: 1px solid #1a202c; /* Borda preta fina igual imagem */
+  border-radius: 12px;
+  padding: 1.5rem;
+  height: 100%; /* Ocupa 100% da altura da coluna */
+  min-height: 280px; /* Altura mínima para garantir alinhamento */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+}
+
+/* Estilo do conteúdo interno do Certificado (dentro do carrossel) */
+.cert-slide-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  min-height: 200px; /* Garante que o conteúdo empurre o botão pra baixo */
+}
+
+/* Títulos e Textos */
+.gh-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+.gh-icon { font-size: 2.5rem; line-height: 1; }
+.gh-title { font-weight: 800; font-size: 1.4rem; letter-spacing: -0.5px; }
+
+.cert-title { font-weight: 700; font-size: 1.2rem; margin-bottom: 0.5rem; color: #1a202c; }
+.cert-school { font-size: 0.9rem; color: #718096; font-weight: 500; display: block; margin-bottom: 1rem; }
+.cert-details-list { list-style-type: disc; padding-left: 1.2rem; margin-bottom: 0; font-size: 0.85rem; color: #4a5568; }
+
+/* Botão Oval "Confira" / "Visualizar" */
+.btn-card-confira {
+  border: 1px solid #1a202c;
+  background: white;
+  color: #1a202c;
+  border-radius: 20px;
+  padding: 0.4rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  align-self: flex-end; /* Joga para direita */
+  transition: 0.2s;
+  display: inline-block;
+  margin-top: auto; /* Garante que fique no fundo */
+}
+.btn-card-confira:hover { background: #1a202c; color: white; }
+
+/* --- AJUSTES DO BOOTSTRAP CAROUSEL --- */
+/* Muda a cor das setas do carrossel para preto (padrão é branco) */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  filter: invert(1) grayscale(100);
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Posiciona as setas nas laterais extremas */
+.carousel-control-prev { left: -15px; width: 5%; opacity: 0.5; }
+.carousel-control-next { right: -15px; width: 5%; opacity: 0.5; }
+.carousel-control-prev:hover, .carousel-control-next:hover { opacity: 1; }
+
+/* Área interna do slide */
+.carousel-inner { padding: 0 1rem; height: 100%; }
+.carousel-item { height: 100%; transition: transform .6s ease-in-out; }
+
+/* Botão editar pequeno */
+.btn-edit-corner { position: absolute; top: 1rem; right: 1rem; color: #a0aec0; cursor: pointer; z-index: 10; }
+.btn-edit-corner:hover { color: #1a202c; }
+
+/* RESPONSIVIDADE */
+@media (max-width: 768px) {
+  .equal-height-card { min-height: auto; margin-bottom: 1rem; }
+  .carousel-inner { padding: 0; }
+  .carousel-control-prev, .carousel-control-next { display: none; } /* Esconde setas no mobile, usa swipe nativo se houver ou bullets */
+}
 
 @media (max-width: 992px) {
     .sidebar { transform: translateX(-100%); } .sidebar.active { transform: translateX(0); }
