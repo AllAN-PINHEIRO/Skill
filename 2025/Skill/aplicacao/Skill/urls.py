@@ -7,5 +7,6 @@ urlpatterns = [
   # Rotas páginas do MVT
     path('admin/', admin.site.urls),
     path('auth/', include('contas.urls', namespace='contas')),
+    path('vagas/', include('vagas.urls')),
     path('', views.homepage_view, name='home'),
 ]

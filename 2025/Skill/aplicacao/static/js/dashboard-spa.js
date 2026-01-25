@@ -12,7 +12,8 @@ const SPA = {
         'home': '/auth/partial/home/',
         'perfil': '/auth/partial/perfil/',
         'editar': '/auth/partial/editar/',
-        'portfolio': '/auth/partial/portfolio/'
+        'portfolio': '/auth/partial/portfolio/',
+        'vagas': '/vagas/partial/feed/' // <--- Rota da nova App Vagas
     },
     chartInstance: null,
 
@@ -73,13 +74,17 @@ const SPA = {
             const html = await response.text();
             container.innerHTML = html;
             
+            // --- INICIALIZADORES ESPECÍFICOS POR PÁGINA ---
             if (pageKey === 'home') this.initChart();
-
-            // --- CORREÇÃO AQUI: Chamar o GitHub nas páginas certas ---
+            
             if (pageKey === 'perfil' || pageKey === 'portfolio') {
                 this.loadGithubRepos();
             }
-            // ---------------------------------------------------------
+
+            if (pageKey === 'vagas') {
+                this.setupVagasSearch(); // <--- Ativa a busca na tela de vagas
+            }
+            // ----------------------------------------------
 
         } catch (error) {
             if(window.showToast) showToast("Erro ao carregar conteúdo.", "danger");
@@ -373,6 +378,31 @@ const SPA = {
             console.error(err);
             container.innerHTML = `<div class="d-flex align-items-center justify-content-center h-100 text-muted small">Erro ao carregar GitHub.</div>`;
         }
+    },
+
+    // --- FILTRO DE VAGAS EM TEMPO REAL ---
+    setupVagasSearch: function() {
+        const input = document.getElementById('input-busca-vagas');
+        const container = document.getElementById('lista-vagas-container');
+        
+        if (!input || !container) return;
+
+        input.addEventListener('keyup', function() {
+            const termo = input.value.toLowerCase();
+            const cards = container.getElementsByClassName('vaga-card-item');
+
+            Array.from(cards).forEach(card => {
+                const titulo = card.querySelector('.vaga-titulo').textContent.toLowerCase();
+                const empresa = card.querySelector('.vaga-empresa').textContent.toLowerCase();
+
+                // Busca tanto no título quanto na empresa
+                if (titulo.includes(termo) || empresa.includes(termo)) {
+                    card.style.display = ""; // Mostra
+                } else {
+                    card.style.display = "none"; // Esconde
+                }
+            });
+        });
     },
 };
 

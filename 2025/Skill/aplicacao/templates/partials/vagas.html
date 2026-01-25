@@ -1,0 +1,122 @@
+{% load static %}
+<div class="animate-fade-in">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h3 class="fw-bold mb-0 text-dark">🚀 Mural de Oportunidades</h3>
+            <p class="text-muted mb-0 small">Encontre a vaga ideal para o seu perfil técnico.</p>
+        </div>
+        
+        <div class="input-group" style="max-width: 300px;">
+            <span class="input-group-text bg-white border-end-0 ps-3">
+                <i class="bi bi-search text-muted"></i>
+            </span>
+            <input type="text" id="input-busca-vagas" class="form-control border-start-0 ps-2" placeholder="Buscar cargo, empresa...">
+        </div>
+    </div>
+
+    <div class="row g-4">
+        
+        <div class="col-lg-3 d-none d-lg-block">
+            
+            <div class="modern-card p-3 mb-4 border-0 shadow-sm">
+                <h6 class="fw-bold mb-3 small text-uppercase text-muted">Suas Candidaturas</h6>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="small"><i class="bi bi-send text-primary me-2"></i>Enviadas</span>
+                    <span class="badge bg-light text-dark">0</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="small"><i class="bi bi-eye text-info me-2"></i>Vistas</span>
+                    <span class="badge bg-light text-dark">0</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="small"><i class="bi bi-check-circle text-success me-2"></i>Aprovadas</span>
+                    <span class="badge bg-light text-dark">0</span>
+                </div>
+            </div>
+
+            <div class="modern-card p-3 bg-primary-subtle border-0">
+                <div class="text-center mb-2">
+                    <i class="bi bi-lightbulb-fill text-primary fs-4"></i>
+                </div>
+                <h6 class="fw-bold text-center text-primary mb-2">Dica de Ouro</h6>
+                <p class="small text-muted text-center mb-0" style="font-size: 0.8rem;">
+                    Mantenha seu perfil e skills sempre atualizados para aumentar o "Match" com as vagas.
+                </p>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            
+            <div id="lista-vagas-container" class="d-flex flex-column gap-3">
+                
+                {% for vaga in vagas %}
+                <div class="vaga-card-item bg-white p-4 border rounded-3 shadow-sm position-relative hover-lift">
+                    
+                    <div class="d-flex justify-content-between align-items-start">
+                        
+                        <div class="d-flex gap-3">
+                            <div class="company-logo-placeholder">
+                                <i class="bi bi-building"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-1 text-dark vaga-titulo">{{ vaga.titulo }}</h5>
+                                <p class="text-muted small mb-2 vaga-empresa">
+                                    {{ vaga.empresa }} • <span class="text-success"><i class="bi bi-geo-alt-fill"></i> Eunápolis/Remoto</span>
+                                </p>
+                                
+                                <div class="d-flex gap-1 flex-wrap mt-2">
+                                    {% for skill in vaga.habilidades.all|slice:":3" %}
+                                        <span class="badge bg-light text-secondary border fw-normal">{{ skill.nome }}</span>
+                                    {% empty %}
+                                        <span class="badge bg-light text-muted border fw-normal">Geral</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-end d-none d-md-block">
+                            {% if vaga.tipo == 'ESTAGIO' %}
+                                <span class="badge bg-indigo-subtle text-indigo px-3 py-2 rounded-pill mb-2">Estágio</span>
+                            {% elif vaga.tipo == 'JUNIOR' %}
+                                <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill mb-2">Júnior</span>
+                            {% else %}
+                                <span class="badge bg-secondary-subtle text-secondary px-3 py-2 rounded-pill mb-2">{{ vaga.get_tipo_display }}</span>
+                            {% endif %}
+                            
+                            <br>
+                            <small class="text-muted" style="font-size: 0.75rem;">
+                                <i class="bi bi-clock"></i> {{ vaga.criado_em|timesince }} atrás
+                            </small>
+                        </div>
+                    </div>
+
+                    <hr class="border-light my-3">
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="match-indicator d-flex align-items-center gap-2">
+                            <div class="progress" style="width: 60px; height: 6px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small class="text-muted" style="font-size: 0.75rem;">Calculando match...</small>
+                        </div>
+
+                        <button class="btn btn-sm btn-success px-4 rounded-pill fw-bold" onclick="alert('Candidatura enviada para: {{ vaga.titulo }}')">
+                            Candidatar-se
+                        </button>
+                    </div>
+
+                </div>
+                {% empty %}
+                    <div class="text-center py-5">
+                        <img src="https://cdn-icons-png.flaticon.com/512/7486/7486747.png" width="100" class="opacity-50 mb-3">
+                        <h5 class="text-muted fw-bold">Nenhuma vaga encontrada</h5>
+                        <p class="text-muted small">Tente ajustar seus filtros ou volte mais tarde.</p>
+                    </div>
+                {% endfor %}
+
+            </div>
+
+        </div>
+    </div>
+</div>

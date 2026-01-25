@@ -271,12 +271,10 @@ def api_salvar_certificado(request):
         try:
             data = json.loads(request.body)
             perfil = request.user.perfil_aluno
-            
             cert_id = data.get('id')
             titulo = data.get('titulo', '').strip()
             instituicao = data.get('instituicao', '').strip()
             horas = data.get('horas', '').strip()
-            # --- NOVO: PEGAR O LINK ---
             link = data.get('link', '').strip() 
 
             if not titulo or not instituicao:

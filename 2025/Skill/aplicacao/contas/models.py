@@ -17,7 +17,7 @@ class Cadastro(models.Model):
     
     # --- Campos da tabela 'cadastro' ---
     nome = models.CharField(max_length=45)
-    matricula = models.IntegerField(unique=True) # Garante que não haja matrículas repetidas
+    matricula = models.BigIntegerField(unique=True) # Garante que não haja matrículas repetidas
     campus = models.CharField(max_length=30)
     
     # --- Campo da tabela 'usuario' (tipoDoCadastro) ---

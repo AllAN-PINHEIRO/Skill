@@ -154,7 +154,7 @@
                 <div class="sidebar-section">
                     <div class="sidebar-section-title">Tenho Interesse e XP</div>
                     <div class="skills-list-simple">
-                        {% for s in dados.perfil.habilidades|slice:":4" %}
+                        {% for s in dados.perfil.habilidades %}
                             <div class="skill-row"><span class="skill-name">{{ s.nome_habilidade }}</span><span class="skill-val">{{ s.nivel }}%</span></div>
                         {% empty %}
                             <div class="text-center text-muted small">Sem skills</div>

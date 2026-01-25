@@ -244,7 +244,31 @@ a { text-decoration: none !important; }
 .sidebar-detail { font-size: 0.85rem; color: #4a5568; margin-bottom: 0.2rem; line-height: 1.4; }
 .sidebar-section { border-top: 1px solid #e2e8f0; padding: 1rem 1.5rem; }
 .sidebar-section-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.75rem; text-align: center; }
-.skills-list-simple { display: flex; flex-direction: column; gap: 0.5rem; }
+/* --- LISTA DE SKILLS NA SIDEBAR (COM SCROLL) --- */
+.skills-list-simple {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  
+  /* Configuração do Scroll */
+  max-height: 180px; /* Altura máxima antes de rolar */
+  overflow-y: auto;  /* Ativa a rolagem vertical */
+  padding-right: 5px; /* Espaço para não colar no texto */
+}
+
+/* Estilo da barra de rolagem (Fina e discreta) */
+.skills-list-simple::-webkit-scrollbar {
+  width: 4px;
+}
+
+.skills-list-simple::-webkit-scrollbar-thumb {
+  background-color: #cbd5e0;
+  border-radius: 4px;
+}
+
+.skills-list-simple::-webkit-scrollbar-track {
+  background: transparent;
+}
 .skill-row { display: flex; justify-content: space-between; font-family: monospace; font-size: 0.9rem; color: #4a5568; }
 .skill-name { color: #a0aec0; } .skill-val { font-weight: 700; color: #2d3748; }
 .social-icons-row { display: flex; justify-content: center; gap: 1.5rem; font-size: 1.4rem; }
@@ -396,6 +420,48 @@ a { text-decoration: none !important; }
   font-size: 0.7rem;
   color: #9ca3af;
 }
+
+/* --- ESTILOS DA TELA DE VAGAS --- */
+
+/* Badge Personalizada Indigo */
+.bg-indigo-subtle { background-color: #e0e7ff; }
+.text-indigo { color: #4338ca; }
+
+/* Placeholder do Logo da Empresa */
+.company-logo-placeholder {
+    width: 48px;
+    height: 48px;
+    background-color: #f8f9fa;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #cbd5e0;
+    flex-shrink: 0;
+}
+
+/* Card da Vaga */
+.vaga-card-item {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #edf2f7;
+}
+
+.hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+    border-color: #10b981; /* Borda verde suave ao passar o mouse */
+}
+
+/* Inputs de Busca */
+#input-busca-vagas:focus {
+    box-shadow: none;
+    border-color: #10b981;
+}
+
+/* Scroll na lista (opcional, caso queira limitar altura) */
+/* Mas como é a pagina principal de vagas, deixar rolar a página inteira é melhor UX no mobile */
 
 /* RESPONSIVIDADE */
 @media (max-width: 768px) {
