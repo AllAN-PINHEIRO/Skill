@@ -10,7 +10,7 @@ from .models import PerfilAluno, Habilidade, HabilidadeAluno, Cadastro, Certific
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from .serializers import CadastroSerializer, MeuPerfilSerializer, PasswordResetSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate, login
@@ -130,34 +130,32 @@ def partial_home_view(request):
     data_values = []
     tem_skills = False
     
-    # Debug: Imprime no terminal do VSCode/CMD
-    print(f"--- CARREGANDO HOME PARA: {request.user.email} ---")
-    
+    # 1. BUSCAR O NOME DO USUÁRIO (Correção)
+    nome_aluno = "Aluno"
+    try:
+        cadastro = Cadastro.objects.get(user=request.user)
+        nome_aluno = cadastro.nome
+    except Cadastro.DoesNotExist:
+        pass
+
+    # Lógica do Gráfico (Mantida)
     if hasattr(request.user, 'perfil_aluno'):
         perfil = request.user.perfil_aluno
-        
-        # Busca skills ordenadas pelo nível (maior para menor)
         skills = HabilidadeAluno.objects.filter(perfil=perfil).order_by('-nivel')
-        
-        print(f"Skills encontradas no Banco: {skills.count()}") # Debug
         
         if skills.exists():
             tem_skills = True
             for s in skills:
-                # Adiciona o nome
                 labels.append(s.habilidade.nome)
-                
-                # IMPORTANTE: Converte para Inteiro (int) para o gráfico entender
                 try:
                     nivel_int = int(s.nivel)
                 except:
                     nivel_int = 0
                 data_values.append(nivel_int)
-                
-                print(f"Skill: {s.habilidade.nome} - Nível: {nivel_int}") # Debug
 
-    # Preparando JSON seguro
+    # 2. ENVIAR 'dados' NO CONTEXTO (Correção)
     context = {
+        'dados': {'nome': nome_aluno}, # <--- O HTML espera {{ dados.nome }}
         'skill_labels': json.dumps(labels),
         'skill_data': json.dumps(data_values),
         'tem_skills': tem_skills
@@ -364,6 +362,9 @@ def api_github_repos(request):
 # --- VIEWS DE API (DRF) - As novas versões ---
 
 class LoginAPIView(APIView):
+    # LIBERA O ACESSO PÚBLICO (Correção do Erro 401)
+    permission_classes = [AllowAny] 
+
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
@@ -371,40 +372,27 @@ class LoginAPIView(APIView):
         if not email or not password:
             return Response({'message': 'Email e senha são obrigatórios.'}, status=status.HTTP_400_BAD_REQUEST)
         
-        # A "Correção": A chamada deve ser 'is_institutional_email' (minúsculo)
         if not is_institutional_email(email):
             return Response({'message': 'Por favor, use um email institucional válido.'}, status=status.HTTP_400_BAD_REQUEST)
 
         user = authenticate(username=email, password=password)
 
         if user:
-            # ============================================================
-            # CORREÇÃO BLINDADA DE SESSÃO
-            # ============================================================
-            # 1. Usamos 'request._request' para garantir que o Django 
-            #    manipule a sessão HTTP padrão, não a do DRF.
+            # Mantém a sessão do Django ativa (híbrido)
             login(request._request, user)
-            
-            # 2. Forçamos o salvamento da sessão no banco de dados agora.
             request._request.session.save()
             
-            print(f"Sessão criada para: {user.email}") # Log de confirmação
-            # ============================================================
+            print(f"Sessão criada para: {user.email}") 
 
             try:
                 user_type = user.cadastro.tipoDoCadastro
-                # --- LÓGICA DE VERIFICAÇÃO DE PERFIL ---
                 tem_perfil = False
-                if user_type == 1: # Se for Aluno
-                    # Verifica se existe a relação 'perfil_aluno' criada
+                if user_type == 1: 
                     tem_perfil = hasattr(user, 'perfil_aluno')
-                # ---------------------------------------
             except Cadastro.DoesNotExist:
-                return Response(
-                    {'message': 'Erro: Usuário autenticado mas sem perfil de cadastro.'}, 
-                    status=status.HTTP_404_NOT_FOUND
-                )
+                return Response({'message': 'Erro: Usuário sem cadastro.'}, status=status.HTTP_404_NOT_FOUND)
             
+            # Gera o Token JWT
             refresh = RefreshToken.for_user(user)
 
             return Response({
@@ -436,6 +424,9 @@ class LogoutAPIView(APIView):
             return Response({'message': 'Erro ao realizar logout.'}, status=status.HTTP_400_BAD_REQUEST)
 
 class RegisterAPIView(APIView):
+    # LIBERA O ACESSO PÚBLICO (Para criar conta não precisa estar logado)
+    permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = CadastroSerializer(data=request.data)
         if serializer.is_valid():
@@ -446,72 +437,49 @@ class RegisterAPIView(APIView):
     
 
 class ForgotPasswordAPIView(APIView):
+    # LIBERA O ACESSO PÚBLICO (Esqueci a senha)
+    permission_classes = [AllowAny]
+
     def post(self, request):
         email = request.data.get('email')
         if not email:
             return Response({'message': 'O campo de e-mail é obrigatório.'}, status=status.HTTP_400_BAD_REQUEST)
         
-        # A "Correção": A chamada deve ser 'is_institutional_email' (minúsculo)
         if not is_institutional_email(email):
-            return Response(
-                {'message': 'Este e-mail não é institucional.'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({'message': 'Este e-mail não é institucional.'}, status=status.HTTP_400_BAD_REQUEST)
         
         user = User.objects.filter(email=email).first()
 
         if not user:
-            return Response(
-                {'message': 'Este e-mail não está cadastrando em nosso sistema.'}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({'message': 'Este e-mail não está cadastrando.'}, status=status.HTTP_404_NOT_FOUND)
         
         token_generator = PasswordResetTokenGenerator()
         token = token_generator.make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
+        
+        # Ajuste para URL absoluta se necessário, mas o path relativo funciona se for o mesmo domínio
         reset_path = f'/auth/reset-password/{uid}/{token}/'
         reset_link = request.build_absolute_uri(reset_path)
 
         subject = 'Redefinição de Senha - Match Skills'
-        message = (
-            f'Olá, {user.cadastro.nome}!\n\n' # Corrigido para user.cadastro.nome
-            f'Você solicitou uma redefinição de senha. Clique no link abaixo para redefinir sua senha:\n\n'
-            f'{reset_link}\n\n'
-            f'Se você não solicitou isso, ignore este email.\n\n'
-            f'Atenciosamente,\nEquipe Match Skills'
-        )
+        message = f'Olá, {user.cadastro.nome}!\n\nClique para redefinir: {reset_link}'
 
         try:
-            send_mail(
-                subject,
-                message,
-                'naoresponda@matchskills.com',
-                [email],
-                fail_silently=False,
-            ) 
+            send_mail(subject, message, 'naoresponda@matchskills.com', [email], fail_silently=False) 
         except Exception as e:
-            print(f"Erro ao enviar email: {e}")
-            return Response(
-                {'message': 'Erro interno ao tentar enviar o e-mail.'}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({'message': 'Erro interno ao enviar e-mail.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response({'message': 'Se um usuário com esse email existir, um link de redefinição de senha será enviado.'}, status=status.HTTP_200_OK)
+        return Response({'message': 'Link de redefinição enviado.'}, status=status.HTTP_200_OK)
     
 class ResetPasswordAPIView(APIView):
+    # LIBERA O ACESSO PÚBLICO (Redefinir a senha)
+    permission_classes = [AllowAny]
+
     def post(self, request):
-         # Passa os dados do JSON (request.data) para o serializer
         serializer = PasswordResetSerializer(data=request.data)
-            
-        # 1. 'is_valid()' chama a função 'validate' do serializer
         if serializer.is_valid():
-             # 2. 'save()' chama a função 'save' do serializer
             serializer.save()
-            return Response(
-                {'message': 'Senha redefinida com sucesso! Você já pode fazer login.'}, status=status.HTTP_200_OK)
-            
-            # 3. Se a validação falhar (senhas não batem, token inválido),
-            # o serializer envia os erros.
+            return Response({'message': 'Senha redefinida com sucesso!'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 # 2. VIEW DA API (Salvar dados)

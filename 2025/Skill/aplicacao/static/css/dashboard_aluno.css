@@ -327,6 +327,76 @@ a { text-decoration: none !important; }
 .btn-edit-corner { position: absolute; top: 1rem; right: 1rem; color: #a0aec0; cursor: pointer; z-index: 10; }
 .btn-edit-corner:hover { color: #1a202c; }
 
+/* --- LEGENDA DO GRÁFICO (LATERAL) --- */
+.chart-legend-container::-webkit-scrollbar {
+  width: 4px;
+}
+.chart-legend-container::-webkit-scrollbar-thumb {
+  background-color: #cbd5e0;
+  border-radius: 4px;
+}
+
+.chart-legend-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.legend-item:last-child {
+  border-bottom: none;
+}
+
+.legend-item:hover {
+  background-color: #f8f9fa;
+  border-radius: 6px;
+}
+
+.legend-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.legend-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px; /* Quadrado arredondado */
+  flex-shrink: 0;
+}
+
+.legend-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.legend-stats {
+  text-align: right;
+  line-height: 1.1;
+}
+
+.legend-percent {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.legend-value {
+  font-size: 0.7rem;
+  color: #9ca3af;
+}
+
 /* RESPONSIVIDADE */
 @media (max-width: 768px) {
   .equal-height-card { min-height: auto; margin-bottom: 1rem; }

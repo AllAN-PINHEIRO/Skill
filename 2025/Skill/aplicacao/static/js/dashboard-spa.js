@@ -102,20 +102,61 @@ const SPA = {
 
         if (this.chartInstance) this.chartInstance.destroy();
 
+        // Cores do gráfico
         const backgroundColors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
-        
-        if (typeof Chart !== 'undefined') {
-            this.chartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{ data: dataValues, backgroundColor: backgroundColors.slice(0, labels.length), borderWidth: 2, borderColor: '#ffffff', hoverOffset: 10 }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, cutout: '65%',
-                    plugins: { legend: { display: true, position: 'bottom', labels: { usePointStyle: true, padding: 20 } } }
+        const total = dataValues.reduce((a, b) => a + b, 0);
+
+        // 1. CONFIGURAÇÃO DO GRÁFICO (Limpo)
+        this.chartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{ 
+                    data: dataValues, 
+                    backgroundColor: backgroundColors.slice(0, labels.length), 
+                    borderWidth: 0,
+                    hoverOffset: 5 
+                }]
+            },
+            options: {
+                responsive: true, 
+                maintainAspectRatio: false,
+                cutout: '75%', // Donut mais fino
+                layout: { padding: 10 },
+                plugins: { 
+                    legend: { display: false }, // Remove a legenda padrão
+                    tooltip: { enabled: true },
+                    datalabels: { display: false } // Remove textos de cima do gráfico
                 }
+            }
+        });
+
+        // 2. GERAÇÃO DA LEGENDA LATERAL
+        const legendContainer = document.getElementById('custom-chart-legend');
+        if (legendContainer) {
+            let htmlLegend = '<ul class="chart-legend-list">';
+            
+            labels.forEach((label, i) => {
+                const val = dataValues[i];
+                const color = backgroundColors[i % backgroundColors.length];
+                const percent = total > 0 ? Math.round((val / total) * 100) : 0;
+
+                htmlLegend += `
+                    <li class="legend-item">
+                        <div class="legend-info">
+                            <span class="legend-color-dot" style="background-color: ${color}"></span>
+                            <span class="legend-label">${label}</span>
+                        </div>
+                        <div class="legend-stats">
+                            <span class="legend-percent">${percent}%</span>
+                            <span class="legend-value">Nível: ${val}</span>
+                        </div>
+                    </li>
+                `;
             });
+            
+            htmlLegend += '</ul>';
+            legendContainer.innerHTML = htmlLegend;
         }
     },
 

@@ -1,41 +1,59 @@
-<div class="row g-4 mb-5">
-    
-    <div class="col-md-4">
-        <div class="modern-card nav-card" data-route="perfil">
-            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="nav-card-img" alt="Perfil">
-            <h5>Perfil</h5>
-        </div>
-    </div>
-    
-    <div class="col-md-4">
-        <div class="modern-card nav-card" data-route="vagas">
-            <img src="https://cdn-icons-png.flaticon.com/512/3281/3281329.png" class="nav-card-img" alt="Vagas">
-            <h5>Vagas</h5>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="modern-card nav-card">
-            <img src="https://cdn-icons-png.flaticon.com/512/3652/3652191.png" class="nav-card-img" alt="Grade">
-            <h5>Grade</h5>
-        </div>
-    </div>
-
-</div>
-
 <div class="animate-fade-in">
-    <div class="section-header">
-        <h5><i class="bi bi-pie-chart-fill text-success"></i> Índice de Skills</h5>
-        <a href="#" class="section-link" data-route="portfolio">Ver detalhado <i class="bi bi-chevron-right"></i></a>
+
+    <div class="mb-4">
+        <h3 class="fw-bold mb-0">👋 Olá, {{ dados.nome }}!</h3>
+        <p class="text-muted">Bem-vindo ao seu painel do Conecta IFBA.</p>
     </div>
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="modern-card">
-                
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="modern-card nav-card h-100 d-flex flex-column align-items-center justify-content-center p-4" 
+                 data-route="perfil" style="cursor: pointer;">
+                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" 
+                     class="nav-card-img mb-3" style="width: 60px; height: 60px;" alt="Perfil">
+                <h5 class="fw-bold mb-0">Meu Perfil</h5>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="modern-card nav-card h-100 d-flex flex-column align-items-center justify-content-center p-4" 
+                 data-route="vagas" style="cursor: pointer;">
+                <img src="https://cdn-icons-png.flaticon.com/512/3281/3281329.png" 
+                     class="nav-card-img mb-3" style="width: 60px; height: 60px;" alt="Vagas">
+                <h5 class="fw-bold mb-0">Mural de Vagas</h5>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="modern-card nav-card h-100 d-flex flex-column align-items-center justify-content-center p-4">
+                <img src="https://cdn-icons-png.flaticon.com/512/3652/3652191.png" 
+                     class="nav-card-img mb-3" style="width: 60px; height: 60px;" alt="Grade">
+                <h5 class="fw-bold mb-0">Minha Grade</h5>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        
+        <div class="col-lg-6">
+            <div class="section-header d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-pie-chart-fill text-success me-2"></i> Índice de Skills</h5>
+                <a href="#" class="section-link text-decoration-none small" data-route="portfolio">
+                    Detalhes <i class="bi bi-chevron-right"></i>
+                </a>
+            </div>
+
+            <div class="modern-card p-3 h-100"> 
                 {% if tem_skills %}
-                    <div class="chart-container-wrapper">
-                        <canvas id="skillsChart"></canvas>
+                    <div class="d-flex align-items-center h-100">
+                        
+                        <div style="flex: 0 0 55%; height: 260px; position: relative;">
+                            <canvas id="skillsChart"></canvas>
+                        </div>
+
+                        <div class="chart-legend-container ps-3" id="custom-chart-legend" style="flex: 1; height: 260px; overflow-y: auto;">
+                            </div>
+
                     </div>
                     
                     <script id="chart-labels" type="application/json">{{ skill_labels|safe }}</script>
@@ -43,42 +61,60 @@
 
                 {% else %}
                     <div class="text-center py-5">
-                        <i class="bi bi-bar-chart-line text-muted" style="font-size: 3rem;"></i>
-                        <h6 class="mt-3 text-muted fw-bold">Nenhuma skill cadastrada</h6>
-                        <p class="small text-muted mb-4">Adicione suas habilidades no perfil para gerar o gráfico.</p>
+                        <i class="bi bi-bar-chart-line text-muted opacity-25 display-1"></i>
+                        <h6 class="mt-3 text-muted fw-bold">Sem dados</h6>
+                        <p class="small text-muted mb-4">Cadastre suas habilidades para ver o gráfico.</p>
                         <button class="btn btn-sm btn-outline-success rounded-pill px-4" data-route="editar">
                             Cadastrar Agora
                         </button>
                     </div>
                 {% endif %}
-
             </div>
         </div>
-    </div>
 
-    <div class="section-header mt-5">
-        <h5><i class="bi bi-briefcase-fill text-primary"></i> Divulgação de Vagas</h5>
-        <a href="#" class="section-link">Ver mais <i class="bi bi-chevron-right"></i></a>
-    </div>
+        <div class="col-lg-6">
+            <div class="section-header d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-briefcase-fill text-primary me-2"></i> Vagas Recentes</h5>
+                <a href="#" class="section-link text-decoration-none small">
+                    Ver todas <i class="bi bi-chevron-right"></i>
+                </a>
+            </div>
 
-    <div class="vaga-card-modern">
-        <div class="vaga-info">
-            <h6>Analista de Suporte</h6>
-            <p>Empresa: Fanfury Software LTDA</p>
-            <p>Disponível até 30 de jul de 2025</p>
+            <div class="d-flex flex-column gap-3" style="min-height: 280px;">
+                <div class="vaga-card-modern bg-white p-3 border rounded shadow-sm">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="fw-bold mb-1">Analista de Suporte</h6>
+                            <p class="text-muted small mb-1">Fanfury Software LTDA</p>
+                            <small class="text-danger"><i class="bi bi-clock"></i> Expira em 5 dias</small>
+                        </div>
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">Urgente</span>
+                    </div>
+                </div>
+
+                <div class="vaga-card-modern bg-white p-3 border rounded shadow-sm">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="fw-bold mb-1">Dev FullStack Jr</h6>
+                            <p class="text-muted small mb-1">Resolve Software</p>
+                            <small class="text-success"><i class="bi bi-check-circle"></i> Vaga Nova</small>
+                        </div>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">Disponível</span>
+                    </div>
+                </div>
+
+                <div class="vaga-card-modern bg-white p-3 border rounded shadow-sm">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="fw-bold mb-1">Estágio TI</h6>
+                            <p class="text-muted small mb-1">Prefeitura Municipal</p>
+                            <small class="text-muted"><i class="bi bi-calendar"></i> Há 1 semana</small>
+                        </div>
+                        <span class="badge bg-light text-dark border rounded-pill">Estágio</span>
+                    </div>
+                </div>
+            </div>
         </div>
-        <span class="badge-modern badge-urgente">Urgente</span>
-    </div>
 
-    <div class="vaga-card-modern">
-        <div class="vaga-info">
-            <h6>Desenvolvedor FullStack</h6>
-            <p>Empresa: Resolve Software LTDA</p>
-            <p>Disponível até 31 de jul de 2025</p>
-        </div>
-        <span class="badge-modern badge-disponivel">Disponível</span>
     </div>
 </div>
-
-{{ skill_labels|json_script:"chart-labels" }}
-{{ skill_data|json_script:"chart-data" }}

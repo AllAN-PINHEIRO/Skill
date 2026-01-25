@@ -59,6 +59,7 @@
                                                  data-link_certificado="{{ cert.link_certificado|default:'' }}">
                                                 <i class="bi bi-pencil-fill small"></i>
                                             </div>
+                                            
                                             <div>
                                                 <h5 class="cert-title">{{ cert.titulo }}</h5>
                                                 <small class="cert-school">{{ cert.instituicao }}</small>
@@ -68,6 +69,7 @@
                                                     {% if cert.link_certificado %}<li>Certificado digital disponível</li>{% endif %}
                                                 </ul>
                                             </div>
+                                            
                                             <div class="text-end w-100 mt-3">
                                                 {% if cert.link_certificado %}
                                                     <a href="{{ cert.link_certificado }}" target="_blank" class="btn-card-confira">Visualizar</a>
@@ -79,6 +81,7 @@
                                     </div>
                                     {% endfor %}
                                 </div>
+                                
                                 {% if certificados|length > 1 %}
                                     <button class="carousel-control-prev" type="button" data-bs-target="#carouselCertificadosPerfil" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
                                     <button class="carousel-control-next" type="button" data-bs-target="#carouselCertificadosPerfil" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>

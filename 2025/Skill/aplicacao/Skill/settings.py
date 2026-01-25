@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+from datetime import timedelta
 import os
 from pathlib import Path
 
@@ -136,3 +137,24 @@ STATICFILES_DIRS = [
 
 # Django Email
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Configurações do Simple JWT
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # O token expira em 1 hora
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),     # O refresh dura 1 dia
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,  # Usa a chave do seu projeto
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+# Configuração do Django REST Framework para usar o JWT
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated', # Bloqueia tudo por padrão (segurança)
+    ),
+}
