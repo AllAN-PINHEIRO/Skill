@@ -463,6 +463,97 @@ a { text-decoration: none !important; }
 /* Scroll na lista (opcional, caso queira limitar altura) */
 /* Mas como é a pagina principal de vagas, deixar rolar a página inteira é melhor UX no mobile */
 
+/* --- ESTILOS DO DASHBOARD PROFESSOR --- */
+
+/* Avatar Redondo na Tabela */
+.avatar-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* Ajustes finos na Tabela */
+.table-hover tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.table th {
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+.hover-primary:hover {
+  color: #0d6efd !important;
+  background-color: #e9ecef;
+}
+
+/* Efeito Borda Tracejada (Dashed) */
+.border-dashed {
+  border-style: dashed !important;
+}
+
+/* Ajuste nos Cards de Topo do Professor */
+.modern-card img {
+  transition: transform 0.3s ease;
+}
+
+.modern-card:hover img {
+  transform: scale(1.1);
+}
+
+/* ============================================================
+   ESTILOS ESPECÍFICOS DO DASHBOARD PROFESSOR
+   ============================================================ */
+
+/* Ajuste para o logo do professor na Sidebar */
+.sidebar-logo h5 { 
+  color: #fff; 
+  font-weight: 600; 
+}
+.sidebar-logo i { 
+  color: #fff; 
+}
+
+/* Utilitários de Texto e Peso */
+.fw-500 { 
+  font-weight: 500; 
+}
+
+/* Efeitos de Hover nos Cards (Levantar) */
+.hover-lift { 
+  transition: transform 0.2s, box-shadow 0.2s; 
+}
+.hover-lift:hover { 
+  transform: translateY(-3px); 
+  box-shadow: 0 .5rem 1rem rgba(0,0,0,.08) !important; 
+}
+
+/* Hover escuro para ícones */
+.hover-dark:hover { 
+  color: #212529 !important; 
+}
+
+/* Utilitário de Cursor */
+.cursor-pointer { 
+  cursor: pointer; 
+}
+
+/* Bordas tracejadas */
+.border-dashed { 
+  border-style: dashed !important; 
+}
+
+/* Divisor Vertical */
+.vr { 
+  width: 1px; 
+  background-color: #dee2e6; 
+}
+
 /* RESPONSIVIDADE */
 @media (max-width: 768px) {
   .equal-height-card { min-height: auto; margin-bottom: 1rem; }

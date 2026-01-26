@@ -1,0 +1,203 @@
+{% load static %}
+<div class="animate-fade-in">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold text-dark mb-0">Gerenciar Vagas</h4>
+            <p class="text-muted small mb-0">Publique e gerencie as oportunidades.</p>
+        </div>
+        <button class="btn btn-dark shadow-sm px-3" onclick="abrirModalCriar()">
+            <i class="bi bi-plus-lg me-2"></i> Nova Vaga
+        </button>
+    </div>
+
+    <div class="bg-white p-3 rounded-4 shadow-sm border mb-4 d-flex align-items-center gap-3">
+        <div class="input-group" style="max-width: 300px;">
+            <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" class="form-control bg-light border-start-0 shadow-none" placeholder="Pesquisar vaga...">
+        </div>
+        <div class="ms-auto">
+            <button class="btn btn-light border" title="Filtros"><i class="bi bi-funnel"></i></button>
+        </div>
+    </div>
+
+    <div class="bg-white border rounded-4 shadow-sm overflow-hidden">
+        <div class="table-responsive">
+            <table class="table align-middle table-hover mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 py-3 small text-muted text-uppercase fw-bold">Empresa / Cargo</th>
+                        <th class="small text-muted text-uppercase fw-bold">Cidade</th>
+                        <th class="small text-muted text-uppercase fw-bold">Modalidade</th>
+                        <th class="small text-muted text-uppercase fw-bold">Status</th>
+                        <th class="text-end pe-4 small text-muted text-uppercase fw-bold">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vaga in vagas %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-3 bg-light border d-flex justify-content-center align-items-center text-muted me-3" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-building"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark">{{ vaga.empresa }}</div>
+                                    <div class="text-muted small">{{ vaga.titulo }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-dark small">{{ vaga.cidade }}</td>
+                        <td>
+                            {% if vaga.modalidade == 'REMOTO' %} <span class="badge bg-info-subtle text-info rounded-pill">Remoto</span>
+                            {% elif vaga.modalidade == 'HIBRIDO' %} <span class="badge bg-warning-subtle text-warning rounded-pill">Híbrido</span>
+                            {% else %} <span class="badge bg-secondary-subtle text-secondary rounded-pill">Presencial</span> {% endif %}
+                        </td>
+                        <td>
+                            {% if vaga.status == 'ABERTA' %} <span class="badge bg-success-subtle text-success px-3 rounded-1">Aberta</span>
+                            {% elif vaga.status == 'CANCELADA' %} <span class="badge bg-danger-subtle text-danger px-3 rounded-1">Cancelada</span>
+                            {% elif vaga.status == 'EM_ESPERA' %} <span class="badge bg-warning-subtle text-warning px-3 rounded-1">Em Espera</span>
+                            {% else %} <span class="badge bg-primary-subtle text-primary px-3 rounded-1">Futuro</span> {% endif %}
+                        </td>
+                        <td class="text-end pe-4">
+                            <button class="btn btn-sm btn-light border text-muted me-1 hover-dark" onclick="verVaga('{{ vaga.id }}')" title="Ver Detalhes">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-light border text-muted me-1 hover-dark" onclick="editarVaga('{{ vaga.id }}')" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-light border text-danger hover-danger" onclick="excluirVaga('{{ vaga.id }}')" title="Excluir">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center py-5 text-muted">Nenhuma vaga encontrada.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalFormVaga" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold" id="modalVagaTitulo">Nova Oportunidade</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="form-vaga">
+                    {% csrf_token %}
+                    <input type="hidden" id="vaga_id" value=""> <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Empresa</label>
+                            <input type="text" class="form-control bg-light border-0" id="vaga_empresa" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Cargo</label>
+                            <input type="text" class="form-control bg-light border-0" id="vaga_titulo" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">Status</label>
+                            <select class="form-select bg-light border-0" id="vaga_status">
+                                <option value="ABERTA">Aberta</option>
+                                <option value="EM_ANDAMENTO">Em Andamento (Futuro)</option>
+                                <option value="EM_ESPERA">Em Espera</option>
+                                <option value="CANCELADA">Cancelada</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">Modalidade</label>
+                            <select class="form-select bg-light border-0" id="vaga_modalidade">
+                                <option value="PRESENCIAL">Presencial</option>
+                                <option value="HIBRIDO">Híbrido</option>
+                                <option value="REMOTO">Remoto</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">Cidade</label>
+                            <input type="text" class="form-control bg-light border-0" id="vaga_cidade" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">Sobre a Vaga</label>
+                            <textarea class="form-control bg-light border-0" id="vaga_sobre" rows="3"></textarea>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted mb-1">Habilidades Solicitadas</label>
+                            <div class="d-flex gap-2 mb-2">
+                                <select class="form-select bg-light border-0" id="select_skills_source">
+                                    <option value="" selected disabled>Selecione uma habilidade...</option>
+                                    {% for skill in todas_habilidades %}
+                                        <option value="{{ skill.id }}">{{ skill.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="button" class="btn btn-dark shadow-sm" onclick="adicionarSkillUI()">
+                                    Adicionar
+                                </button>
+                            </div>
+                            <div id="skills_container" class="d-flex flex-wrap gap-2 p-3 bg-light rounded-3 border min-h-50">
+                                <span class="text-muted small fst-italic w-100 text-center" id="no_skills_msg">Nenhuma habilidade selecionada.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-dark px-4" id="btnSalvarVaga">Publicar Vaga</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalVerVaga" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title fw-bold">Detalhes da Vaga</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body px-4 pb-4">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="bg-success-subtle text-success p-3 rounded-3 me-3">
+                        <i class="bi bi-building fs-3"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0 text-dark" id="view_empresa">--</h5>
+                        <p class="text-muted small mb-0" id="view_titulo">--</p>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-6">
+                        <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.65rem;">Cidade</small>
+                        <span class="text-dark fw-500" id="view_cidade">--</span>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.65rem;">Modalidade</small>
+                        <span class="badge bg-light text-dark border" id="view_modalidade">--</span>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.65rem;">Status</small>
+                        <span class="badge bg-light text-dark border" id="view_status">--</span>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <small class="text-muted fw-bold d-block text-uppercase mb-2" style="font-size: 0.65rem;">Requisitos</small>
+                    <div id="view_skills_container" class="d-flex flex-wrap gap-1">
+                        </div>
+                </div>
+
+                <div class="bg-light p-3 rounded-3 border">
+                    <small class="text-muted fw-bold d-block text-uppercase mb-1" style="font-size: 0.65rem;">Sobre a vaga</small>
+                    <p class="small text-dark mb-0 text-justify" id="view_sobre" style="white-space: pre-line;">--</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

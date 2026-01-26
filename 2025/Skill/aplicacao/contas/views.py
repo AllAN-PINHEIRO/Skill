@@ -4,7 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404 # Essencial para MVT
 from django.contrib.auth.models import User
 import requests
-from .models import PerfilAluno, Habilidade, HabilidadeAluno, Cadastro, Certificado, HabilidadeDestaque
+from .models import PerfilAluno, Habilidade, HabilidadeAluno, Cadastro, Certificado, HabilidadeDestaque, PerfilProfessor
 
 # --- NOVOS IMPORTS PARA DRF ---
 from rest_framework.views import APIView
@@ -77,27 +77,26 @@ def dashboard_shell_view(request): # Você pode manter o nome antigo se preferir
 @login_required(login_url='/auth/login/') 
 def dashboard_professor_page_view(request):
     """
-    Serve a página principal (dashboard) do Professor.
+    Serve a página principal do Professor com verificação de primeiro acesso.
     """
-    print(f"--- TENTATIVA DE ACESSO AO DASHBOARD PROFESSOR ---")
-    print(f"Usuário: {request.user.email}")
-
     try:
         cadastro = get_object_or_404(Cadastro, user=request.user)
-        print(f"Tipo do Cadastro no Banco: {cadastro.tipoDoCadastro}")
 
         if cadastro.tipoDoCadastro != 2:
-            print(f"ACESSO NEGADO: Tipo {cadastro.tipoDoCadastro} não é 2 (Professor). Redirecionando para Home.")
             return redirect('home')
 
-        print("ACESSO PERMITIDO: Renderizando dashboard-professor.html")
+        # Lógica de Primeiro Acesso:
+        # Se NÃO tem perfil criado, é o primeiro acesso (True)
+        primeiro_acesso = not hasattr(request.user, 'perfil_professor')
+
         context = {
-            'nome_usuario': cadastro.nome 
+            'nome_usuario': cadastro.nome,
+            'primeiro_acesso': primeiro_acesso 
         }
         return render(request, 'dashboard-professor.html', context)
 
     except Exception as e:
-        print(f"ERRO CRÍTICO NO DASHBOARD: {e}")
+        print(f"ERRO: {e}")
         return redirect('home')
     
 
@@ -539,4 +538,23 @@ class MeuPerfilAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'message': f'Erro ao recuperar perfil: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
+        
+@login_required
+def api_salvar_perfil_professor(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            # get_or_create: Se o perfil não existir, ele cria. Se existir, ele pega.
+            perfil, created = PerfilProfessor.objects.get_or_create(user=request.user)
+            
+            perfil.bio = data.get('bio', '')
+            perfil.telefone = data.get('telefone', '')
+            perfil.save()
+            
+            return JsonResponse({'success': True, 'message': 'Dados salvos com sucesso!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+            
+    return JsonResponse({'success': False}, status=405)
         

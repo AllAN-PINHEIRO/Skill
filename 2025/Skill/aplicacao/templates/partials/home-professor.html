@@ -1,0 +1,146 @@
+{% load static %}
+<div class="animate-fade-in">
+
+    <div class="mb-5">
+        <h3 class="fw-bold text-dark mb-1">👋 Bem-Vindo, {{ nome_usuario }}</h3>
+        <p class="text-muted small mb-0">{% now "d \d\e F \d\e Y" %}</p>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="bg-white p-5 rounded-4 text-center h-100 border shadow-sm cursor-pointer hover-lift" data-route="perfil-prof">
+                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" width="100" alt="Perfil" class="mb-4 opacity-75">
+                <h4 class="fw-bold mb-0">Perfil</h4>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="bg-white p-5 rounded-4 text-center h-100 border shadow-sm cursor-pointer hover-lift" data-route="minhas-vagas">
+                <img src="https://cdn-icons-png.flaticon.com/512/3281/3281329.png" width="100" alt="Vagas" class="mb-4 opacity-75">
+                <h4 class="fw-bold mb-0">Vagas</h4>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="bg-white p-5 rounded-4 text-center h-100 border shadow-sm cursor-pointer hover-lift">
+                <img src="https://cdn-icons-png.flaticon.com/512/3652/3652191.png" width="100" alt="Grade" class="mb-4 opacity-75">
+                <h4 class="fw-bold mb-0">Grade</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        
+        <div class="col-xl-8 col-lg-7">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0 d-flex align-items-center">
+                    <i class="bi bi-laptop me-2 fs-4"></i> Alunos Registrados
+                </h5>
+                <a href="#" class="text-success text-decoration-none fw-bold fs-5">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </div>
+
+            <div class="bg-white border rounded-4 shadow-sm overflow-hidden">
+                <div class="p-3 d-flex justify-content-between align-items-center border-bottom">
+                    <div class="input-group bg-light rounded p-1" style="max-width: 280px;">
+                        <span class="input-group-text bg-transparent border-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" class="form-control bg-transparent border-0 shadow-none small" placeholder="Procurar...">
+                    </div>
+                    <div class="d-flex gap-3 align-items-center text-muted small fw-bold">
+                        <span>Ver recentes</span>
+                        <div class="vr"></div>
+                        <i class="bi bi-funnel cursor-pointer"></i>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-white text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 1px;">
+                            <tr>
+                                <th class="ps-4 py-3" width="5%"></th>
+                                <th width="35%">Aluno</th>
+                                <th width="15%">Matrícula</th>
+                                <th width="15%">Habilidade</th>
+                                <th width="15%">Entrada</th>
+                                <th class="text-end pe-4" width="15%">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for aluno in alunos_tabela %}
+                            <tr>
+                                <td class="ps-4"><input type="checkbox" class="form-check-input"></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center fw-bold text-primary border" 
+                                             style="width: 45px; height: 45px; font-size: 1.1rem;">
+                                            {{ aluno.cadastro.nome|slice:":1"|upper }}
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 fw-bold text-dark">{{ aluno.cadastro.nome }}</h6>
+                                            <small class="text-muted">{{ aluno.perfil_aluno.resumo|truncatechars:20|default:"Estudante" }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-dark fw-500">{{ aluno.cadastro.matricula }}</td>
+                                <td>
+                                    {% with skill=aluno.perfil_aluno.habilidades_aluno.first %}
+                                        {% if skill %}
+                                            <span class="text-dark fw-bold">{{ skill.habilidade.nome }}</span>
+                                        {% else %}
+                                            <span class="text-muted small fst-italic">---</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-info-subtle text-info fw-bold px-3 py-2 rounded-pill">
+                                        {{ aluno.date_joined|date:"d/m/Y" }}
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="d-flex gap-3 justify-content-end text-muted">
+                                        <i class="bi bi-download cursor-pointer hover-dark" title="Baixar"></i>
+                                        <i class="bi bi-eye cursor-pointer hover-dark" title="Ver"></i>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="6" class="text-center py-5 text-muted">Nenhum aluno encontrado.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0 d-flex align-items-center">
+                    <i class="bi bi-briefcase me-2 fs-4"></i> Vagas
+                </h5>
+                <a href="#" class="text-success text-decoration-none fw-bold fs-5" data-route="minhas-vagas">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </div>
+
+            <div class="d-flex flex-column gap-3">
+                {% for vaga in vagas_recentes %}
+                <div class="bg-white p-4 border rounded-4 shadow-sm position-relative hover-lift">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h6 class="fw-bold text-dark mb-0 fs-5">{{ vaga.titulo }}</h6>
+                        <span class="badge bg-success-subtle text-success border border-success fw-bold rounded-pill px-2 py-1" style="font-size: 0.65rem;">Disponível</span>
+                    </div>
+                    <p class="text-muted small mb-2">Empresa: <span class="fw-bold">{{ vaga.empresa }}</span></p>
+                    <p class="text-muted small mb-0">Até {{ vaga.data_limite|date:"d/m/Y"|default:"--" }}</p>
+                    <div class="position-absolute top-0 start-0 h-100 bg-success rounded-start-4" style="width: 6px;"></div>
+                </div>
+                {% empty %}
+                <div class="bg-white p-5 border rounded-4 text-center border-dashed text-muted">
+                    <p class="fw-bold mb-0">Sem vagas recentes.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>

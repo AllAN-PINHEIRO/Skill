@@ -32,4 +32,5 @@ urlpatterns = [
     path('api/certificado/salvar/', views.api_salvar_certificado, name='api-salvar-certificado'),
     path('api/certificado/excluir/<int:cert_id>/', views.api_excluir_certificado, name='api-excluir-certificado'),
     path('api/github/repos/', api_github_repos, name='api_github_repos'),
+    path('api/professor/salvar-perfil/', views.api_salvar_perfil_professor, name='api-salvar-perfil-prof'),
 ]
