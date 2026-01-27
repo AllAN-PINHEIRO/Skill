@@ -10,8 +10,10 @@ const SPA = {
     // Mapa de Rotas (URLs do Backend)
     routes: {
         // --- ROTAS DO ALUNO ---
-        'home': '/auth/partial/home/',
+        // 'home': '/auth/partial/home/',
+        'home': '/vagas/partial/home/',
         'perfil': '/auth/partial/perfil/',
+        'meu-perfil': '/contas/partial/perfil/',
         'editar': '/auth/partial/editar/',
         'portfolio': '/auth/partial/portfolio/',
         'vagas': '/vagas/partial/feed/', 
@@ -596,11 +598,16 @@ const SPA = {
 
     // 3. Renderiza as Tags de Skill na tela
     // 3. Renderiza as Tags de Skill na tela (CORRIGIDA)
+    // --- Substitua a função renderSkillsUI inteira por esta ---
     renderSkillsUI: function(novoNome = null, novoId = null) {
         const container = document.getElementById('skills_container');
+        
+        // PROTEÇÃO 1: Se o container não existe na tela (ex: modal fechado), para aqui.
+        if (!container) return;
+
         let msg = document.getElementById('no_skills_msg');
 
-        // PROTEÇÃO: Se a mensagem não existir (foi apagada), cria ela dinamicamente
+        // PROTEÇÃO 2: Se a mensagem sumiu, recria ela na memória para não dar erro
         if (!msg) {
             msg = document.createElement('span');
             msg.id = 'no_skills_msg';
@@ -608,32 +615,32 @@ const SPA = {
             msg.innerText = 'Nenhuma habilidade selecionada.';
         }
 
+        // Cenário A: Lista vazia -> Mostra mensagem
         if (this.selectedSkillsIds.length === 0) {
-            container.innerHTML = '';
-            container.appendChild(msg);
+            container.innerHTML = ''; 
+            container.appendChild(msg); 
             msg.style.display = 'block';
             return;
         }
 
-        // Se tem skills, esconde a mensagem
+        // Cenário B: Tem skills -> Esconde mensagem
         msg.style.display = 'none';
-        // Garante que a mensagem esteja no container (mesmo oculta) para ser achada depois
+        // Garante que a mensagem esteja no HTML (mesmo oculta) para ser achada depois
         if (!container.contains(msg)) {
             container.appendChild(msg);
         }
 
-        // Se não foi passado um novo nome (é apenas um refresh ou clear), para aqui
-        if (!novoNome) return;
-
-        // Cria a Tag Visual
-        const tag = document.createElement('div');
-        tag.className = 'badge bg-white text-dark border d-flex align-items-center gap-2 px-3 py-2';
-        tag.dataset.id = novoId;
-        tag.innerHTML = `
-            <span>${novoNome}</span>
-            <i class="bi bi-x-circle-fill text-danger cursor-pointer" onclick="SPA.removerSkillUI('${novoId}', this)"></i>
-        `;
-        container.appendChild(tag);
+        // Cenário C: Adicionar nova tag visualmente
+        if (novoNome && novoId) {
+            const tag = document.createElement('div');
+            tag.className = 'badge bg-white text-dark border d-flex align-items-center gap-2 px-3 py-2';
+            tag.dataset.id = novoId;
+            tag.innerHTML = `
+                <span>${novoNome}</span>
+                <i class="bi bi-x-circle-fill text-danger cursor-pointer" onclick="SPA.removerSkillUI('${novoId}', this)"></i>
+            `;
+            container.appendChild(tag);
+        }
     },
 
     // 4. Remover Skill (Ao clicar no X)
@@ -966,6 +973,69 @@ window.abrirModalCriar = () => SPA.abrirModalCriar();
 window.adicionarSkillUI = () => SPA.adicionarSkillUI();
 window.verVaga = (id) => SPA.verVaga(id);
 window.editarVaga = (id) => SPA.editarVaga(id);
+
+// Função global para iniciar o gráfico de skills e Gerar Legenda
+window.initSkillsChart = function() {
+    const ctx = document.getElementById('skillsChart');
+    const legendContainer = document.getElementById('custom-chart-legend');
+    
+    if (!ctx || !legendContainer) return;
+
+    // Destroi gráfico anterior para evitar bugs
+    if (window.mySkillsChart) {
+        window.mySkillsChart.destroy();
+    }
+
+    try {
+        const labels = JSON.parse(document.getElementById('chart-labels').textContent);
+        const data = JSON.parse(document.getElementById('chart-data').textContent);
+        
+        // Cores vibrantes para o gráfico
+        const colors = [
+            '#198754', '#20c997', '#0dcaf0', '#ffc107', '#fd7e14', '#d63384', '#6f42c1', '#0d6efd'
+        ];
+
+        // 1. CRIA O GRÁFICO
+        window.mySkillsChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: colors.slice(0, labels.length),
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '75%', // Deixa o buraco do meio maior (mais moderno)
+                plugins: {
+                    legend: { display: false }, // Esconde a legenda padrão do Chart.js
+                    tooltip: { enabled: true }
+                }
+            }
+        });
+
+        // 2. GERA A LEGENDA HTML MANUALMENTE (OS ÍNDICES)
+        legendContainer.innerHTML = ''; // Limpa anterior
+        
+        labels.forEach((label, index) => {
+            const color = colors[index % colors.length];
+            // HTML de cada item da legenda
+            const item = document.createElement('div');
+            item.className = 'd-flex align-items-center mb-1';
+            item.innerHTML = `
+                <span style="width: 12px; height: 12px; background-color: ${color}; border-radius: 50%; display: inline-block; margin-right: 8px;"></span>
+                <span class="text-muted small fw-bold text-truncate" style="max-width: 120px;" title="${label}">${label}</span>
+                <span class="ms-auto text-dark small fw-bold">${data[index]}%</span>
+            `;
+            legendContainer.appendChild(item);
+        });
+
+    } catch (e) { console.error("Erro ao montar gráfico:", e); }
+};
 
 // --- UTILITÁRIO: PEGAR COOKIE DJANGO ---
 function getCookie(name) { let cookieValue = null; if (document.cookie && document.cookie !== '') { const cookies = document.cookie.split(';'); for (let i = 0; i < cookies.length; i++) { const cookie = cookies[i].trim(); if (cookie.substring(0, name.length + 1) === (name + '=')) { cookieValue = decodeURIComponent(cookie.substring(name.length + 1)); break; } } } return cookieValue; }

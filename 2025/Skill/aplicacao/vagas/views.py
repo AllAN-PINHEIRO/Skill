@@ -11,9 +11,121 @@ from .models import Vaga
 # =========================================================
 @login_required
 def partial_vagas_view(request):
-    vagas = Vaga.objects.filter(status='ABERTA').order_by('-criado_em') # Ajustado para 'ABERTA' conforme novo model
-    context = {'vagas': vagas}
+    # 1. Busca todas as vagas abertas inicialmente
+    todas_vagas = Vaga.objects.filter(status='ABERTA').order_by('-criado_em')
+    
+    vagas_compativeis = []
+    
+    # 2. Tenta pegar as habilidades do aluno logado
+    skills_aluno = set()
+    try:
+        # Verifica se o usuário tem perfil de aluno e pega os IDs das habilidades
+        if hasattr(request.user, 'perfil_aluno'):
+            skills_aluno = set(request.user.perfil_aluno.habilidades.values_list('id', flat=True))
+    except:
+        pass # Se não for aluno ou der erro, skills_aluno fica vazio
+
+    # 3. Processa o Match de cada vaga
+    for vaga in todas_vagas:
+        skills_vaga = set(vaga.habilidades.values_list('id', flat=True))
+        total_requisitos = len(skills_vaga)
+        
+        match_percent = 0
+        
+        if total_requisitos == 0:
+            # Se a vaga não pede nada, é 100% compatível com qualquer um
+            match_percent = 100
+        else:
+            # Interseção: Quais skills da vaga o aluno TEM
+            skills_em_comum = skills_aluno.intersection(skills_vaga)
+            qtd_comum = len(skills_em_comum)
+            
+            # Cálculo da porcentagem (Ex: 3 de 4 = 0.75 * 100 = 75%)
+            match_percent = int((qtd_comum / total_requisitos) * 100)
+        
+        # 4. APLICA A REGRA DOS 75%
+        if match_percent >= 75:
+            # Adiciona um atributo dinâmico na vaga para usar no HTML (mostrar a %)
+            vaga.match_percent = match_percent
+            vagas_compativeis.append(vaga)
+
+    context = {
+        'vagas': vagas_compativeis
+    }
+    
     return render(request, 'partials/vagas.html', context)
+
+@login_required
+def partial_home_view(request):
+    # 1. PEGAR NOME
+    nome_usuario = "Aluno"
+    try:
+        if hasattr(request.user, 'cadastro'):
+            nome_usuario = request.user.cadastro.nome
+    except: pass
+
+    # 2. PEGAR SKILLS (Para Gráfico e Match)
+    skills_ids = set()
+    skill_labels = []
+    skill_data = []
+    tem_skills = False
+
+    try:
+        # Se você usa o modelo PerfilAluno (que tem habilidades many-to-many)
+        if hasattr(request.user, 'perfil_aluno'):
+            perfil = request.user.perfil_aluno
+            # Pega todas as habilidades
+            skills_qs = perfil.habilidades.all()
+            
+            # IDs para fazer o match das vagas
+            skills_ids = set(skills_qs.values_list('id', flat=True))
+            
+            # Labels para o gráfico
+            skill_labels = [s.nome for s in skills_qs]
+            
+            # Como é Many-to-Many simples, não tem "nível". 
+            # Fixamos em 100 ou geramos aleatório para visual.
+            skill_data = [100] * len(skill_labels)
+            
+            tem_skills = len(skill_labels) > 0
+    except Exception as e:
+        print(f"Erro skills: {e}")
+
+    # 3. MATCH DE VAGAS
+    vagas_finais = []
+    todas_vagas = Vaga.objects.filter(status__in=['ABERTA', 'ATIVA']).order_by('-criado_em')
+
+    for vaga in todas_vagas:
+        skills_vaga = set(vaga.habilidades.values_list('id', flat=True))
+        total = len(skills_vaga)
+        
+        match = 0
+        if total == 0:
+            match = 100
+        else:
+            comum = skills_ids.intersection(skills_vaga)
+            match = int((len(comum) / total) * 100)
+        
+        vaga.match_percent = match
+        
+        # Filtro: Mostra se tiver pelo menos 1 skill em comum (ou 50%, como preferir)
+        if match > 0:
+            vagas_finais.append(vaga)
+
+    # Ordena e pega Top 3
+    vagas_finais.sort(key=lambda x: x.match_percent, reverse=True)
+    vagas_recentes = vagas_finais[:3]
+
+    # CONTEXTO FINAL
+    context = {
+        'dados': {'nome': nome_usuario}, # Mantém padrão do HTML
+        'tem_skills': tem_skills,
+        'skill_labels': json.dumps(skill_labels),
+        'skill_data': json.dumps(skill_data),
+        'vagas_recentes': vagas_recentes
+    }
+    
+    return render(request, 'partials/home.html', context)
 
 # =========================================================
 # 2. VIEW DO PROFESSOR (HOME DASHBOARD)

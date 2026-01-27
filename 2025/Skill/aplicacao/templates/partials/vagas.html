@@ -18,7 +18,6 @@
     <div class="row g-4">
         
         <div class="col-lg-3 d-none d-lg-block">
-            
             <div class="modern-card p-3 mb-4 border-0 shadow-sm">
                 <h6 class="fw-bold mb-3 small text-uppercase text-muted">Suas Candidaturas</h6>
                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -62,7 +61,7 @@
                             <div>
                                 <h5 class="fw-bold mb-1 text-dark vaga-titulo">{{ vaga.titulo }}</h5>
                                 <p class="text-muted small mb-2 vaga-empresa">
-                                    {{ vaga.empresa }} • <span class="text-success"><i class="bi bi-geo-alt-fill"></i> Eunápolis/Remoto</span>
+                                    {{ vaga.empresa }} • <span class="text-success"><i class="bi bi-geo-alt-fill"></i> {{ vaga.cidade }}</span>
                                 </p>
                                 
                                 <div class="d-flex gap-1 flex-wrap mt-2">
@@ -85,23 +84,46 @@
                             {% endif %}
                             
                             <br>
-                            <small class="text-muted" style="font-size: 0.75rem;">
+                            {% if vaga.modalidade == 'REMOTO' %}
+                                <small class="text-info fw-bold" style="font-size: 0.7rem;">REMOTO</small>
+                            {% elif vaga.modalidade == 'HIBRIDO' %}
+                                <small class="text-warning fw-bold" style="font-size: 0.7rem;">HÍBRIDO</small>
+                            {% endif %}
+                            
+                            <div class="small text-muted mt-1" style="font-size: 0.75rem;">
                                 <i class="bi bi-clock"></i> {{ vaga.criado_em|timesince }} atrás
-                            </small>
+                            </div>
                         </div>
                     </div>
 
                     <hr class="border-light my-3">
 
                     <div class="d-flex justify-content-between align-items-center">
-                        <div class="match-indicator d-flex align-items-center gap-2">
-                            <div class="progress" style="width: 60px; height: 6px;">
-                                <div class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                        
+                        <div class="match-indicator d-flex align-items-center gap-3">
+                            
+                            <div class="d-flex flex-column justify-content-center" style="width: 80px;">
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar {% if vaga.match_percent == 100 %}bg-success{% else %}bg-primary{% endif %}" 
+                                         role="progressbar" 
+                                         style="width: '{{ vaga.match_percent }}'"
+                                         aria-valuenow="{{ vaga.match_percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
                             </div>
-                            <small class="text-muted" style="font-size: 0.75rem;">Calculando match...</small>
+
+                            {% if vaga.match_percent == 100 %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">
+                                    <i class="bi bi-stars me-1"></i> 100% Compatível
+                                </span>
+                            {% else %}
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill">
+                                    <i class="bi bi-check-circle me-1"></i> {{ vaga.match_percent }}% Match
+                                </span>
+                            {% endif %}
+
                         </div>
 
-                        <button class="btn btn-sm btn-success px-4 rounded-pill fw-bold" onclick="alert('Candidatura enviada para: {{ vaga.titulo }}')">
+                        <button class="btn btn-sm btn-dark px-4 rounded-pill fw-bold shadow-sm" onclick="alert('Funcionalidade de candidatura em breve!')">
                             Candidatar-se
                         </button>
                     </div>
@@ -109,9 +131,17 @@
                 </div>
                 {% empty %}
                     <div class="text-center py-5">
-                        <img src="https://cdn-icons-png.flaticon.com/512/7486/7486747.png" width="100" class="opacity-50 mb-3">
-                        <h5 class="text-muted fw-bold">Nenhuma vaga encontrada</h5>
-                        <p class="text-muted small">Tente ajustar seus filtros ou volte mais tarde.</p>
+                        <div class="mb-3">
+                             <i class="bi bi-search display-1 text-muted opacity-25"></i>
+                        </div>
+                        <h5 class="text-muted fw-bold">Nenhuma vaga compatível encontrada</h5>
+                        <p class="text-muted small">
+                            Só mostramos vagas com pelo menos <strong>75% de compatibilidade</strong> com suas habilidades.<br>
+                            Adicione mais skills ao seu perfil para ver mais oportunidades!
+                        </p>
+                        <button class="btn btn-outline-primary btn-sm rounded-pill mt-2" onclick="SPA.load('meu-perfil')">
+                            Atualizar Minhas Skills
+                        </button>
                     </div>
                 {% endfor %}
 

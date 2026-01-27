@@ -14,6 +14,7 @@ urlpatterns = [
     path('dashboard-aluno/', views.dashboard_shell_view, name='dashboard-aluno'),
     path('dashboard-professor/', views.dashboard_professor_page_view, name='dashboard-professor'),
     path('completar-perfil/', views.completar_perfil_page_view, name='completar-perfil'),
+    # path('partial/home/', views.partial_home_view, name='partial-home'),
     path('partial/home/', views.partial_home_view, name='partial-home'),
     path('partial/perfil/', views.partial_perfil_view, name='partial-perfil'),
     path('partial/editar/', views.partial_editar_perfil_view, name='partial-editar'),

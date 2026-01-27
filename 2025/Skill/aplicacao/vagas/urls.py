@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('partial/feed/', views.partial_vagas_view, name='partial-vagas-feed'),
+    path('partial/home/', views.partial_home_view, name='partial-home'),
     path('partial/professor/home/', views.partial_home_professor_view, name='partial-home-prof'),
     path('partial/professor/perfil/', views.partial_perfil_professor_view, name='partial-perfil-prof'),
     path('partial/professor/minhas-vagas/', views.partial_minhas_vagas_view, name='partial-minhas-vagas'),

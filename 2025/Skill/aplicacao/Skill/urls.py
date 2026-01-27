@@ -8,5 +8,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('contas.urls', namespace='contas')),
     path('vagas/', include('vagas.urls')),
+    path('contas/', include('contas.urls')),
     path('', views.homepage_view, name='home'),
 ]
