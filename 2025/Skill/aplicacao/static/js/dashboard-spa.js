@@ -194,23 +194,38 @@ const SPA = {
             // --- INICIALIZADORES ESPECÍFICOS POR PÁGINA ---
             
             // 1. Home do Aluno (Carregar Gráfico Chart.js)
-            if (pageKey === 'home') this.initChart();
+            if (pageKey === 'home') {
+                // Tenta chamar a função global do gráfico se existir
+                if(typeof window.initSkillsChart === 'function') window.initSkillsChart();
+                else if(typeof this.initChart === 'function') this.initChart();
+            }
             
             // 2. Perfil/Portfólio (Carregar GitHub)
-            if (pageKey === 'perfil' || pageKey === 'portfolio') {
-                this.loadGithubRepos();
+            // === AQUI ESTÁ A CORREÇÃO: Adicionei || pageKey === 'meu-perfil' ===
+            if (pageKey === 'perfil' || pageKey === 'portfolio' || pageKey === 'meu-perfil') {
+                
+                // Pequeno delay para garantir que o HTML existe
+                setTimeout(() => {
+                    // Verifica se usa a função global ou interna
+                    if (typeof window.carregarRepositoriosGitHub === 'function') {
+                        window.carregarRepositoriosGitHub();
+                    } else if (typeof this.loadGithubRepos === 'function') {
+                        this.loadGithubRepos();
+                    }
+                }, 200);
             }
 
             // 3. Feed de Vagas (Ativar Filtro de Busca)
             if (pageKey === 'vagas') {
-                this.setupVagasSearch(); 
+                if(typeof this.setupVagasSearch === 'function') this.setupVagasSearch(); 
             }
             
             // ----------------------------------------------
 
         } catch (error) {
             console.error(error);
-            if(window.showToast) showToast("Erro ao carregar conteúdo. Tente novamente.", "danger");
+            // Verifica se showToast existe antes de chamar
+            if(typeof window.showToast === 'function') showToast("Erro ao carregar conteúdo.", "danger");
         }
     },
 
@@ -974,14 +989,13 @@ window.adicionarSkillUI = () => SPA.adicionarSkillUI();
 window.verVaga = (id) => SPA.verVaga(id);
 window.editarVaga = (id) => SPA.editarVaga(id);
 
-// Função global para iniciar o gráfico de skills e Gerar Legenda
+// Função para desenhar o Gráfico de Skills + Legenda Detalhada
 window.initSkillsChart = function() {
     const ctx = document.getElementById('skillsChart');
     const legendContainer = document.getElementById('custom-chart-legend');
     
     if (!ctx || !legendContainer) return;
 
-    // Destroi gráfico anterior para evitar bugs
     if (window.mySkillsChart) {
         window.mySkillsChart.destroy();
     }
@@ -990,18 +1004,25 @@ window.initSkillsChart = function() {
         const labels = JSON.parse(document.getElementById('chart-labels').textContent);
         const data = JSON.parse(document.getElementById('chart-data').textContent);
         
-        // Cores vibrantes para o gráfico
+        // 1. Calcular o TOTAL para descobrir a porcentagem da "fatia" (Share)
+        // Ex: Se tem Nível 90 e Nível 10, o total é 100. O de 90 vale 90%.
+        const total = data.reduce((acc, curr) => acc + Number(curr), 0);
+
         const colors = [
-            '#198754', '#20c997', '#0dcaf0', '#ffc107', '#fd7e14', '#d63384', '#6f42c1', '#0d6efd'
+            '#198754', // Verde (CSS)
+            '#0d6efd', // Azul (HTML)
+            '#ffc107', // Amarelo (JS)
+            '#dc3545', // Vermelho (C#)
+            '#0dcaf0', '#6f42c1', '#fd7e14'
         ];
 
-        // 1. CRIA O GRÁFICO
+        // 2. Criar o Gráfico
         window.mySkillsChart = new Chart(ctx, {
             type: 'doughnut',
             data: {
                 labels: labels,
                 datasets: [{
-                    data: data,
+                    data: data, // Usa os níveis reais para desenhar o tamanho
                     backgroundColor: colors.slice(0, labels.length),
                     borderWidth: 0,
                     hoverOffset: 4
@@ -1010,31 +1031,57 @@ window.initSkillsChart = function() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: '75%', // Deixa o buraco do meio maior (mais moderno)
+                cutout: '70%',
                 plugins: {
-                    legend: { display: false }, // Esconde a legenda padrão do Chart.js
-                    tooltip: { enabled: true }
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                // Tooltip mostra o Nível Real
+                                return ` Nível: ${context.raw}`;
+                            }
+                        }
+                    }
                 }
             }
         });
 
-        // 2. GERA A LEGENDA HTML MANUALMENTE (OS ÍNDICES)
-        legendContainer.innerHTML = ''; // Limpa anterior
+        // 3. Gerar a Legenda Detalhada (Porcentagem + Nível)
+        legendContainer.innerHTML = '';
         
         labels.forEach((label, index) => {
+            const nivelReal = Number(data[index]);
             const color = colors[index % colors.length];
-            // HTML de cada item da legenda
+            
+            // Cálculo da Porcentagem "da Pizza" (Participação)
+            // (Nível / Total) * 100
+            let sharePercent = 0;
+            if (total > 0) {
+                sharePercent = Math.round((nivelReal / total) * 100);
+            }
+
             const item = document.createElement('div');
-            item.className = 'd-flex align-items-center mb-1';
+            item.className = 'd-flex justify-content-between align-items-center mb-3 border-bottom pb-2'; // Adicionei espaçamento
+            
+            // LADO ESQUERDO: Bolinha + Nome
             item.innerHTML = `
-                <span style="width: 12px; height: 12px; background-color: ${color}; border-radius: 50%; display: inline-block; margin-right: 8px;"></span>
-                <span class="text-muted small fw-bold text-truncate" style="max-width: 120px;" title="${label}">${label}</span>
-                <span class="ms-auto text-dark small fw-bold">${data[index]}%</span>
+                <div class="d-flex align-items-center gap-2">
+                    <span style="width: 12px; height: 12px; background-color: ${color}; border-radius: 50%;"></span>
+                    <span class="fw-bold text-dark small">${label}</span>
+                </div>
+                
+                <div class="text-end lh-1">
+                    <div class="fw-bold text-dark h6 mb-0">${sharePercent}%</div>
+                    <small class="text-muted" style="font-size: 0.65rem;">Nível: ${nivelReal}</small>
+                </div>
             `;
+            
             legendContainer.appendChild(item);
         });
 
-    } catch (e) { console.error("Erro ao montar gráfico:", e); }
+    } catch (e) { 
+        console.error("Erro ao montar gráfico:", e); 
+    }
 };
 
 // --- UTILITÁRIO: PEGAR COOKIE DJANGO ---

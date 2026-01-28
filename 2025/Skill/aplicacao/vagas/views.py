@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404 # <--- ADICIONADO get_obj
 from django.http import JsonResponse # <--- NOVO IMPORT
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from contas.models import Cadastro, PerfilAluno, PerfilProfessor, Habilidade # <--- ADICIONADO Habilidade
+from contas.models import Cadastro, HabilidadeAluno, PerfilAluno, PerfilProfessor, Habilidade # <--- ADICIONADO Habilidade
 from .models import Vaga 
 
 # =========================================================
@@ -64,34 +64,39 @@ def partial_home_view(request):
             nome_usuario = request.user.cadastro.nome
     except: pass
 
-    # 2. PEGAR SKILLS (Para Gráfico e Match)
+    # 2. PEGAR SKILLS (Agora com NÍVEIS REAIS)
     skills_ids = set()
     skill_labels = []
-    skill_data = []
+    skill_data = [] 
     tem_skills = False
 
     try:
-        # Se você usa o modelo PerfilAluno (que tem habilidades many-to-many)
         if hasattr(request.user, 'perfil_aluno'):
             perfil = request.user.perfil_aluno
-            # Pega todas as habilidades
-            skills_qs = perfil.habilidades.all()
             
-            # IDs para fazer o match das vagas
-            skills_ids = set(skills_qs.values_list('id', flat=True))
+            # [MUDANÇA CRUCIAL] 
+            # Em vez de pegar direto as habilidades, pegamos a relação HabilidadeAluno
+            # Ordenamos por '-nivel' para as maiores aparecerem primeiro
+            skills_rels = HabilidadeAluno.objects.filter(perfil=perfil).order_by('-nivel')
             
-            # Labels para o gráfico
-            skill_labels = [s.nome for s in skills_qs]
-            
-            # Como é Many-to-Many simples, não tem "nível". 
-            # Fixamos em 100 ou geramos aleatório para visual.
-            skill_data = [100] * len(skill_labels)
-            
-            tem_skills = len(skill_labels) > 0
-    except Exception as e:
-        print(f"Erro skills: {e}")
+            if skills_rels.exists():
+                tem_skills = True
+                
+                for item in skills_rels:
+                    # Guarda o ID para calcular o Match das vagas logo abaixo
+                    skills_ids.add(item.habilidade.id)
+                    
+                    # Guarda o Nome para o Gráfico
+                    skill_labels.append(item.habilidade.nome)
+                    
+                    # [AQUI ESTÁ A CORREÇÃO]
+                    # Pega o nível real (ex: 30, 55, 90) em vez de fixar em 100
+                    skill_data.append(item.nivel)
 
-    # 3. MATCH DE VAGAS
+    except Exception as e:
+        print(f"Erro ao carregar skills: {e}")
+
+    # 3. MATCH DE VAGAS (Lógica mantém a mesma, mas usa os IDs reais carregados acima)
     vagas_finais = []
     todas_vagas = Vaga.objects.filter(status__in=['ABERTA', 'ATIVA']).order_by('-criado_em')
 
@@ -108,7 +113,7 @@ def partial_home_view(request):
         
         vaga.match_percent = match
         
-        # Filtro: Mostra se tiver pelo menos 1 skill em comum (ou 50%, como preferir)
+        # Filtro: Mostra se tiver match maior que 0%
         if match > 0:
             vagas_finais.append(vaga)
 
@@ -118,10 +123,10 @@ def partial_home_view(request):
 
     # CONTEXTO FINAL
     context = {
-        'dados': {'nome': nome_usuario}, # Mantém padrão do HTML
+        'dados': {'nome': nome_usuario},
         'tem_skills': tem_skills,
         'skill_labels': json.dumps(skill_labels),
-        'skill_data': json.dumps(skill_data),
+        'skill_data': json.dumps(skill_data), # Agora envia os dados reais
         'vagas_recentes': vagas_recentes
     }
     
