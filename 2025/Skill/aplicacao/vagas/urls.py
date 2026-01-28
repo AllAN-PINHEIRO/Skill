@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     path('partial/feed/', views.partial_vagas_view, name='partial-vagas-feed'),
     path('partial/home/', views.partial_home_view, name='partial-home'),
+    path('partials/grade/', views.partial_grade_view, name='partial-grade'),
     path('partial/professor/home/', views.partial_home_professor_view, name='partial-home-prof'),
     path('partial/professor/perfil/', views.partial_perfil_professor_view, name='partial-perfil-prof'),
     path('partial/professor/minhas-vagas/', views.partial_minhas_vagas_view, name='partial-minhas-vagas'),
@@ -13,4 +14,6 @@ urlpatterns = [
     path('api/professor/editar-vaga/<int:vaga_id>/', views.api_editar_vaga, name='api-editar-vaga'),
     path('api/vaga/<int:vaga_id>/detalhes/', views.api_detalhes_vaga, name='api-vaga-detalhes'),
     path('api/vaga/<int:vaga_id>/candidatar/', views.api_candidatar_vaga, name='api-vaga-candidatar'),
+    path('api/candidatura/<int:id_candidatura>/detalhes/', views.api_detalhes_candidatura, name='api-detalhes-candidatura'),
+    path('api/candidatura/<int:id_candidatura>/avaliar/', views.api_avaliar_candidatura, name='api-avaliar-candidatura'),
 ]

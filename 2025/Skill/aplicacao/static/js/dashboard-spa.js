@@ -17,6 +17,7 @@ const SPA = {
         'editar': '/auth/partial/editar/',
         'portfolio': '/auth/partial/portfolio/',
         'vagas': '/vagas/partial/feed/', 
+        'grade': '/vagas/partials/grade/',
         
         // --- ROTAS DO PROFESSOR ---
         'home-prof': '/vagas/partial/professor/home/', 
@@ -1280,6 +1281,134 @@ async function processarEnvioCandidatura() {
         if(msgErro) msgErro.innerText = "Erro de conexão.";
     }
 }
+
+//* ==========================================================================
+/*LÓGICA DO PROFESSOR (GRADE E AVALIAÇÃO)
+========================================================================== */
+let candidatoAtualId = null;
+
+// 1. Abrir Modal de Avaliação
+window.abrirModalAvaliacao = async function(id) {
+ candidatoAtualId = id;
+ const modalEl = document.getElementById('modalAvaliarCandidato');
+ const modal = new bootstrap.Modal(modalEl);
+ modal.show();
+
+ // Refs
+ const elNome = document.getElementById('modal-nome-aluno');
+ const elSkills = document.getElementById('modal-skills-list');
+ const btnAprovar = document.getElementById('btn-aprovar-candidato'); 
+ const btnReprovar = document.getElementById('btn-reprovar-candidato'); 
+
+ // Reset visual
+ elNome.innerText = "Carregando...";
+ elSkills.innerHTML = '<div class="spinner-border spinner-border-sm"></div>';
+ 
+ // Reseta Botões (Habilita tudo inicialmente)
+ btnAprovar.disabled = false;
+ btnAprovar.className = "btn btn-success w-100 py-2 rounded-pill fw-bold shadow-sm";
+ btnAprovar.innerHTML = "Aprovar Candidato";
+
+ btnReprovar.disabled = false;
+ btnReprovar.className = "btn btn-outline-danger w-100 py-2 rounded-pill fw-bold";
+ btnReprovar.innerHTML = "Recusar";
+
+ try {
+     const response = await fetch(`/vagas/api/candidatura/${id}/detalhes/`);
+     const data = await response.json();
+
+     elNome.innerText = data.nome_aluno;
+     document.getElementById('modal-nome-vaga').innerText = data.nome_vaga;
+     document.getElementById('modal-nome-empresa').innerText = data.nome_empresa;
+     
+     // Badge
+     const badge = document.getElementById('modal-match-badge');
+     badge.innerText = `${data.match_percent}% Match`;
+     
+     // Cores Badge
+     if(data.match_percent >= 75) badge.className = "position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success border border-white shadow-sm fs-6";
+     else if(data.match_percent >= 40) badge.className = "position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning border border-white shadow-sm fs-6 text-dark";
+     else badge.className = "position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary border border-white shadow-sm fs-6";
+
+     // --- LÓGICA DE DECISÃO ---
+     if (data.status === 'APROVADO') {
+         // Já Aprovado
+         btnAprovar.disabled = true;
+         btnAprovar.innerHTML = "<i class='bi bi-check-circle-fill me-1'></i> Já Aprovado";
+         
+         btnReprovar.disabled = true;
+         btnReprovar.className = "btn btn-light w-100 py-2 rounded-pill text-muted border";
+
+     } else if (data.status === 'REJEITADO') {
+         // Já Recusado
+         btnReprovar.disabled = true;
+         btnReprovar.innerHTML = "<i class='bi bi-x-circle-fill me-1'></i> Já Recusado";
+         btnReprovar.className = "btn btn-danger w-100 py-2 rounded-pill fw-bold opacity-75";
+
+         btnAprovar.disabled = true;
+         btnAprovar.className = "btn btn-light w-100 py-2 rounded-pill text-muted border";
+
+     } else {
+         // Pendente: Verifica Match Mínimo (75%)
+         if (data.match_percent < 75) {
+             btnAprovar.disabled = true;
+             btnAprovar.className = "btn btn-secondary w-100 py-2 rounded-pill fw-bold opacity-50 cursor-not-allowed"; 
+             btnAprovar.innerHTML = "<i class='bi bi-lock-fill me-1'></i> Requisitos Insuficientes";
+         }
+     }
+
+     // Renderiza Skills Coloridas
+     elSkills.innerHTML = '';
+     if(data.skills_detalhadas && data.skills_detalhadas.length > 0) {
+         data.skills_detalhadas.forEach(s => {
+             const cor = s.tem ? 'bg-success-subtle text-success border-success-subtle' : 'bg-white text-muted border-light-subtle opacity-50';
+             const icone = s.tem ? '<i class="bi bi-check-lg me-1"></i>' : '';
+             elSkills.innerHTML += `
+                 <span class="badge ${cor} border rounded-pill px-3 py-2 fw-normal">
+                     ${icone}${s.nome}
+                 </span>`;
+         });
+     } else {
+         elSkills.innerHTML = '<span class="text-muted small">Sem requisitos técnicos.</span>';
+     }
+
+ } catch (e) {
+     console.error(e);
+     elNome.innerText = "Erro ao carregar dados";
+ }
+};
+
+// 2. Enviar Decisão (Professor)
+window.enviarDecisao = async function(decisao) {
+ if(!candidatoAtualId) return;
+
+ try {
+     const response = await fetch(`/vagas/api/candidatura/${candidatoAtualId}/avaliar/`, {
+         method: 'POST',
+         headers: {
+             'Content-Type': 'application/json',
+             'X-CSRFToken': getCookie('csrftoken')
+         },
+         body: JSON.stringify({ acao: decisao }) 
+     });
+
+     const data = await response.json();
+
+     if (data.success) {
+         const modalEl = document.getElementById('modalAvaliarCandidato');
+         const modal = bootstrap.Modal.getInstance(modalEl);
+         modal.hide();
+         
+         // Recarrega a tabela
+         if(typeof SPA !== 'undefined') SPA.load('grade');
+     } else {
+         alert("Erro: " + data.message);
+     }
+ } catch (e) {
+     console.error(e);
+     alert("Erro de conexão.");
+ }
+};
 
 // Auxiliar para pegar Token CSRF
 function getCookie(name) {

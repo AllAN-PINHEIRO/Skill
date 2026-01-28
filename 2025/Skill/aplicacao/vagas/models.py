@@ -58,7 +58,6 @@ class Vaga(models.Model):
         return f"{self.titulo} - {self.empresa}"
 
 class Candidatura(models.Model):
-    # ... (seu código da classe Candidatura) ...
     STATUS_CANDIDATURA = (
         ('ENVIADO', 'Candidatura Enviada'),
         ('VISUALIZADO', 'Visualizado'),
@@ -68,8 +67,8 @@ class Candidatura(models.Model):
     )
 
     aluno = models.ForeignKey(User, on_delete=models.CASCADE, related_name='minhas_candidaturas')
-    vaga = models.ForeignKey(Vaga, on_delete=models.CASCADE, related_name='candidatos')
-    data_aplicacao = models.DateTimeField(auto_now_add=True)
+    vaga = models.ForeignKey('Vaga', on_delete=models.CASCADE, related_name='candidatos')
+    data_aplicacao = models.DateTimeField(auto_now_add=True) # Nome correto do campo
     status = models.CharField(max_length=20, choices=STATUS_CANDIDATURA, default='ENVIADO')
     match_percent = models.IntegerField(default=0)
     curriculo_pdf = models.FileField(upload_to='curriculos/', null=True, blank=True)

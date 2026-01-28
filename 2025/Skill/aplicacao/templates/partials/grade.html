@@ -1,0 +1,133 @@
+{% load static %}
+<div class="animate-fade-in">
+    
+    <div class="mb-4">
+        <h3 class="fw-bold mb-0">🎓 Gestão de Candidaturas</h3>
+        <p class="text-muted">Acompanhe quem se interessou pelas suas vagas.</p>
+    </div>
+
+    <div class="modern-card bg-white border rounded-4 shadow-sm overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light border-bottom">
+                    <tr>
+                        <th class="ps-4 py-3 text-uppercase text-muted small fw-bold">Candidato</th> 
+                        <th class="py-3 text-uppercase text-muted small fw-bold">Vaga / Empresa</th> 
+                        <th class="py-3 text-uppercase text-muted small fw-bold text-center">Match</th> 
+                        <th class="py-3 text-uppercase text-muted small fw-bold">Status</th>
+                        <th class="pe-4 py-3 text-end text-uppercase text-muted small fw-bold">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in candidaturas %}
+                    <tr class="cursor-pointer" onclick="abrirModalAvaliacao('{{ c.id }}')">
+                        
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
+                                    {{ c.aluno.cadastro.nome|slice:":1"|default:c.aluno.username|slice:":1"|upper }}
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold text-dark">
+                                        {{ c.aluno.cadastro.nome|default:c.aluno.get_full_name|default:c.aluno.username }}
+                                    </h6>
+                                    <small class="text-muted" style="font-size: 0.8rem;">{{ c.aluno.email }}</small>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span class="fw-bold text-dark">{{ c.vaga.titulo }}</span>
+                                <span class="text-muted small"><i class="bi bi-building me-1"></i>{{ c.vaga.empresa }}</span>
+                            </div>
+                        </td>
+                        
+                        <td class="text-center">
+                            {% if c.match_real >= 70 %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3">
+                                    <i class="bi bi-stars me-1"></i>{{ c.match_real }}%
+                                </span>
+                            {% elif c.match_real >= 40 %}
+                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3">
+                                    {{ c.match_real }}%
+                                </span>
+                            {% else %}
+                                <span class="badge bg-light text-muted border rounded-pill px-3">
+                                    {{ c.match_real }}%
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if c.status == 'ENVIADO' %}
+                                <span class="badge bg-secondary text-white rounded-pill">Novo</span>
+                            {% elif c.status == 'VISUALIZADO' %}
+                                <span class="badge bg-info text-white rounded-pill">Visto</span>
+                            {% elif c.status == 'APROVADO' %}
+                                <span class="badge bg-success text-white rounded-pill">Aprovado</span>
+                            {% elif c.status == 'REJEITADO' %}
+                                <span class="badge bg-danger text-white rounded-pill">Recusado</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="pe-4 text-end">
+                            <button class="btn btn-light btn-sm rounded-circle border">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            Nenhum candidato encontrado.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalAvaliarCandidato" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0 pt-4 px-4">
+                <h5 class="fw-bold mb-0">Análise de Candidato</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                
+                <div class="mb-3 position-relative d-inline-block">
+                    <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold display-4 mx-auto" style="width: 80px; height: 80px;">
+                        <i class="bi bi-person"></i>
+                    </div>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success border border-white shadow-sm fs-6" id="modal-match-badge">
+                        --%
+                    </span>
+                </div>
+
+                <h4 class="fw-bold text-dark mb-1" id="modal-nome-aluno">Carregando...</h4>
+                <p class="text-muted mb-3"><span id="modal-nome-vaga">...</span> na <span id="modal-nome-empresa" class="fw-bold">...</span></p>
+
+                <h6 class="fw-bold text-start ps-2 mb-2 text-muted small text-uppercase">Comparativo de Skills:</h6>
+                <div class="d-flex flex-wrap gap-2 mb-4 justify-content-center bg-light p-3 rounded-3" id="modal-skills-list">
+                    </div>
+
+                  <div class="row g-2 mt-3">
+                      <div class="col-6">
+                          <button id="btn-reprovar-candidato" onclick="enviarDecisao('REJEITAR')" class="btn btn-outline-danger w-100 py-2 rounded-pill fw-bold">
+                              Recusar
+                          </button>
+                      </div>
+                      <div class="col-6">
+                          <button id="btn-aprovar-candidato" onclick="enviarDecisao('APROVAR')" class="btn btn-success w-100 py-2 rounded-pill fw-bold shadow-sm">
+                              Aprovar Candidato
+                          </button>
+                      </div>
+                  </div>
+            </div>
+        </div>
+    </div>
+</div>

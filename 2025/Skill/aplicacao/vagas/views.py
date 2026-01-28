@@ -423,3 +423,122 @@ def api_candidatar_vaga(request, vaga_id):
     Candidatura.objects.create(aluno=usuario, vaga=vaga)
     
     return JsonResponse({'success': True, 'message': 'Candidatura enviada com sucesso!'})
+
+# =========================================================
+# CORREÇÃO 1: VIEW DA GRADE (LISTA)
+# =========================================================
+@login_required
+def partial_grade_view(request):
+    # Busca candidaturas das vagas deste professor
+    candidaturas = Candidatura.objects.filter(
+        vaga__professor=request.user 
+    ).select_related('aluno', 'vaga', 'aluno__perfil_aluno').order_by('-data_aplicacao') 
+
+    # --- LÓGICA DE CÁLCULO DE MATCH PARA A TABELA ---
+    for c in candidaturas:
+        try:
+            # 1. Pega IDs das skills da Vaga
+            skills_vaga = set(c.vaga.habilidades.values_list('id', flat=True))
+            
+            # 2. Pega IDs das skills do Aluno
+            skills_aluno = set()
+            if hasattr(c.aluno, 'perfil_aluno'):
+                skills_aluno = set(c.aluno.perfil_aluno.habilidades.values_list('id', flat=True))
+            
+            # 3. Calcula
+            if not skills_vaga:
+                c.match_real = 100 # Se a vaga não exige nada, é 100%
+            else:
+                comum = skills_aluno.intersection(skills_vaga)
+                c.match_real = int((len(comum) / len(skills_vaga)) * 100)
+        except:
+            c.match_real = 0
+
+    context = {
+        'candidaturas': candidaturas
+    }
+    return render(request, 'partials/grade.html', context)
+
+# =========================================================
+# CORREÇÃO 2: API PARA DAR MATCH OU RECUSAR
+# =========================================================
+@login_required
+@require_POST
+def api_avaliar_candidatura(request, id_candidatura):
+    data = json.loads(request.body)
+    acao = data.get('acao') 
+    
+    # CORRIGIDO: Aqui também mudamos para 'vaga__professor'
+    # Isso garante que só o dono da vaga pode avaliar o aluno
+    candidatura = get_object_or_404(Candidatura, id=id_candidatura, vaga__professor=request.user)
+    
+    if acao == 'APROVAR':
+        candidatura.status = 'APROVADO'
+        msg = "Sucesso! O match foi realizado."
+    elif acao == 'REJEITAR': 
+        candidatura.status = 'REJEITADO'
+        msg = "Candidatura marcada como não selecionada."
+    else:
+        return JsonResponse({'success': False, 'message': 'Ação inválida'})
+        
+    candidatura.save()
+    
+    return JsonResponse({'success': True, 'message': msg})
+
+# API DETALHES (MODAL)
+@login_required
+def api_detalhes_candidatura(request, id_candidatura):
+    # Busca a candidatura
+    c = get_object_or_404(Candidatura, id=id_candidatura)
+    
+    # [REMOVIDO] A lógica de atualizar para 'VISUALIZADO' foi retirada.
+    # O status agora se mantém inalterado ao apenas abrir o modal.
+
+    # --- CÁLCULO DE SKILLS PARA O MODAL ---
+    skills_vaga_objs = c.vaga.habilidades.all()
+    lista_skills_formatada = []
+    
+    # Pega skills do aluno para comparar
+    skills_aluno_ids = []
+    if hasattr(c.aluno, 'perfil_aluno'):
+        skills_aluno_ids = list(c.aluno.perfil_aluno.habilidades.values_list('id', flat=True))
+
+    match_percent = 0
+    skills_vaga_ids = set(s.id for s in skills_vaga_objs)
+    
+    if skills_vaga_ids:
+        comum = set(skills_aluno_ids).intersection(skills_vaga_ids)
+        match_percent = int((len(comum) / len(skills_vaga_ids)) * 100)
+    elif not skills_vaga_ids:
+        match_percent = 100
+
+    # Monta lista visual (Verde se tem, Cinza se falta)
+    for skill in skills_vaga_objs:
+        tem_skill = skill.id in skills_aluno_ids
+        lista_skills_formatada.append({
+            'nome': skill.nome,
+            'tem': tem_skill # True ou False
+        })
+
+    # Lógica para pegar o nome correto (Cadastro > FullName > Username)
+    nome_real = c.aluno.username
+    try:
+        if hasattr(c.aluno, 'cadastro') and c.aluno.cadastro.nome:
+            nome_real = c.aluno.cadastro.nome
+        elif c.aluno.get_full_name():
+            nome_real = c.aluno.get_full_name()
+    except:
+        pass
+
+    data = {
+        'id': c.id,
+        'nome_aluno': nome_real, # Agora busca o nome do cadastro
+        'nome_vaga': c.vaga.titulo,
+        'nome_empresa': c.vaga.empresa,
+        'email': c.aluno.email,
+        'skills_detalhadas': lista_skills_formatada,
+        'data': c.data_aplicacao.strftime('%d/%m/%Y'),
+        'match_percent': match_percent,
+        'status': c.status,
+    }
+    return JsonResponse(data)
