@@ -424,40 +424,42 @@ def api_candidatar_vaga(request, vaga_id):
     
     return JsonResponse({'success': True, 'message': 'Candidatura enviada com sucesso!'})
 
+# --- 1. FUNÇÃO DE SEGURANÇA (ADICIONE ISTO NO TOPO) ---
+def is_aluno(user):
+    # Tenta verificar se é aluno pelo perfil ou pelo cadastro
+    if hasattr(user, 'perfil_aluno'): return True
+    if hasattr(user, 'cadastro') and user.cadastro.tipoDoCadastro == 1: return True
+    return False
+
 # =========================================================
 # CORREÇÃO 1: VIEW DA GRADE (LISTA)
 # =========================================================
 @login_required
 def partial_grade_view(request):
-    # Busca candidaturas das vagas deste professor
-    candidaturas = Candidatura.objects.filter(
-        vaga__professor=request.user 
-    ).select_related('aluno', 'vaga', 'aluno__perfil_aluno').order_by('-data_aplicacao') 
+    """
+    Renderiza a tela 'Minhas Candidaturas' do Aluno com Estatísticas.
+    """
+    if is_aluno(request.user):
+        # 1. Busca todas as candidaturas desse aluno
+        candidaturas = Candidatura.objects.filter(aluno=request.user).select_related('vaga').order_by('-data_aplicacao')
+        
+        # 2. Calcula as Estatísticas
+        stats = {
+            'total': candidaturas.count(),
+            'aprovadas': candidaturas.filter(status='APROVADA').count(),
+            'reprovadas': candidaturas.filter(status='REPROVADA').count(),
+            'em_analise': candidaturas.filter(status='PENDENTE').count()
+        }
 
-    # --- LÓGICA DE CÁLCULO DE MATCH PARA A TABELA ---
-    for c in candidaturas:
-        try:
-            # 1. Pega IDs das skills da Vaga
-            skills_vaga = set(c.vaga.habilidades.values_list('id', flat=True))
-            
-            # 2. Pega IDs das skills do Aluno
-            skills_aluno = set()
-            if hasattr(c.aluno, 'perfil_aluno'):
-                skills_aluno = set(c.aluno.perfil_aluno.habilidades.values_list('id', flat=True))
-            
-            # 3. Calcula
-            if not skills_vaga:
-                c.match_real = 100 # Se a vaga não exige nada, é 100%
-            else:
-                comum = skills_aluno.intersection(skills_vaga)
-                c.match_real = int((len(comum) / len(skills_vaga)) * 100)
-        except:
-            c.match_real = 0
-
-    context = {
-        'candidaturas': candidaturas
-    }
-    return render(request, 'partials/grade.html', context)
+        context = {
+            'candidaturas': candidaturas,
+            'stats': stats
+        }
+        return render(request, 'partials/grade-aluno.html', context)
+    else:
+        # Se for professor, vai para a grade do professor (já configurado antes)
+        candidaturas = Candidatura.objects.filter(vaga__professor=request.user).order_by('-data_aplicacao')
+        return render(request, 'partials/grade.html', {'candidaturas': candidaturas})
 
 # =========================================================
 # CORREÇÃO 2: API PARA DAR MATCH OU RECUSAR
