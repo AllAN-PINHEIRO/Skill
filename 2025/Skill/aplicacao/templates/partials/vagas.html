@@ -1,152 +1,249 @@
 {% load static %}
+
 <div class="animate-fade-in">
 
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-        <div>
-            <h3 class="fw-bold mb-0 text-dark">🚀 Mural de Oportunidades</h3>
-            <p class="text-muted mb-0 small">Encontre a vaga ideal para o seu perfil técnico.</p>
+    <div class="row g-3 mb-4">
+        
+        <div class="col-md-6">
+            <div class="bg-white p-3 rounded-4 shadow-sm border d-flex align-items-center justify-content-between h-100">
+                <div>
+                    <span class="text-muted small fw-bold text-uppercase">Para seu Perfil</span>
+                    <h3 class="fw-bold text-dark mb-0 mt-1">{{ stats.disponiveis }}</h3>
+                </div>
+                <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                    <i class="bi bi-briefcase fs-4"></i>
+                </div>
+            </div>
         </div>
         
-        <div class="input-group" style="max-width: 300px;">
-            <span class="input-group-text bg-white border-end-0 ps-3">
-                <i class="bi bi-search text-muted"></i>
-            </span>
-            <input type="text" id="input-busca-vagas" class="form-control border-start-0 ps-2" placeholder="Buscar cargo, empresa...">
+        <div class="col-md-6">
+            <div class="bg-white p-3 rounded-4 shadow-sm border d-flex align-items-center justify-content-between h-100">
+                <div>
+                    <span class="text-muted small fw-bold text-uppercase">Minhas Candidaturas</span>
+                    <h3 class="fw-bold text-dark mb-0 mt-1">{{ stats.enviadas }}</h3>
+                </div>
+                <div class="bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                    <i class="bi bi-send fs-4"></i>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h4 class="fw-bold mb-0">Mural de Vagas</h4>
+            <p class="text-muted mb-0 small">Oportunidades selecionadas para você.</p>
+        </div>
+        
+        <div class="position-relative flex-grow-1 flex-md-grow-0" style="min-width: 320px;">
+            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+            <input type="text" id="inputBuscaVagas" class="form-control rounded-pill ps-5 py-2 border-0 shadow-sm" 
+                   placeholder="Pesquisar cargo, empresa ou skill..." onkeyup="SPA.filtrarVagas()">
         </div>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-4" id="lista-vagas-container">
         
-        <div class="col-lg-3 d-none d-lg-block">
-            <div class="modern-card p-3 mb-4 border-0 shadow-sm">
-                <h6 class="fw-bold mb-3 small text-uppercase text-muted">Suas Candidaturas</h6>
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="small"><i class="bi bi-send text-primary me-2"></i>Enviadas</span>
-                    <span class="badge bg-light text-dark">0</span>
+        {% for vaga in vagas %}
+        
+        <div class="col-md-6 col-xl-6 vaga-item" data-texto="{{ vaga.titulo }} {{ vaga.empresa }} {{ vaga.habilidades.all|join:' ' }}">
+            
+            <div class="modern-card h-100 bg-white border rounded-4 shadow-sm p-4 d-flex flex-column hover-lift position-relative {% if vaga.match_percent < 30 %}opacity-75 bg-light{% endif %}">
+                
+                <div class="position-absolute top-0 end-0 mt-3 me-3">
+                    {% if vaga.match_percent >= 70 %}
+                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">
+                            <i class="bi bi-stars me-1"></i>{{ vaga.match_percent }}% Match
+                        </span>
+                    {% elif vaga.match_percent >= 30 %}
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill">
+                            {{ vaga.match_percent }}% Match
+                        </span>
+                    {% else %}
+                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill" title="Requisitos baixos">
+                            <i class="bi bi-exclamation-circle me-1"></i>Baixo: {{ vaga.match_percent }}%
+                        </span>
+                    {% endif %}
                 </div>
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="small"><i class="bi bi-eye text-info me-2"></i>Vistas</span>
-                    <span class="badge bg-light text-dark">0</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="small"><i class="bi bi-check-circle text-success me-2"></i>Aprovadas</span>
-                    <span class="badge bg-light text-dark">0</span>
-                </div>
-            </div>
 
-            <div class="modern-card p-3 bg-primary-subtle border-0">
-                <div class="text-center mb-2">
-                    <i class="bi bi-lightbulb-fill text-primary fs-4"></i>
+                <div class="d-flex align-items-start gap-3 mb-3">
+                    <div class="bg-white rounded-3 p-3 border d-flex align-items-center justify-content-center shadow-sm" style="width: 55px; height: 55px;">
+                        <i class="bi bi-building text-secondary fs-3"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold text-dark mb-1">{{ vaga.empresa }}</h5>
+                        <p class="text-muted small mb-0"><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ vaga.cidade }}</p>
+                    </div>
                 </div>
-                <h6 class="fw-bold text-center text-primary mb-2">Dica de Ouro</h6>
-                <p class="small text-muted text-center mb-0" style="font-size: 0.8rem;">
-                    Mantenha seu perfil e skills sempre atualizados para aumentar o "Match" com as vagas.
+
+                <h4 class="fw-bold text-dark mb-3">{{ vaga.titulo }}</h4>
+
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    {% if vaga.tipo == 'ESTAGIO' %}
+                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3">Estágio</span>
+                    {% elif vaga.tipo == 'JUNIOR' %}
+                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle rounded-pill px-3">Júnior</span>
+                    {% elif vaga.tipo == 'PLENO' %}
+                        <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle rounded-pill px-3">Pleno</span>
+                    {% elif vaga.tipo == 'SENIOR' %}
+                        <span class="badge bg-dark-subtle text-dark-emphasis border border-dark-subtle rounded-pill px-3">Sênior</span>
+                    {% else %}
+                        <span class="badge bg-light text-dark border rounded-pill px-3">{{ vaga.get_tipo_display }}</span>
+                    {% endif %}
+
+                    {% if vaga.modalidade == 'REMOTO' %}
+                        <span class="badge bg-purple-subtle text-purple border border-purple-subtle rounded-pill px-3" style="background-color: #f3e8ff; color: #6b21a8;">Remoto</span>
+                    {% else %}
+                        <span class="badge bg-light text-secondary border rounded-pill px-3">Presencial</span>
+                    {% endif %}
+                </div>
+
+                <p class="text-muted small line-clamp-2 flex-grow-1">
+                    {{ vaga.descricao|truncatechars:110 }}
                 </p>
+
+                <div class="mt-4 pt-3 border-top border-light d-flex justify-content-between align-items-center">
+                    <small class="text-muted fst-italic">
+                        <i class="bi bi-clock me-1"></i> {{ vaga.criado_em|timesince }} atrás
+                    </small>
+
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center hover-scale" 
+                                style="width: 38px; height: 38px;"
+                                onclick="verDetalhesVaga('{{ vaga.id }}')" 
+                                title="Ver Detalhes">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        
+                        {% if vaga.match_percent >= 30 %}
+                            <button class="btn btn-success btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center hover-scale shadow-sm" 
+                                    style="width: 38px; height: 38px;"
+                                    onclick="candidatarVaga('{{ vaga.id }}')"
+                                    title="Candidatar-se Agora">
+                                <i class="bi bi-send-fill"></i>
+                            </button>
+                        {% else %}
+                            <button class="btn btn-secondary btn-sm rounded-pill px-3 py-2 disabled cursor-not-allowed opacity-50" 
+                                    style="height: 38px;"
+                                    disabled
+                                    title="Skill insuficiente para esta vaga">
+                                <i class="bi bi-lock-fill me-1"></i> Bloqueado
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+
             </div>
         </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5 bg-white rounded-4 shadow-sm border border-dashed mt-3">
+                <i class="bi bi-emoji-frown text-muted display-4 mb-3"></i>
+                <h4 class="fw-bold text-dark">Nenhuma vaga compatível</h4>
+                <p class="text-muted mb-4">
+                    Não encontramos vagas com Match > 0% para o seu perfil. <br>
+                    Adicione mais skills ao seu portfólio para ver oportunidades.
+                </p>
+                <button class="btn btn-outline-primary rounded-pill px-4" onclick="SPA.load('meu-perfil')">
+                    Melhorar meu Perfil
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+        
+    </div>
+</div>
 
-        <div class="col-lg-9">
+<div class="modal fade" id="modalDetalhesVaga" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
             
-            <div id="lista-vagas-container" class="d-flex flex-column gap-3">
-                
-                {% for vaga in vagas %}
-                <div class="vaga-card-item bg-white p-4 border rounded-3 shadow-sm position-relative hover-lift">
-                    
-                    <div class="d-flex justify-content-between align-items-start">
-                        
-                        <div class="d-flex gap-3">
-                            <div class="company-logo-placeholder">
-                                <i class="bi bi-building"></i>
-                            </div>
-                            <div>
-                                <h5 class="fw-bold mb-1 text-dark vaga-titulo">{{ vaga.titulo }}</h5>
-                                <p class="text-muted small mb-2 vaga-empresa">
-                                    {{ vaga.empresa }} • <span class="text-success"><i class="bi bi-geo-alt-fill"></i> {{ vaga.cidade }}</span>
-                                </p>
-                                
-                                <div class="d-flex gap-1 flex-wrap mt-2">
-                                    {% for skill in vaga.habilidades.all|slice:":3" %}
-                                        <span class="badge bg-light text-secondary border fw-normal">{{ skill.nome }}</span>
-                                    {% empty %}
-                                        <span class="badge bg-light text-muted border fw-normal">Geral</span>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="text-end d-none d-md-block">
-                            {% if vaga.tipo == 'ESTAGIO' %}
-                                <span class="badge bg-indigo-subtle text-indigo px-3 py-2 rounded-pill mb-2">Estágio</span>
-                            {% elif vaga.tipo == 'JUNIOR' %}
-                                <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill mb-2">Júnior</span>
-                            {% else %}
-                                <span class="badge bg-secondary-subtle text-secondary px-3 py-2 rounded-pill mb-2">{{ vaga.get_tipo_display }}</span>
-                            {% endif %}
-                            
-                            <br>
-                            {% if vaga.modalidade == 'REMOTO' %}
-                                <small class="text-info fw-bold" style="font-size: 0.7rem;">REMOTO</small>
-                            {% elif vaga.modalidade == 'HIBRIDO' %}
-                                <small class="text-warning fw-bold" style="font-size: 0.7rem;">HÍBRIDO</small>
-                            {% endif %}
-                            
-                            <div class="small text-muted mt-1" style="font-size: 0.75rem;">
-                                <i class="bi bi-clock"></i> {{ vaga.criado_em|timesince }} atrás
-                            </div>
-                        </div>
-                    </div>
-
-                    <hr class="border-light my-3">
-
-                    <div class="d-flex justify-content-between align-items-center">
-                        
-                        <div class="match-indicator d-flex align-items-center gap-3">
-                            
-                            <div class="d-flex flex-column justify-content-center" style="width: 80px;">
-                                <div class="progress" style="height: 6px;">
-                                    <div class="progress-bar {% if vaga.match_percent == 100 %}bg-success{% else %}bg-primary{% endif %}" 
-                                         role="progressbar" 
-                                         style="width: '{{ vaga.match_percent }}'"
-                                         aria-valuenow="{{ vaga.match_percent }}" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-
-                            {% if vaga.match_percent == 100 %}
-                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">
-                                    <i class="bi bi-stars me-1"></i> 100% Compatível
-                                </span>
-                            {% else %}
-                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill">
-                                    <i class="bi bi-check-circle me-1"></i> {{ vaga.match_percent }}% Match
-                                </span>
-                            {% endif %}
-
-                        </div>
-
-                        <button class="btn btn-sm btn-dark px-4 rounded-pill fw-bold shadow-sm" onclick="alert('Funcionalidade de candidatura em breve!')">
-                            Candidatar-se
-                        </button>
-                    </div>
-
-                </div>
-                {% empty %}
-                    <div class="text-center py-5">
-                        <div class="mb-3">
-                             <i class="bi bi-search display-1 text-muted opacity-25"></i>
-                        </div>
-                        <h5 class="text-muted fw-bold">Nenhuma vaga compatível encontrada</h5>
-                        <p class="text-muted small">
-                            Só mostramos vagas com pelo menos <strong>75% de compatibilidade</strong> com suas habilidades.<br>
-                            Adicione mais skills ao seu perfil para ver mais oportunidades!
-                        </p>
-                        <button class="btn btn-outline-primary btn-sm rounded-pill mt-2" onclick="SPA.load('meu-perfil')">
-                            Atualizar Minhas Skills
-                        </button>
-                    </div>
-                {% endfor %}
-
+            <div class="modal-header border-0 pb-0 bg-white pt-4 px-4">
+                <span id="modal-vaga-tag" class="badge bg-light text-dark border rounded-pill px-3 py-2 fw-bold shadow-sm">
+                    Carregando...
+                </span>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
+            <div class="modal-body p-4 pt-2">
+                <div class="d-flex align-items-center gap-3 mb-4 mt-2">
+                    <div class="bg-light rounded-4 p-3 border shadow-sm">
+                        <i class="bi bi-building fs-1 text-secondary"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold text-dark mb-1" id="modal-vaga-titulo">...</h3>
+                        <p class="text-muted mb-0 fs-5">
+                            <span id="modal-vaga-empresa">...</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        <h6 class="fw-bold text-dark mb-2">Sobre a vaga</h6>
+                        <p class="text-muted" id="modal-vaga-descricao">Carregando detalhes...</p>
+                    </div>
+                    <div class="col-lg-4 border-start border-light ps-lg-4">
+                        <h6 class="fw-bold text-dark mb-3">Requisitos</h6>
+                        <div id="modal-vaga-skills" class="d-flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer border-0 pt-0 px-4 pb-4 bg-white">
+                <button type="button" class="btn btn-light rounded-pill px-4 border" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" id="btn-candidatar-modal" class="btn btn-success rounded-pill px-5 fw-bold shadow-sm">
+                    🚀 Quero me candidatar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalConfirmarCandidatura" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-body p-4 text-center">
+                
+                <div id="step-confirmacao">
+                    <div class="mb-3">
+                        <div class="bg-primary-subtle text-primary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                            <i class="bi bi-send-fill fs-1"></i>
+                        </div>
+                    </div>
+                    <h4 class="fw-bold mb-2">Confirmar envio?</h4>
+                    <p class="text-muted mb-4">Você está se candidatando para:<br><strong id="nome-vaga-confirmar" class="text-dark">---</strong></p>
+                    
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" id="btn-confirma-envio" class="btn btn-primary rounded-pill px-4 fw-bold">Sim, Enviar Agora</button>
+                    </div>
+                </div>
+
+                <div id="step-loading" class="d-none py-3">
+                    <div class="spinner-border text-primary mb-3" role="status"></div>
+                    <h5 class="fw-bold">Processando...</h5>
+                </div>
+
+                <div id="step-sucesso" class="d-none py-3">
+                    <div class="mb-3">
+                        <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                            <i class="bi bi-check-lg fs-1"></i>
+                        </div>
+                    </div>
+                    <h4 class="fw-bold text-success mb-2">Candidatura Enviada!</h4>
+                    <p class="text-muted">Boa sorte no processo seletivo.</p>
+                </div>
+
+                <div id="step-erro" class="d-none py-3">
+                    <div class="text-danger mb-3"><i class="bi bi-x-circle fs-1"></i></div>
+                    <h5 class="fw-bold text-danger">Erro no envio</h5>
+                    <p id="msg-erro-candidatura" class="text-muted small">Tente novamente.</p>
+                    <button type="button" class="btn btn-light rounded-pill btn-sm" data-bs-dismiss="modal">Fechar</button>
+                </div>
+
+            </div>
         </div>
     </div>
 </div>

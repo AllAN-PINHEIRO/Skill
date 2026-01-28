@@ -4,53 +4,62 @@ from django.http import JsonResponse # <--- NOVO IMPORT
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from contas.models import Cadastro, HabilidadeAluno, PerfilAluno, PerfilProfessor, Habilidade # <--- ADICIONADO Habilidade
-from .models import Vaga 
+from .models import Vaga, Candidatura
+from django.views.decorators.http import require_POST
+
 
 # =========================================================
 # 1. VIEW DO ALUNO (FEED DE VAGAS)
 # =========================================================
 @login_required
 def partial_vagas_view(request):
-    # 1. Busca todas as vagas abertas inicialmente
+    # 1. Filtro de Busca
+    termo = request.GET.get('q', '').strip()
+    
+    # Pega TODAS as abertas inicialmente
     todas_vagas = Vaga.objects.filter(status='ABERTA').order_by('-criado_em')
     
-    vagas_compativeis = []
-    
-    # 2. Tenta pegar as habilidades do aluno logado
-    skills_aluno = set()
-    try:
-        # Verifica se o usuário tem perfil de aluno e pega os IDs das habilidades
-        if hasattr(request.user, 'perfil_aluno'):
-            skills_aluno = set(request.user.perfil_aluno.habilidades.values_list('id', flat=True))
-    except:
-        pass # Se não for aluno ou der erro, skills_aluno fica vazio
+    if termo:
+        todas_vagas = todas_vagas.filter(titulo__icontains=termo) | todas_vagas.filter(empresa__icontains=termo)
 
-    # 3. Processa o Match de cada vaga
+    # 2. Match e Filtragem
+    vagas_finais = [] # Lista que vai para o template
+    
+    skills_aluno = set()
+    if hasattr(request.user, 'perfil_aluno'):
+        skills_aluno = set(request.user.perfil_aluno.habilidades.values_list('id', flat=True))
+
     for vaga in todas_vagas:
         skills_vaga = set(vaga.habilidades.values_list('id', flat=True))
-        total_requisitos = len(skills_vaga)
+        match = 0
         
-        match_percent = 0
-        
-        if total_requisitos == 0:
-            # Se a vaga não pede nada, é 100% compatível com qualquer um
-            match_percent = 100
+        if not skills_vaga:
+            match = 100 # Vaga sem requisitos = Match total
         else:
-            # Interseção: Quais skills da vaga o aluno TEM
-            skills_em_comum = skills_aluno.intersection(skills_vaga)
-            qtd_comum = len(skills_em_comum)
-            
-            # Cálculo da porcentagem (Ex: 3 de 4 = 0.75 * 100 = 75%)
-            match_percent = int((qtd_comum / total_requisitos) * 100)
+            comum = skills_aluno.intersection(skills_vaga)
+            match = int((len(comum) / len(skills_vaga)) * 100)
         
-        # 4. APLICA A REGRA DOS 75%
-        if match_percent >= 75:
-            # Adiciona um atributo dinâmico na vaga para usar no HTML (mostrar a %)
-            vaga.match_percent = match_percent
-            vagas_compativeis.append(vaga)
+        vaga.match_percent = match
+        
+        # --- REGRA DE OURO ---
+        # Só adiciona na lista se tiver ALGUM match (> 0)
+        if match > 0:
+            vagas_finais.append(vaga)
+
+    # 3. Estatísticas (Baseadas apenas no que o aluno PODE ver)
+    total_candidaturas = 0
+    if request.user.is_authenticated:
+        total_candidaturas = Candidatura.objects.filter(aluno=request.user).count()
+
+    # Ordena: As com maior match aparecem primeiro
+    vagas_finais.sort(key=lambda x: x.match_percent, reverse=True)
 
     context = {
-        'vagas': vagas_compativeis
+        'vagas': vagas_finais, # Enviamos a lista filtrada
+        'stats': {
+            'enviadas': total_candidaturas,
+            'disponiveis': len(vagas_finais)
+        }
     }
     
     return render(request, 'partials/vagas.html', context)
@@ -293,27 +302,43 @@ def api_excluir_vaga(request, vaga_id):
 @login_required
 def api_detalhes_vaga(request, vaga_id):
     try:
-        vaga = get_object_or_404(Vaga, id=vaga_id, professor=request.user)
+        vaga = Vaga.objects.get(id=vaga_id)
         
-        # Prepara a lista de IDs das habilidades que essa vaga já tem
-        skills_ids = list(vaga.habilidades.values_list('id', flat=True))
-        # Prepara os nomes das habilidades também (para mostrar visualmente)
-        skills_data = list(vaga.habilidades.values('id', 'nome'))
+        # 1. Verifica Candidatura (Mantido)
+        ja_candidatou = False
+        if Candidatura.objects.filter(aluno=request.user, vaga=vaga).exists():
+            ja_candidatou = True
+
+        # 2. CALCULAR MATCH (NOVO!)
+        match = 0
+        if hasattr(request.user, 'perfil_aluno'):
+            skills_aluno = set(request.user.perfil_aluno.habilidades.values_list('id', flat=True))
+            skills_vaga = set(vaga.habilidades.values_list('id', flat=True))
+            
+            if not skills_vaga:
+                match = 100
+            else:
+                comum = skills_aluno.intersection(skills_vaga)
+                match = int((len(comum) / len(skills_vaga)) * 100)
 
         data = {
             'id': vaga.id,
-            'empresa': vaga.empresa,
             'titulo': vaga.titulo,
+            'empresa': vaga.empresa,
+            'descricao': vaga.descricao,
+            'modalidade': vaga.get_modalidade_display(),
+            'tipo': vaga.get_tipo_display(),
             'cidade': vaga.cidade,
-            'modalidade': vaga.modalidade,
-            'status': vaga.status,
-            'sobre': vaga.descricao,
-            'skills_ids': skills_ids, # Lista de IDs [1, 5, 9]
-            'skills_data': skills_data # Lista de Objetos [{'id':1, 'nome':'Java'}]
+            'skills': [s.nome for s in vaga.habilidades.all()],
+            'ja_candidatou': ja_candidatou,
+            'match_percent': match  # <--- Enviando o Match para o JS
         }
-        return JsonResponse({'success': True, 'data': data})
+        return JsonResponse(data)
+    except Vaga.DoesNotExist:
+        return JsonResponse({'error': 'Vaga não encontrada'}, status=404)
     except Exception as e:
-        return JsonResponse({'success': False, 'message': str(e)}, status=400)
+        print(f"ERRO API: {e}")
+        return JsonResponse({'error': str(e)}, status=500)
 
 # --- API: ATUALIZAR (EDITAR) VAGA ---
 @login_required
@@ -344,3 +369,57 @@ def api_editar_vaga(request, vaga_id):
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
     return JsonResponse({'success': False}, status=405)
+
+# 1. API DE DETALHES (Corrigida)
+@login_required
+def api_detalhes_vaga(request, vaga_id):
+    try:
+        vaga = Vaga.objects.get(id=vaga_id)
+        
+        # Verifica se o aluno já se candidatou
+        ja_candidatou = False
+        
+        # CORREÇÃO AQUI:
+        # O modelo Candidatura espera um User, não um PerfilAluno.
+        # Então usamos 'aluno=request.user'
+        if Candidatura.objects.filter(aluno=request.user, vaga=vaga).exists():
+            ja_candidatou = True
+
+        data = {
+            'id': vaga.id,
+            'titulo': vaga.titulo,
+            'empresa': vaga.empresa,
+            'descricao': vaga.descricao,
+            'modalidade': vaga.get_modalidade_display(),
+            'tipo': vaga.get_tipo_display(),
+            'cidade': vaga.cidade,
+            'skills': [s.nome for s in vaga.habilidades.all()],
+            'ja_candidatou': ja_candidatou
+        }
+        return JsonResponse(data)
+    except Vaga.DoesNotExist:
+        return JsonResponse({'error': 'Vaga não encontrada'}, status=404)
+    except Exception as e:
+        # Isso vai te ajudar a ver erros futuros no terminal sem quebrar a tela
+        print(f"ERRO API DETALHES: {e}") 
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+# 2. API DE CANDIDATAR (Corrigida)
+@login_required
+@require_POST
+def api_candidatar_vaga(request, vaga_id):
+    # Removido a checagem de perfil_aluno pois o banco pede User
+    
+    vaga = get_object_or_404(Vaga, id=vaga_id)
+    usuario = request.user # <--- Usamos o User direto
+    
+    # Verifica duplicidade
+    if Candidatura.objects.filter(aluno=usuario, vaga=vaga).exists():
+        return JsonResponse({'success': False, 'message': 'Você já se candidatou a esta vaga!'})
+
+    # Cria a candidatura
+    # CORREÇÃO AQUI TAMBÉM: Enviamos o usuario (request.user)
+    Candidatura.objects.create(aluno=usuario, vaga=vaga)
+    
+    return JsonResponse({'success': True, 'message': 'Candidatura enviada com sucesso!'})

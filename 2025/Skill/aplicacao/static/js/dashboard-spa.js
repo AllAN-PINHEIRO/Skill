@@ -1084,5 +1084,218 @@ window.initSkillsChart = function() {
     }
 };
 
+/* ==========================================================================
+   LÓGICA DE VAGAS (MODAIS, DETALHES E CANDIDATURA)
+   ========================================================================== */
+
+// Variável global para armazenar o ID da vaga atual
+let vagaSelecionadaId = null;
+
+/**
+ * 1. FUNÇÃO PARA VER DETALHES (Botão Olho)
+ * Busca dados da API e configura o botão com base no MATCH
+ */
+window.verDetalhesVaga = async function(id) {
+    const modalEl = document.getElementById('modalDetalhesVaga');
+    
+    // Verificação de Segurança (Evita erro de backdrop)
+    if (!modalEl) {
+        console.error("ERRO: Modal 'modalDetalhesVaga' não encontrado.");
+        return; 
+    }
+
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+
+    // Referências aos elementos do DOM
+    const elTitulo = document.getElementById('modal-vaga-titulo');
+    const elEmpresa = document.getElementById('modal-vaga-empresa');
+    const elDescricao = document.getElementById('modal-vaga-descricao');
+    const elSkills = document.getElementById('modal-vaga-skills');
+    const elTag = document.getElementById('modal-vaga-tag');
+    const btnCandidatar = document.getElementById('btn-candidatar-modal');
+
+    // Reset visual enquanto carrega
+    elTitulo.innerText = "Carregando...";
+    elEmpresa.innerText = "...";
+    elDescricao.innerText = "Buscando informações...";
+    elSkills.innerHTML = "";
+    elTag.innerText = "...";
+    
+    // Desabilita botão enquanto carrega
+    btnCandidatar.className = "btn btn-light border rounded-pill px-4 disabled";
+    btnCandidatar.innerText = "Aguarde...";
+
+    try {
+        const response = await fetch(`/vagas/api/vaga/${id}/detalhes/`);
+        const data = await response.json();
+
+        if (data.error) throw new Error(data.error);
+
+        // Preenche dados básicos
+        elTitulo.innerText = data.titulo;
+        elEmpresa.innerText = `${data.empresa} • ${data.cidade}`;
+        elDescricao.innerText = data.descricao;
+        elTag.innerText = data.tipo; // Ex: Júnior, Estágio
+
+        // Ajuste de cor da Tag (Estético)
+        if(data.tipo === 'ESTAGIO') {
+            elTag.className = "badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-2 fw-bold shadow-sm";
+            elTag.innerText = "Estágio";
+        } else {
+            elTag.className = "badge bg-info-subtle text-info-emphasis border border-info-subtle rounded-pill px-3 py-2 fw-bold shadow-sm";
+        }
+
+        // Renderiza Skills
+        elSkills.innerHTML = '';
+        if (data.skills && data.skills.length > 0) {
+            data.skills.forEach(skill => {
+                elSkills.innerHTML += `<span class="badge bg-light text-dark border fw-normal shadow-sm">${skill}</span>`;
+            });
+        } else {
+            elSkills.innerHTML = '<span class="text-muted small">Sem requisitos específicos.</span>';
+        }
+
+        // =========================================================
+        // AQUI ESTÁ A CORREÇÃO DE SEGURANÇA (BLOQUEIO POR MATCH)
+        // =========================================================
+        const MATCH_MINIMO = 75; // 75%
+
+        // CASO 1: Usuário já se candidatou
+        if (data.ja_candidatou) {
+            btnCandidatar.className = "btn btn-secondary rounded-pill px-4 fw-bold disabled";
+            btnCandidatar.innerHTML = "<i class='bi bi-check-circle-fill me-2'></i> Já Candidatado";
+            btnCandidatar.disabled = true;
+            btnCandidatar.onclick = null;
+        } 
+        // CASO 2: Match Baixo (Bloqueia o botão mesmo dentro do modal)
+        else if (data.match_percent < MATCH_MINIMO) {
+            btnCandidatar.className = "btn btn-light text-muted border rounded-pill px-4 fw-bold disabled cursor-not-allowed opacity-75";
+            // Mostra o motivo do bloqueio
+            btnCandidatar.innerHTML = `<i class='bi bi-lock-fill me-2'></i> Requisitos Insuficientes (${data.match_percent}%)`;
+            btnCandidatar.disabled = true;
+            btnCandidatar.onclick = null;
+        } 
+        // CASO 3: Liberado
+        else {
+            btnCandidatar.className = "btn btn-success rounded-pill px-4 fw-bold hover-scale shadow-sm";
+            btnCandidatar.innerHTML = "🚀 Quero me candidatar";
+            btnCandidatar.disabled = false;
+            
+            // Define a ação de clique
+            btnCandidatar.onclick = () => {
+                modal.hide(); // Fecha detalhes
+                candidatarVaga(id); // Abre confirmação
+            };
+        }
+
+    } catch (e) {
+        console.error(e);
+        elDescricao.innerHTML = `<span class="text-danger">Erro ao carregar: ${e.message}</span>`;
+    }
+};
+
+/**
+ * 2. FUNÇÃO PARA ABRIR O MODAL DE CONFIRMAÇÃO
+ */
+window.candidatarVaga = function(id) {
+    vagaSelecionadaId = id;
+    
+    const modalEl = document.getElementById('modalConfirmarCandidatura');
+    if (!modalEl) return; 
+
+    // Tenta pegar o nome da vaga visualmente para por no texto (Opcional)
+    const cardEl = document.querySelector(`.vaga-item button[onclick*="${id}"]`)?.closest('.vaga-item');
+    // Se achou o card, pega o título, senão usa texto genérico
+    const tituloVaga = cardEl ? cardEl.dataset.texto.split(' ')[0] + "..." : "esta oportunidade"; 
+    
+    const labelVaga = document.getElementById('nome-vaga-confirmar');
+    if(labelVaga) labelVaga.innerText = tituloVaga;
+
+    // Reseta estados visuais
+    document.getElementById('step-confirmacao').classList.remove('d-none');
+    document.getElementById('step-loading').classList.add('d-none');
+    document.getElementById('step-sucesso').classList.add('d-none');
+    document.getElementById('step-erro').classList.add('d-none');
+
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+
+    // Vincula o botão "Sim"
+    document.getElementById('btn-confirma-envio').onclick = processarEnvioCandidatura;
+};
+
+/**
+ * 3. FUNÇÃO QUE FAZ O POST (ENVIA A CANDIDATURA)
+ */
+async function processarEnvioCandidatura() {
+    if (!vagaSelecionadaId) return;
+
+    // Muda para Loading
+    document.getElementById('step-confirmacao').classList.add('d-none');
+    document.getElementById('step-loading').classList.remove('d-none');
+
+    try {
+        const csrftoken = getCookie('csrftoken'); 
+
+        const response = await fetch(`/vagas/api/vaga/${vagaSelecionadaId}/candidatar/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        // Tira Loading
+        document.getElementById('step-loading').classList.add('d-none');
+
+        if (data.success) {
+            // Sucesso Visual
+            document.getElementById('step-sucesso').classList.remove('d-none');
+            
+            // Fecha e recarrega após 2s
+            setTimeout(() => {
+                const modalEl = document.getElementById('modalConfirmarCandidatura');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if(modal) modal.hide();
+                
+                // Recarrega a lista para atualizar os botões na tela principal
+                if(typeof SPA !== 'undefined') SPA.load('vagas'); 
+            }, 2000);
+
+        } else {
+            // Erro de Regra (ex: Já candidatou)
+            document.getElementById('step-erro').classList.remove('d-none');
+            const msgErro = document.getElementById('msg-erro-candidatura');
+            if(msgErro) msgErro.innerText = data.message;
+        }
+
+    } catch (e) {
+        console.error(e);
+        document.getElementById('step-loading').classList.add('d-none');
+        document.getElementById('step-erro').classList.remove('d-none');
+        const msgErro = document.getElementById('msg-erro-candidatura');
+        if(msgErro) msgErro.innerText = "Erro de conexão.";
+    }
+}
+
+// Auxiliar para pegar Token CSRF
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 // --- UTILITÁRIO: PEGAR COOKIE DJANGO ---
 function getCookie(name) { let cookieValue = null; if (document.cookie && document.cookie !== '') { const cookies = document.cookie.split(';'); for (let i = 0; i < cookies.length; i++) { const cookie = cookies[i].trim(); if (cookie.substring(0, name.length + 1) === (name + '=')) { cookieValue = decodeURIComponent(cookie.substring(name.length + 1)); break; } } } return cookieValue; }

@@ -11,4 +11,6 @@ urlpatterns = [
     path('api/professor/excluir-vaga/<int:vaga_id>/', views.api_excluir_vaga, name='api-excluir-vaga'),
     path('api/professor/vaga/<int:vaga_id>/', views.api_detalhes_vaga, name='api-detalhes-vaga'),
     path('api/professor/editar-vaga/<int:vaga_id>/', views.api_editar_vaga, name='api-editar-vaga'),
+    path('api/vaga/<int:vaga_id>/detalhes/', views.api_detalhes_vaga, name='api-vaga-detalhes'),
+    path('api/vaga/<int:vaga_id>/candidatar/', views.api_candidatar_vaga, name='api-vaga-candidatar'),
 ]
