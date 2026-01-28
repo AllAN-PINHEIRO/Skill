@@ -1096,19 +1096,21 @@ let vagaSelecionadaId = null;
  * 1. FUNÇÃO PARA VER DETALHES (Botão Olho)
  * Busca dados da API e configura o botão com base no MATCH
  */
+/**
+ * FUNÇÃO LIMPA: Apenas busca o modal existente e preenche
+ */
 window.verDetalhesVaga = async function(id) {
     const modalEl = document.getElementById('modalDetalhesVaga');
     
-    // Verificação de Segurança (Evita erro de backdrop)
     if (!modalEl) {
-        console.error("ERRO: Modal 'modalDetalhesVaga' não encontrado.");
-        return; 
+        console.error("ERRO: O modal não está no HTML principal (dashboard-aluno.html).");
+        return;
     }
 
     const modal = new bootstrap.Modal(modalEl);
     modal.show();
 
-    // Referências aos elementos do DOM
+    // Referências aos elementos (O modal já existe, então é rápido achar)
     const elTitulo = document.getElementById('modal-vaga-titulo');
     const elEmpresa = document.getElementById('modal-vaga-empresa');
     const elDescricao = document.getElementById('modal-vaga-descricao');
@@ -1116,16 +1118,17 @@ window.verDetalhesVaga = async function(id) {
     const elTag = document.getElementById('modal-vaga-tag');
     const btnCandidatar = document.getElementById('btn-candidatar-modal');
 
-    // Reset visual enquanto carrega
+    // Reset visual (Limpa dados anteriores)
     elTitulo.innerText = "Carregando...";
     elEmpresa.innerText = "...";
     elDescricao.innerText = "Buscando informações...";
     elSkills.innerHTML = "";
     elTag.innerText = "...";
     
-    // Desabilita botão enquanto carrega
+    // Configura botão de carregamento
     btnCandidatar.className = "btn btn-light border rounded-pill px-4 disabled";
     btnCandidatar.innerText = "Aguarde...";
+    btnCandidatar.onclick = null;
 
     try {
         const response = await fetch(`/vagas/api/vaga/${id}/detalhes/`);
@@ -1133,21 +1136,21 @@ window.verDetalhesVaga = async function(id) {
 
         if (data.error) throw new Error(data.error);
 
-        // Preenche dados básicos
+        // Preenche os dados
         elTitulo.innerText = data.titulo;
         elEmpresa.innerText = `${data.empresa} • ${data.cidade}`;
         elDescricao.innerText = data.descricao;
-        elTag.innerText = data.tipo; // Ex: Júnior, Estágio
-
-        // Ajuste de cor da Tag (Estético)
+        
+        // Tag de Tipo
         if(data.tipo === 'ESTAGIO') {
             elTag.className = "badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-2 fw-bold shadow-sm";
             elTag.innerText = "Estágio";
         } else {
             elTag.className = "badge bg-info-subtle text-info-emphasis border border-info-subtle rounded-pill px-3 py-2 fw-bold shadow-sm";
+            elTag.innerText = data.tipo || "Vaga";
         }
 
-        // Renderiza Skills
+        // Skills
         elSkills.innerHTML = '';
         if (data.skills && data.skills.length > 0) {
             data.skills.forEach(skill => {
@@ -1157,36 +1160,26 @@ window.verDetalhesVaga = async function(id) {
             elSkills.innerHTML = '<span class="text-muted small">Sem requisitos específicos.</span>';
         }
 
-        // =========================================================
-        // AQUI ESTÁ A CORREÇÃO DE SEGURANÇA (BLOQUEIO POR MATCH)
-        // =========================================================
-        const MATCH_MINIMO = 75; // 75%
+        // LÓGICA DE BLOQUEIO (Match e Já Candidatado)
+        const MATCH_MINIMO = 75;
 
-        // CASO 1: Usuário já se candidatou
         if (data.ja_candidatou) {
             btnCandidatar.className = "btn btn-secondary rounded-pill px-4 fw-bold disabled";
             btnCandidatar.innerHTML = "<i class='bi bi-check-circle-fill me-2'></i> Já Candidatado";
             btnCandidatar.disabled = true;
-            btnCandidatar.onclick = null;
         } 
-        // CASO 2: Match Baixo (Bloqueia o botão mesmo dentro do modal)
         else if (data.match_percent < MATCH_MINIMO) {
             btnCandidatar.className = "btn btn-light text-muted border rounded-pill px-4 fw-bold disabled cursor-not-allowed opacity-75";
-            // Mostra o motivo do bloqueio
             btnCandidatar.innerHTML = `<i class='bi bi-lock-fill me-2'></i> Requisitos Insuficientes (${data.match_percent}%)`;
             btnCandidatar.disabled = true;
-            btnCandidatar.onclick = null;
         } 
-        // CASO 3: Liberado
         else {
             btnCandidatar.className = "btn btn-success rounded-pill px-4 fw-bold hover-scale shadow-sm";
             btnCandidatar.innerHTML = "🚀 Quero me candidatar";
             btnCandidatar.disabled = false;
-            
-            // Define a ação de clique
             btnCandidatar.onclick = () => {
-                modal.hide(); // Fecha detalhes
-                candidatarVaga(id); // Abre confirmação
+                modal.hide(); 
+                candidatarVaga(id); // Chama a função de confirmação
             };
         }
 
