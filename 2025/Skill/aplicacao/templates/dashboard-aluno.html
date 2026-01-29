@@ -1,127 +1,216 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard Aluno</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="{% static 'css/dashboard_aluno.css' %}">
-</head>
-<body>
-    
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <link rel="stylesheet" href="{% static 'css/dashboard_aluno.css' %}" />
+  </head>
+  <body>
     <div class="sidebar" id="sidebar">
-        <div class="sidebar-logo">
-            <i class="bi bi-gem"></i> <h5>Conecta IFBA</h5>
-            <button class="sidebar-close" id="sidebarClose"><i class="bi bi-x-lg"></i></button>
-        </div>
-        
-        <ul class="sidebar-menu">
-            <li class="active nav-item" data-route="home">
-                <a href="#"><i class="bi bi-house-door"></i> <span>Home</span></a>
-            </li>
-            <li class="nav-item" data-route="perfil">
-                <a href="#"><i class="bi bi-person"></i> <span>Perfil</span></a>
-            </li>
-            <li class="nav-item" data-route="vagas">
-                <a href="#"><i class="bi bi-briefcase"></i> <span>Vagas</span></a>
-            </li>
-            <li class="nav-item" data-route="grade">
-                <a href="#"><i class="bi bi-briefcase"></i> <span>Grade</span></a>
-            </li>
-            <li id="btn-logout-sidebar" class="text-danger mt-5 pt-3 border-top">
-                <a href="#"><i class="bi bi-box-arrow-right"></i> <span>Sair</span></a>
-            </li>
-        </ul>
+      <div class="sidebar-logo">
+        <i class="bi bi-gem"></i>
+        <h5>Match Skills</h5>
+        <button class="sidebar-close" id="sidebarClose">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <ul class="sidebar-menu">
+        <li class="active nav-item" data-route="home">
+          <a href="#"><i class="bi bi-house-door"></i> <span>Home</span></a>
+        </li>
+        <li class="nav-item" data-route="perfil">
+          <a href="#"><i class="bi bi-person"></i> <span>Perfil</span></a>
+        </li>
+        <li class="nav-item" data-route="vagas">
+          <a href="#"><i class="bi bi-briefcase"></i> <span>Vagas</span></a>
+        </li>
+        <li class="nav-item" data-route="grade">
+          <a href="#"><i class="bi bi-briefcase"></i> <span>Grade</span></a>
+        </li>
+        <li id="btn-logout-sidebar" class="text-danger mt-5 pt-3 border-top">
+          <a href="#"
+            ><i class="bi bi-box-arrow-right"></i> <span>Sair</span></a
+          >
+        </li>
+      </ul>
     </div>
 
     <div class="main-content">
-        <div class="top-bar">
-            <div class="d-flex align-items-center gap-3">
-                <button class="btn btn-link text-dark p-0 hamburger-menu" id="hamburgerMenu">
-                    <i class="bi bi-list" style="font-size: 1.75rem;"></i>
-                </button>
-                <div class="welcome-text">
-                    <h4>👋 Olá, {{ nome_usuario }}!</h4>
-                </div>
-            </div>
-        
-            <div class="user-profile">
-                <div class="dropdown">
-                    <button class="dropdown-toggle user-avatar" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        {{ nome_usuario|slice:":1"|upper }}
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
-                        <li><a class="dropdown-item" href="#" data-route="perfil">Meu Perfil</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="#" id="header-logout-btn">Sair</a></li>
-                    </ul>
-                </div>
-            </div>
+      <div class="top-bar">
+        <div class="d-flex align-items-center gap-3">
+          <button
+            class="btn btn-link text-dark p-0 hamburger-menu"
+            id="hamburgerMenu"
+          >
+            <i class="bi bi-list" style="font-size: 1.75rem"></i>
+          </button>
+          <div class="welcome-text">
+            <h4>👋 Olá, {{ nome_usuario }}!</h4>
+          </div>
         </div>
 
-        <div id="conteudo-dinamico">
-            <div class="text-center mt-5"><div class="spinner-border text-success"></div></div>
+        <div class="user-profile">
+          <div class="dropdown">
+            <button
+              class="dropdown-toggle user-avatar"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              {{ nome_usuario|slice:":1"|upper }}
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+              <li>
+                <a class="dropdown-item" href="#" data-route="perfil"
+                  >Meu Perfil</a
+                >
+              </li>
+              <li><hr class="dropdown-divider" /></li>
+              <li>
+                <a
+                  class="dropdown-item text-danger"
+                  href="#"
+                  id="header-logout-btn"
+                  >Sair</a
+                >
+              </li>
+            </ul>
+          </div>
         </div>
+      </div>
+
+      <div id="conteudo-dinamico">
+        <div class="text-center mt-5">
+          <div class="spinner-border text-success"></div>
+        </div>
+      </div>
     </div>
 
-    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;" id="toastContainer">
+    <div
+      class="toast-container position-fixed bottom-0 end-0 p-3"
+      style="z-index: 2000"
+      id="toastContainer"
+    ></div>
+
+    <div
+      class="modal fade"
+      id="modalConfirmacaoDelete"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg">
+          <div class="modal-body text-center p-4">
+            <div class="mb-3 text-warning">
+              <i class="bi bi-exclamation-circle" style="font-size: 3rem"></i>
+            </div>
+            <h5 class="fw-bold mb-2">Tem certeza?</h5>
+            <p class="text-muted small mb-4">
+              Essa ação não pode ser desfeita.
+            </p>
+            <div class="d-flex gap-2 justify-content-center">
+              <button
+                type="button"
+                class="btn btn-light btn-sm w-50"
+                data-bs-dismiss="modal"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                class="btn btn-danger btn-sm w-50"
+                id="btnConfirmarExclusao"
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="modal fade" id="modalConfirmacaoDelete" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm"> 
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-body text-center p-4">
-                    <div class="mb-3 text-warning"><i class="bi bi-exclamation-circle" style="font-size: 3rem;"></i></div>
-                    <h5 class="fw-bold mb-2">Tem certeza?</h5>
-                    <p class="text-muted small mb-4">Essa ação não pode ser desfeita.</p>
-                    <div class="d-flex gap-2 justify-content-center">
-                        <button type="button" class="btn btn-light btn-sm w-50" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="button" class="btn btn-danger btn-sm w-50" id="btnConfirmarExclusao">Excluir</button>
-                    </div>
-                </div>
+    <div
+      class="modal fade"
+      id="modalDetalhesVaga"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+          <div class="modal-header border-0 pb-0 bg-white pt-4 px-4">
+            <span
+              id="modal-vaga-tag"
+              class="badge bg-light text-dark border rounded-pill px-3 py-2 fw-bold shadow-sm"
+              >Carregando...</span
+            >
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body p-4 pt-2">
+            <div class="d-flex align-items-center gap-3 mb-4 mt-2">
+              <div class="bg-light rounded-4 p-3 border shadow-sm">
+                <i class="bi bi-building fs-1 text-secondary"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold text-dark mb-1" id="modal-vaga-titulo">
+                  ...
+                </h3>
+                <p class="text-muted mb-0 fs-5">
+                  <span id="modal-vaga-empresa">...</span>
+                </p>
+              </div>
             </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="modalDetalhesVaga" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow-lg rounded-4">
-                <div class="modal-header border-0 pb-0 bg-white pt-4 px-4">
-                    <span id="modal-vaga-tag" class="badge bg-light text-dark border rounded-pill px-3 py-2 fw-bold shadow-sm">Carregando...</span>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4 pt-2">
-                    <div class="d-flex align-items-center gap-3 mb-4 mt-2">
-                        <div class="bg-light rounded-4 p-3 border shadow-sm"><i class="bi bi-building fs-1 text-secondary"></i></div>
-                        <div>
-                            <h3 class="fw-bold text-dark mb-1" id="modal-vaga-titulo">...</h3>
-                            <p class="text-muted mb-0 fs-5"><span id="modal-vaga-empresa">...</span></p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-8">
-                            <h6 class="fw-bold text-dark mb-2">Sobre a vaga</h6>
-                            <p class="text-muted" id="modal-vaga-descricao">...</p>
-                        </div>
-                        <div class="col-lg-4 border-start border-light ps-lg-4">
-                            <h6 class="fw-bold text-dark mb-3">Requisitos</h6>
-                            <div id="modal-vaga-skills" class="d-flex flex-wrap gap-2"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 pt-0 px-4 pb-4 bg-white">
-                    <button type="button" class="btn btn-light rounded-pill px-4 border" data-bs-dismiss="modal">Fechar</button>
-                    <button type="button" id="btn-candidatar-modal" class="btn btn-success rounded-pill px-5 fw-bold shadow-sm">🚀 Quero me candidatar</button>
-                </div>
+            <div class="row">
+              <div class="col-lg-8">
+                <h6 class="fw-bold text-dark mb-2">Sobre a vaga</h6>
+                <p class="text-muted" id="modal-vaga-descricao">...</p>
+              </div>
+              <div class="col-lg-4 border-start border-light ps-lg-4">
+                <h6 class="fw-bold text-dark mb-3">Requisitos</h6>
+                <div
+                  id="modal-vaga-skills"
+                  class="d-flex flex-wrap gap-2"
+                ></div>
+              </div>
             </div>
+          </div>
+          <div class="modal-footer border-0 pt-0 px-4 pb-4 bg-white">
+            <button
+              type="button"
+              class="btn btn-light rounded-pill px-4 border"
+              data-bs-dismiss="modal"
+            >
+              Fechar
+            </button>
+            <button
+              type="button"
+              id="btn-candidatar-modal"
+              class="btn btn-success rounded-pill px-5 fw-bold shadow-sm"
+            >
+              🚀 Quero me candidatar
+            </button>
+          </div>
         </div>
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="{% static 'js/dashboard-spa.js' %}"></script>
-</body>
+  </body>
 </html>

@@ -1,91 +1,100 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Perfil - Conecta IFBA</title>
-  <link rel="stylesheet" href="css/perfilEdite.css">
-</head>
-<body>
-  <div class="container">
-
-    <!-- Topo -->
-    <header class="header">
-      <input type="text" placeholder="🔍 Pesquisar">
-      <div class="user-info">
-        <h1>👋 Bem-Vindo, Raul F.</h1>
-        <small>24 jul 2025, Quinta</small>
-      </div>
-      <img src="session/img/avatar.png" alt="Avatar" class="avatar">
-    </header>
-
-    <!-- Conteúdo principal -->
-    <main class="content">
-      
-      <!-- Coluna da esquerda -->
-      <section class="left">
-        <!-- Sobre mim -->
-        <div class="card sobre">
-          <h2>📄 Sobre Mim</h2>
-          <textarea placeholder="Fale um pouco sobre você..."></textarea>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Perfil - Match Skills</title>
+    <link rel="stylesheet" href="css/perfilEdite.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Topo -->
+      <header class="header">
+        <input type="text" placeholder="🔍 Pesquisar" />
+        <div class="user-info">
+          <h1>👋 Bem-Vindo, Raul F.</h1>
+          <small>24 jul 2025, Quinta</small>
         </div>
+        <img src="session/img/avatar.png" alt="Avatar" class="avatar" />
+      </header>
 
-        <!-- Habilidades -->
-        <div class="card habilidades">
-          <h2>⚡ Principais habilidades</h2>
-          <div class="habilidades-grid">
-            <div class="hab active">Habilidade 1 <p>Descreva</p></div>
-            <div class="hab">Habilidade 2 <p>Descreva</p></div>
-            <div class="hab">Habilidade 3 <p>Descreva</p></div>
-            <div class="hab">Habilidade 4 <p>Descreva</p></div>
+      <!-- Conteúdo principal -->
+      <main class="content">
+        <!-- Coluna da esquerda -->
+        <section class="left">
+          <!-- Sobre mim -->
+          <div class="card sobre">
+            <h2>📄 Sobre Mim</h2>
+            <textarea placeholder="Fale um pouco sobre você..."></textarea>
           </div>
-        </div>
 
-        <!-- Projetos / Cursos -->
-        <div class="projetos">
-          <div class="card projeto">
-            <h3>projetos</h3>
-            
-            <button>Confira</button>
+          <!-- Habilidades -->
+          <div class="card habilidades">
+            <h2>⚡ Principais habilidades</h2>
+            <div class="habilidades-grid">
+              <div class="hab active">
+                Habilidade 1
+                <p>Descreva</p>
+              </div>
+              <div class="hab">
+                Habilidade 2
+                <p>Descreva</p>
+              </div>
+              <div class="hab">
+                Habilidade 3
+                <p>Descreva</p>
+              </div>
+              <div class="hab">
+                Habilidade 4
+                <p>Descreva</p>
+              </div>
+            </div>
           </div>
-          <div class="card projeto">
-            <h3>projeto dois</h3>
-            <button>Confira</button>
+
+          <!-- Projetos / Cursos -->
+          <div class="projetos">
+            <div class="card projeto">
+              <h3>projetos</h3>
+
+              <button>Confira</button>
+            </div>
+            <div class="card projeto">
+              <h3>projeto dois</h3>
+              <button>Confira</button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- Coluna da direita -->
-      <aside class="right">
-        <div class="card perfil">
-          <button class="editar">Editar</button>
-          <img src="session/img/avatar.png" alt="Avatar" class="foto">
-          <p><strong>Nome:</strong> Raul Filho</p>
-          <p><strong>N° Matrícula:</strong> 20226595546</p>
-          <p><strong>Email:</strong> exemplo@ifba.edu.br</p>
-          <p><strong>Semestre:</strong> 5°</p>
-          <p><strong>Cidade:</strong> Porto Seguro - BA</p>
-        </div>
-
-        <div class="card interesses">
-          <h3>Tenho Interesse e XP</h3>
-          <button>incluir</button>
-          <ul>
-          </ul>
-        </div>
-
-        <div class="card portfolio">
-          <h3>conheme-me mais</h3>
-          <a href="github aqui">aluno</a>
-          <div class="social">
-            <a href="#">🔗</a>
-            <a href="#">📘</a>
-            <a href="#">💼</a>
-            <a href="#">📷</a>
+        <!-- Coluna da direita -->
+        <aside class="right">
+          <div class="card perfil">
+            <button class="editar">Editar</button>
+            <img src="session/img/avatar.png" alt="Avatar" class="foto" />
+            <p><strong>Nome:</strong> Raul Filho</p>
+            <p><strong>N° Matrícula:</strong> 20226595546</p>
+            <p><strong>Email:</strong> exemplo@ifba.edu.br</p>
+            <p><strong>Semestre:</strong> 5°</p>
+            <p><strong>Cidade:</strong> Porto Seguro - BA</p>
           </div>
-        </div>
-      </aside>
-    </main>
-  </div>
-</body>
+
+          <div class="card interesses">
+            <h3>Tenho Interesse e XP</h3>
+            <button>incluir</button>
+            <ul></ul>
+          </div>
+
+          <div class="card portfolio">
+            <h3>conheme-me mais</h3>
+            <a href="github aqui">aluno</a>
+            <div class="social">
+              <a href="#">🔗</a>
+              <a href="#">📘</a>
+              <a href="#">💼</a>
+              <a href="#">📷</a>
+            </div>
+          </div>
+        </aside>
+      </main>
+    </div>
+  </body>
 </html>
